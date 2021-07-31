@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31521.260
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperVLauncher", "HyperVLauncher\HyperVLauncher.csproj", "{EDC2B94D-6390-4432-94AF-903E284A0EA5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EDC2B94D-6390-4432-94AF-903E284A0EA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDC2B94D-6390-4432-94AF-903E284A0EA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDC2B94D-6390-4432-94AF-903E284A0EA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDC2B94D-6390-4432-94AF-903E284A0EA5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4CF2E717-1B40-467D-9BE8-885314E8DE03}
+	EndGlobalSection
+EndGlobal
