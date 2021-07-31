@@ -60,6 +60,8 @@ namespace HyperVLauncher
 
         private void GetVirtualMachines()
         {
+            lstVirtualMachines.Items.Clear();
+
             var scope = new ManagementScope("\\\\.\\root\\virtualization\\v2");
             scope.Connect();
 
@@ -121,6 +123,16 @@ namespace HyperVLauncher
                 _hoveredItem = null;
                 lstVirtualMachines.Invalidate();
             }
+        }
+
+        private void btnShortcuts_Click(object sender, EventArgs e)
+        {
+            OnNavButtonClick(btnShortcuts);
+        }
+
+        private void btnShortcuts_MouseLeave(object sender, EventArgs e)
+        {
+            OnNavButtonLeave(btnShortcuts);
         }
     }
 }
