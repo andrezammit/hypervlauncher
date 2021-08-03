@@ -1,18 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Windows;
 using System.Management;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Collections.Generic;
 
 namespace HyperVLauncher
 {
@@ -21,20 +9,22 @@ namespace HyperVLauncher
     /// </summary>
     public partial class MainWindow : Window
     {
-        private List<VirtualMachine> _virtualMachines = new();
+        private readonly double _navPanelOriginalWidth;
+
+        private readonly List<VirtualMachine> _virtualMachines = new();
+
+        private bool _navPanelShowing = true;
+
 
         public MainWindow()
         {
             InitializeComponent();
 
+            _navPanelOriginalWidth = navPanel.Width;
+
             lstVirtualMachines.ItemsSource = _virtualMachines;
 
             RefreshVirtualMachines();
-        }
-
-        private void button_Click(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private void RefreshVirtualMachines()
@@ -57,6 +47,13 @@ namespace HyperVLauncher
                     _virtualMachines.Add(new VirtualMachine(vmName));
                 }
             }
+        }
+
+        private void btnBurger_Click(object sender, RoutedEventArgs e)
+        {
+            navPanel.Width = _navPanelShowing ? 50 : _navPanelOriginalWidth;
+
+            _navPanelShowing = !_navPanelShowing;
         }
     }
 

@@ -8,6 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="icons\settings.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="icons\settings.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Management" Version="5.0.0" />
   </ItemGroup>
 
