@@ -1,0 +1,86 @@
+﻿<Page x:Class="HyperVLauncher.Pages.ShortcutsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:HyperVLauncher"
+      mc:Ignorable="d" 
+      d:DesignHeight="620" d:DesignWidth="970"
+      Title="Shortcuts">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="460" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Label x:Name="label" 
+                   Grid.Row="0"
+                   Grid.ColumnSpan="2"
+                   Content="Shortcuts" 
+                   HorizontalAlignment="Stretch" 
+                   Foreground="White" 
+                   FontFamily="Nirmala UI" 
+                   FontSize="28" 
+                   Padding="20,0,0,0" 
+                   Margin="0,20,0,0"
+                   BorderThickness="0,0,0,1" 
+                   BorderBrush="#40007EEA" 
+                   Height="50" 
+                   HorizontalContentAlignment="Left"/>
+        <ListView 
+                x:Name="lstVirtualMachines" 
+                Grid.Row="1"
+                BorderBrush="{x:Null}" 
+                Height="auto"
+                VerticalAlignment="Stretch"
+                Padding="20,10,0,0"
+                Background="#FF2E3349"
+                HorizontalAlignment="Stretch"
+                ScrollViewer.VerticalScrollBarVisibility="Hidden">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <DockPanel Margin="2" Height="50">
+                        <Image 
+                                Source="../Icons/settings.png" 
+                                Height="32" 
+                                Width="32" 
+                                Margin="0,0,10,0" />
+                        <TextBlock 
+                                Text="{Binding Name}" 
+                                VerticalAlignment="Center" 
+                                Foreground="White" 
+                                FontFamily="Nirmala UI Semilight" 
+                                FontSize="16"/>
+                    </DockPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <StackPanel
+                Grid.Row="1"
+                Grid.Column="2"
+                HorizontalAlignment="Right"
+                Margin="0,19,50,0">
+            <Button Style="{StaticResource ActionButton}" x:Name="btnLaunch">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="../Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
+                    <TextBlock Text="Launch" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource ActionButton}" x:Name="btnEdit">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="../Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
+                    <TextBlock Text="Edit" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource ActionButton}" x:Name="btnDelete">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="../Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
+                    <TextBlock Text="Delete" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Page>

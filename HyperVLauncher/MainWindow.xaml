@@ -6,8 +6,10 @@
         xmlns:local="clr-namespace:HyperVLauncher"
         mc:Ignorable="d"
         Title="Hyper-V Launcher" 
-        MinHeight="616" 
-        MinWidth="967">
+        MinHeight="620" 
+        MinWidth="970"
+        Height="620"
+        Width="970">
     <Window.Resources>
         <Style x:Key="NavButton" TargetType="Button">
             <Setter Property="Height" Value="44" />
@@ -38,36 +40,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="ActionButton" TargetType="Button">
-            <Setter Property="Height" Value="44" />
-            <Setter Property="Width" Value="180" />
-            <Setter Property="FontFamily" Value="Nirmala UI" />
-            <Setter Property="FontSize" Value="14" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="Background" Value="#FF2E3349" />
-            <Setter Property="BorderBrush" Value="#FF181E36" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border 
-                            x:Name="border"
-                            Padding="8,1,1,1"
-                            BorderThickness="1,1,1,1"
-                            Background="{TemplateBinding Background}">
-                            <ContentPresenter 
-                                HorizontalAlignment="Left" 
-                                VerticalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#FF1c2340" />
-                                <Setter TargetName="border" Property="BorderBrush" Value="#FF007EF9" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        
     </Window.Resources>
     <DockPanel Background="#FF2E3349">
         <StackPanel x:Name="navPanel" Width="230" DockPanel.Dock="Left" Background="#FF181E36">
@@ -79,97 +52,28 @@
                 Click="btnBurger_Click"
                 Margin="0,20,0,0">
                 <StackPanel>
-                    <Image Source="icons/settings.png" Height="32" Width="32" />
+                    <Image Source="Icons/settings.png" Height="32" Width="32" />
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource NavButton}" x:Name="btnShortcuts" FontWeight="Bold">
+            <Button Style="{StaticResource NavButton}" x:Name="btnShortcuts" FontWeight="Bold" Click="btnShortcuts_Click">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
+                    <Image Source="Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
                     <TextBlock Text="Shortcuts" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource NavButton}" x:Name="btnVirtualMachines">
+            <Button Style="{StaticResource NavButton}" x:Name="btnVirtualMachines" Click="btnVirtualMachines_Click">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
+                    <Image Source="Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
                     <TextBlock Text="Virtual Machines" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>
             <Button Style="{StaticResource NavButton}" x:Name="btnSettings" Height="39">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
+                    <Image Source="Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
                     <TextBlock Text="Settings" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>
         </StackPanel>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="450" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Label x:Name="label" 
-                   Grid.Row="0"
-                   Grid.ColumnSpan="2"
-                   Content="Virtual Machines" 
-                   HorizontalAlignment="Stretch" 
-                   Foreground="White" 
-                   FontFamily="Nirmala UI" 
-                   FontSize="28" 
-                   Padding="20,0,0,0" 
-                   Margin="0,20,0,0"
-                   BorderThickness="0,0,0,1" 
-                   BorderBrush="#40007EEA" 
-                   Height="50" 
-                   HorizontalContentAlignment="Left"/>
-            <ListView 
-                x:Name="lstVirtualMachines" 
-                Grid.Row="1"
-                BorderBrush="{x:Null}" 
-                Height="auto"
-                VerticalAlignment="Stretch"
-                Padding="20,10,0,0"
-                Background="#FF2E3349"
-                HorizontalAlignment="Left"
-                ScrollViewer.VerticalScrollBarVisibility="Hidden">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <DockPanel Margin="2" Height="50">
-                            <Image 
-                                Source="icons/settings.png" 
-                                Height="32" 
-                                Width="32" 
-                                Margin="0,0,10,0" />
-                            <TextBlock 
-                                Text="{Binding Name}" 
-                                VerticalAlignment="Center" 
-                                Foreground="White" 
-                                FontFamily="Nirmala UI Semilight" 
-                                FontSize="16"/>
-                        </DockPanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-            <StackPanel
-                Grid.Row="1"
-                Grid.Column="2"
-                HorizontalAlignment="Right"
-                Margin="0,19,50,0">
-                <Button Style="{StaticResource ActionButton}" x:Name="btnLaunch">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
-                        <TextBlock Text="Launch" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <Button Style="{StaticResource ActionButton}" x:Name="btnCreateShortcut">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
-                        <TextBlock Text="Create Shortcut" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-            </StackPanel>
-        </Grid>
+        <Frame x:Name="pageFrame" Width="auto" NavigationUIVisibility="Hidden"/>
     </DockPanel>
 </Window>

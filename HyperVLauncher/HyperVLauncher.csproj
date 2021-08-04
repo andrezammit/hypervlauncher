@@ -8,17 +8,38 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="icons\settings.png" />
+    <None Remove="Icons\settings.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="icons\settings.png">
+    <Content Include="Icons\settings.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Management" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Pages\ShortcutsPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Pages\VirtualMachinesPage - Copy - Copy.xaml.cs">
+      <SubType>Code</SubType>
+      <DependentUpon>VirtualMachinesPage - Copy.xaml.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Pages\VirtualMachinesPage - Copy.xaml.cs">
+      <SubType>Code</SubType>
+      <DependentUpon>VirtualMachinesPage.xaml.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Pages\ShortcutsPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
 
 </Project>

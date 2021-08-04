@@ -1,6 +1,9 @@
 ﻿using System.Windows;
-using System.Management;
+using System.Windows.Controls;
 using System.Collections.Generic;
+
+using HyperVLauncher.Pages;
+using HyperVLauncher.Contracts.Enums;
 
 namespace HyperVLauncher
 {
@@ -11,42 +14,25 @@ namespace HyperVLauncher
     {
         private readonly double _navPanelOriginalWidth;
 
-        private readonly List<VirtualMachine> _virtualMachines = new();
+        private readonly Dictionary<MainPages, Page> _pages = new();
 
         private bool _navPanelShowing = true;
-
 
         public MainWindow()
         {
             InitializeComponent();
 
+            CreatePages();
+
             _navPanelOriginalWidth = navPanel.Width;
 
-            lstVirtualMachines.ItemsSource = _virtualMachines;
-
-            RefreshVirtualMachines();
+            pageFrame.NavigationService.Navigate(_pages[MainPages.VirtualMachines]);
         }
 
-        private void RefreshVirtualMachines()
+        private void CreatePages()
         {
-            _virtualMachines.Clear();
-
-            var scope = new ManagementScope("\\\\.\\root\\virtualization\\v2");
-            scope.Connect();
-
-            var query = new ObjectQuery("SELECT * FROM Msvm_ComputerSystem");
-
-            using var searcher = new ManagementObjectSearcher(scope, query);
-
-            foreach (var queryObj in searcher.Get())
-            {
-                var vmName = queryObj["ElementName"].ToString();
-
-                if (!string.IsNullOrEmpty(vmName))
-                {
-                    _virtualMachines.Add(new VirtualMachine(vmName));
-                }
-            }
+            _pages[MainPages.Shortcuts] = new ShortcutsPage();
+            _pages[MainPages.VirtualMachines] = new VirtualMachinesPage();
         }
 
         private void btnBurger_Click(object sender, RoutedEventArgs e)
@@ -55,15 +41,15 @@ namespace HyperVLauncher
 
             _navPanelShowing = !_navPanelShowing;
         }
-    }
 
-    internal class VirtualMachine
-    {
-        public string Name { get; init; }
-
-        public VirtualMachine(string name)
+        private void btnShortcuts_Click(object sender, RoutedEventArgs e)
         {
-            Name = name;
+            pageFrame.NavigationService.Navigate(_pages[MainPages.Shortcuts]);
+        }
+
+        private void btnVirtualMachines_Click(object sender, RoutedEventArgs e)
+        {
+            pageFrame.NavigationService.Navigate(_pages[MainPages.VirtualMachines]);
         }
     }
 }
