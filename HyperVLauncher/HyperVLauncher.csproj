@@ -22,6 +22,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Providers\HyperVLauncher.Providers.Common\HyperVLauncher.Providers.Common.csproj" />
+    <ProjectReference Include="..\Providers\HyperVLauncher.Providers.HyperV\HyperVLauncher.Providers.HyperV.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Pages\ShortcutsPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
