@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Contracts\HyperVLauncher.Contracts\HyperVLauncher.Contracts.csproj" />
+    <ProjectReference Include="..\HyperVLauncher.Providers.Path\HyperVLauncher.Providers.Path.csproj" />
   </ItemGroup>
 
 </Project>

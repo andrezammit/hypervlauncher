@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Management;
-using System.Diagnostics;
 using System.Windows.Controls;
 using System.Collections.Generic;
 
 using HyperVLauncher.Contracts.Models;
+using HyperVLauncher.Contracts.Interfaces;
+
 using HyperVLauncher.Providers.HyperV;
 
 namespace HyperVLauncher.Pages
@@ -14,11 +14,15 @@ namespace HyperVLauncher.Pages
     /// </summary>
     public partial class VirtualMachinesPage : Page
     {
+        private readonly ISettingsProvider _settingsProvider;
+
         private readonly List<VirtualMachine> _virtualMachines = new();
 
-        public VirtualMachinesPage()
+        public VirtualMachinesPage(ISettingsProvider settingsProvider)
         {
             InitializeComponent();
+
+            _settingsProvider = settingsProvider;
 
             lstVirtualMachines.ItemsSource = _virtualMachines;
 
@@ -30,7 +34,7 @@ namespace HyperVLauncher.Pages
             _virtualMachines.Clear();
 
             var vmList = HyperVProvider.GetVirtualMachineList();
-
+            
             foreach (var vm in vmList)
             {
                 _virtualMachines.Add(vm);
@@ -60,37 +64,24 @@ namespace HyperVLauncher.Pages
             }
 
             var vmName = vm.Name;
-            StartVm(vmName);
-
-            var startInfo = new ProcessStartInfo("vmconnect.exe", $"localhost \"{vmName}\"");
-            
-            using (Process.Start(startInfo))
-            {
-
-            }
+         
+            HyperVProvider.StartVirtualMachine(vmName);
+            HyperVProvider.ConnectVirtualMachine(vmName);
         }
 
-        private static void StartVm(string vmName)
+        private async void btnCreateShortcut_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            var scope = new ManagementScope("\\\\.\\root\\virtualization\\v2");
-            scope.Connect();
-
-            var query = new SelectQuery($"SELECT * FROM Msvm_ComputerSystem WHERE ElementName = \"{vmName}\"");
-
-            using var searcher = new ManagementObjectSearcher(scope, query);
-            using var searchResults = searcher.Get();
-
-            foreach (ManagementObject vmObject in searchResults)
+            if (lstVirtualMachines.SelectedItem is not VirtualMachine vm)
             {
-                var inParams = vmObject.GetMethodParameters("RequestStateChange");
-
-                inParams["RequestedState"] = 2;
-
-                var outParams = vmObject.InvokeMethod(
-                    "RequestStateChange",
-                    inParams,
-                    null);
+                throw new InvalidCastException("Invalid selected item type.");
             }
+
+            var vmName = vm.Name;
+            var appSettings = await _settingsProvider.Get();
+
+            appSettings.AddShortcut(vmName);
+
+            await _settingsProvider.Save();
         }
     }
 }

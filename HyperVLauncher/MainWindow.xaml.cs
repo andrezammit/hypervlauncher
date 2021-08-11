@@ -1,6 +1,9 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Collections.Generic;
+
+using Microsoft.Extensions.DependencyInjection;
 
 using HyperVLauncher.Pages;
 using HyperVLauncher.Contracts.Enums;
@@ -14,13 +17,16 @@ namespace HyperVLauncher
     {
         private readonly double _navPanelOriginalWidth;
 
+        private readonly IServiceProvider _serviceProvider;
         private readonly Dictionary<MainPages, Page> _pages = new();
 
         private bool _navPanelShowing = true;
 
-        public MainWindow()
-        {
+        public MainWindow(IServiceProvider serviceProvider)
+{
             InitializeComponent();
+
+            _serviceProvider = serviceProvider;
 
             CreatePages();
 
@@ -31,8 +37,9 @@ namespace HyperVLauncher
 
         private void CreatePages()
         {
+            
             _pages[MainPages.Shortcuts] = new ShortcutsPage();
-            _pages[MainPages.VirtualMachines] = new VirtualMachinesPage();
+            _pages[MainPages.VirtualMachines] = _serviceProvider.GetRequiredService<VirtualMachinesPage>();
         }
 
         private void btnBurger_Click(object sender, RoutedEventArgs e)
