@@ -1,6 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+
+using System.Windows;
 using System.Windows.Controls;
-using System.Collections.Generic;
 
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
@@ -14,7 +17,7 @@ namespace HyperVLauncher.Pages
     {
         private readonly ISettingsProvider _settingsProvider;
 
-        private readonly List<Shortcut> _shortcuts = new();
+        private readonly ObservableCollection<Shortcut> _shortcuts = new();
 
         public ShortcutsPage(
             ISettingsProvider settingsProvider)
@@ -24,7 +27,6 @@ namespace HyperVLauncher.Pages
             _settingsProvider = settingsProvider;
 
             lstShortcuts.ItemsSource = _shortcuts;
-
         }
 
         private async Task RefreshShortcuts()
@@ -33,15 +35,12 @@ namespace HyperVLauncher.Pages
 
             var appSettings = await _settingsProvider.Get();
 
-
+            foreach (var shortcut in appSettings.Shortcuts)
             {
-                foreach (var shortcut in appSettings.Shortcuts)
-                {
-                    _shortcuts.Add(shortcut);
-                }
-
-                EnableControls();
+                _shortcuts.Add(shortcut);
             }
+
+            EnableControls();
         }
 
         private void EnableControls()
@@ -53,7 +52,7 @@ namespace HyperVLauncher.Pages
             btnDelete.IsEnabled = enable;
         }
 
-        private async void Page_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
             await RefreshShortcuts();
         }
@@ -61,6 +60,32 @@ namespace HyperVLauncher.Pages
         private void lstShortcuts_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             EnableControls();
+        }
+
+        private async void btnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstShortcuts.SelectedItem is not Shortcut shortcut)
+            {
+                throw new InvalidCastException("Invalid selected item type.");
+            }
+
+            var result = MessageBox.Show(
+                $"Are you sure you want to delete shortcut {shortcut.VmName}?",
+                "Hyper-V Launcher - Delete shortcut",
+                MessageBoxButton.YesNo);
+
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            var appSettings = await _settingsProvider.Get();
+            
+            appSettings.DeleteShortcut(shortcut.Id);
+
+            await _settingsProvider.Save();
+
+            await RefreshShortcuts();
         }
     }
 }

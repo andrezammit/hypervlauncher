@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Controls;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
@@ -16,7 +16,7 @@ namespace HyperVLauncher.Pages
     {
         private readonly ISettingsProvider _settingsProvider;
 
-        private readonly List<VirtualMachine> _virtualMachines = new();
+        private readonly ObservableCollection<VirtualMachine> _virtualMachines = new();
 
         public VirtualMachinesPage(ISettingsProvider settingsProvider)
         {

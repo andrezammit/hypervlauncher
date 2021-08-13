@@ -75,7 +75,7 @@
                     <TextBlock Text="Edit" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource ActionButton}" x:Name="btnDelete">
+            <Button Style="{StaticResource ActionButton}" x:Name="btnDelete" Click="btnDelete_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="../Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
                     <TextBlock Text="Delete" VerticalAlignment="Center" />
