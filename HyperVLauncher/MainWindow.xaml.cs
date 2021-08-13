@@ -18,6 +18,8 @@ namespace HyperVLauncher
         private readonly double _navPanelOriginalWidth;
 
         private readonly IServiceProvider _serviceProvider;
+
+        private readonly List<Button> _navButtons = new();
         private readonly Dictionary<MainPages, Page> _pages = new();
 
         private bool _navPanelShowing = true;
@@ -27,11 +29,15 @@ namespace HyperVLauncher
             InitializeComponent();
 
             _serviceProvider = serviceProvider;
-
-            CreatePages();
-
             _navPanelOriginalWidth = navPanel.Width;
+        }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            CreatePages();
+            CacheNavButtons();
+
+            SetSelectedNavButton(btnVirtualMachines);
             pageFrame.NavigationService.Navigate(_pages[MainPages.VirtualMachines]);
         }
 
@@ -39,6 +45,13 @@ namespace HyperVLauncher
         {
             _pages[MainPages.Shortcuts] = _serviceProvider.GetRequiredService<ShortcutsPage>();
             _pages[MainPages.VirtualMachines] = _serviceProvider.GetRequiredService<VirtualMachinesPage>();
+        }
+
+        private void CacheNavButtons()
+        {
+            _navButtons.Add(btnShortcuts);
+            _navButtons.Add(btnVirtualMachines);
+            _navButtons.Add(btnSettings);
         }
 
         private void btnBurger_Click(object sender, RoutedEventArgs e)
@@ -50,12 +63,53 @@ namespace HyperVLauncher
 
         private void btnShortcuts_Click(object sender, RoutedEventArgs e)
         {
+            if (sender is not Button navButton)
+            {
+                return;
+            }
+
+            SetSelectedNavButton(navButton);
+
             pageFrame.NavigationService.Navigate(_pages[MainPages.Shortcuts]);
         }
 
         private void btnVirtualMachines_Click(object sender, RoutedEventArgs e)
         {
+            if (sender is not Button navButton)
+            {
+                return;
+            }
+
+            SetSelectedNavButton(navButton);
+
             pageFrame.NavigationService.Navigate(_pages[MainPages.VirtualMachines]);
+        }
+
+        private void btnSettings_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button navButton)
+            {
+                return;
+            }
+
+            SetSelectedNavButton(navButton);
+
+            pageFrame.NavigationService.Navigate(_pages[MainPages.VirtualMachines]);
+        }
+
+        private void SetSelectedNavButton(Button selectedButton)
+        {
+            foreach (var navButton in _navButtons)
+            {
+                var navButtonStyle = Resources["NavButton"] as Style;
+
+                if (navButton == selectedButton)
+                {
+                    navButtonStyle = Resources["SelectedNavButton"] as Style;
+                }
+
+                navButton.Style = navButtonStyle;
+            }
         }
     }
 }
