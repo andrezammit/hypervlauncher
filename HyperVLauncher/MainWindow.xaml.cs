@@ -37,8 +37,7 @@ namespace HyperVLauncher
 
         private void CreatePages()
         {
-            
-            _pages[MainPages.Shortcuts] = new ShortcutsPage();
+            _pages[MainPages.Shortcuts] = _serviceProvider.GetRequiredService<ShortcutsPage>();
             _pages[MainPages.VirtualMachines] = _serviceProvider.GetRequiredService<VirtualMachinesPage>();
         }
 

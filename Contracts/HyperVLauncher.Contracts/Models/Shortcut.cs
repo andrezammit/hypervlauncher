@@ -7,7 +7,7 @@ namespace HyperVLauncher.Contracts.Models
         public string VmName { get; set; }
 
         public Shortcut(
-            string id, 
+            string id,
             string vmName)
         {
             Id = id;

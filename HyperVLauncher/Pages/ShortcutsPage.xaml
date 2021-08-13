@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:HyperVLauncher"
       mc:Ignorable="d" 
       d:DesignHeight="620" d:DesignWidth="970"
-      Title="Shortcuts">
+      Title="Shortcuts" Loaded="Page_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
@@ -31,7 +31,7 @@
                    Height="50" 
                    HorizontalContentAlignment="Left"/>
         <ListView 
-                x:Name="lstVirtualMachines" 
+                x:Name="lstShortcuts" 
                 Grid.Row="1"
                 BorderBrush="{x:Null}" 
                 Height="auto"
@@ -39,7 +39,7 @@
                 Padding="20,10,0,0"
                 Background="#FF2E3349"
                 HorizontalAlignment="Stretch"
-                ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                ScrollViewer.VerticalScrollBarVisibility="Hidden" SelectionChanged="lstShortcuts_SelectionChanged">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <DockPanel Margin="2" Height="50">
@@ -49,7 +49,7 @@
                                 Width="32" 
                                 Margin="0,0,10,0" />
                         <TextBlock 
-                                Text="{Binding Name}" 
+                                Text="{Binding VmName}" 
                                 VerticalAlignment="Center" 
                                 Foreground="White" 
                                 FontFamily="Nirmala UI Semilight" 
