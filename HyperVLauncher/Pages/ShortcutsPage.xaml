@@ -63,7 +63,7 @@
                 Grid.Column="2"
                 HorizontalAlignment="Right"
                 Margin="0,19,50,0">
-            <Button Style="{StaticResource ActionButton}" x:Name="btnLaunch">
+            <Button Style="{StaticResource ActionButton}" x:Name="btnLaunch" Click="btnLaunch_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="../Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
                     <TextBlock Text="Launch" VerticalAlignment="Center" />

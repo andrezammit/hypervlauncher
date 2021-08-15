@@ -8,6 +8,8 @@ using System.Windows.Controls;
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
 
+using HyperVLauncher.Providers.HyperV;
+
 namespace HyperVLauncher.Pages
 {
     /// <summary>
@@ -86,6 +88,19 @@ namespace HyperVLauncher.Pages
             await _settingsProvider.Save();
 
             await RefreshShortcuts();
+        }
+
+        private void btnLaunch_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstShortcuts.SelectedItem is not Shortcut shortcut)
+            {
+                throw new InvalidCastException("Invalid selected item type.");
+            }
+
+            var vmName = shortcut.VmName;
+
+            HyperVProvider.StartVirtualMachine(vmName);
+            HyperVProvider.ConnectVirtualMachine(vmName);
         }
     }
 }
