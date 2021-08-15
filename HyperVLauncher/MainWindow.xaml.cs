@@ -1,12 +1,17 @@
 ﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+
 using System.Windows;
 using System.Windows.Controls;
-using System.Collections.Generic;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using HyperVLauncher.Pages;
 using HyperVLauncher.Contracts.Enums;
+using HyperVLauncher.Contracts.Interfaces;
+
+using HyperVLauncher.Pages;
 
 namespace HyperVLauncher
 {
@@ -18,27 +23,31 @@ namespace HyperVLauncher
         private readonly double _navPanelOriginalWidth;
 
         private readonly IServiceProvider _serviceProvider;
+        private readonly ISettingsProvider _settingsProvider;
 
         private readonly List<Button> _navButtons = new();
         private readonly Dictionary<MainPages, Page> _pages = new();
 
         private bool _navPanelShowing = true;
 
-        public MainWindow(IServiceProvider serviceProvider)
-{
+        public MainWindow(
+            IServiceProvider serviceProvider,
+            ISettingsProvider settingsProvider)
+        {
             InitializeComponent();
 
             _serviceProvider = serviceProvider;
+            _settingsProvider = settingsProvider;
+
             _navPanelOriginalWidth = navPanel.Width;
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CreatePages();
             CacheNavButtons();
 
-            SetSelectedNavButton(btnVirtualMachines);
-            pageFrame.NavigationService.Navigate(_pages[MainPages.VirtualMachines]);
+            await NavigateToInitialPage();
         }
 
         private void CreatePages()
@@ -52,6 +61,23 @@ namespace HyperVLauncher
             _navButtons.Add(btnShortcuts);
             _navButtons.Add(btnVirtualMachines);
             _navButtons.Add(btnSettings);
+        }
+
+        private async Task NavigateToInitialPage()
+        {
+            var appSettings = await _settingsProvider.Get();
+            var anyShortcuts = appSettings.Shortcuts.Any();
+
+            if (anyShortcuts)
+            {
+                SetSelectedNavButton(btnShortcuts);
+                pageFrame.NavigationService.Navigate(_pages[MainPages.Shortcuts]);
+            }
+            else
+            {
+                SetSelectedNavButton(btnVirtualMachines);
+                pageFrame.NavigationService.Navigate(_pages[MainPages.VirtualMachines]);
+            }
         }
 
         private void btnBurger_Click(object sender, RoutedEventArgs e)
