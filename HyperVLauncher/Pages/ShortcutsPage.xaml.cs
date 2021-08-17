@@ -9,6 +9,7 @@ using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
 
 using HyperVLauncher.Providers.HyperV;
+using HyperVLauncher.Modals;
 
 namespace HyperVLauncher.Pages
 {
@@ -101,6 +102,12 @@ namespace HyperVLauncher.Pages
 
             HyperVProvider.StartVirtualMachine(vmName);
             HyperVProvider.ConnectVirtualMachine(vmName);
+        }
+
+        private void btnEdit_Click(object sender, RoutedEventArgs e)
+        {
+            var shortcutWindow = new ShortcutWindow();
+            shortcutWindow.ShowDialog();
         }
     }
 }
