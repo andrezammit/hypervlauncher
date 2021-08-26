@@ -79,7 +79,7 @@ namespace HyperVLauncher.Pages
             var vmName = vm.Name;
             var appSettings = await _settingsProvider.Get();
 
-            appSettings.AddShortcut(vmName);
+            appSettings.AddShortcut(vmName, vmName);
 
             await _settingsProvider.Save();
         }

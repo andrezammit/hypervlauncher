@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Hyper-V Launcher" 
         Height="364" 
-        Width="556"
+        Width="520"
         Background="#FF2E3349"
         Foreground="White" ResizeMode="NoResize" WindowStyle="SingleBorderWindow" SizeToContent="Height">
     <Window.Resources>
@@ -37,8 +37,8 @@
             <ColumnDefinition Width="21*"/>
             <ColumnDefinition Width="535*"/>
         </Grid.ColumnDefinitions>
-        <Label x:Name="label4" 
-               Content="Add a Shortcut" 
+        <Label x:Name="lblTitle" 
+               Content="Add Shortcut" 
                Padding="20,0,0,0"
                Margin="0,20,0,0"
                VerticalAlignment="Top" 
@@ -47,17 +47,17 @@
                FontSize="24" 
                BorderThickness="0,0,0,1" 
                BorderBrush="#40007EEA" Grid.ColumnSpan="2" />
-        <StackPanel
+        <StackPanel x:Name="stackPanel"
             Margin="0,86,0,0" Grid.Column="1">
-            <Label x:Name="label" Content="Virtual Machine Name" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
-            <Label x:Name="label1" Content="vmName" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
-            <Label x:Name="label2" Content="Shortcut Name" Padding="0,0,0,0" Margin="0,15,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
-            <TextBox x:Name="textBox" Margin="0,4,0,0" HorizontalAlignment="Left" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="300" />
-            <CheckBox Margin="0,15,0,0" VerticalContentAlignment="Center" Content="Desktop Shortcut" />
-            <CheckBox Margin="0,15,0,0" VerticalContentAlignment="Center" Content="Start Menu Shortcut" />
+            <Label x:Name="label" Content="Virtual Machine" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="12" />
+            <Label x:Name="lblVmName" Content="vmName" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" />
+            <Label x:Name="label2" Content="Shortcut Name" Padding="0,0,0,0" Margin="0,15,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="12" />
+            <TextBox x:Name="txtName" Margin="0,4,0,0" Padding="4,2,4,4" HorizontalAlignment="Left" TextWrapping="Wrap" Text="" Width="300" />
+            <CheckBox x:Name="chkDesktopShortcut" Margin="0,15,0,0" VerticalContentAlignment="Center" Content="Desktop Shortcut" FontSize="14" />
+            <CheckBox x:Name="chkStartMenuShortcut" Margin="0,15,0,0" VerticalContentAlignment="Center" Content="Start Menu Shortcut" FontSize="14" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,40,20,15">
-                <Button Name="btnSave" IsDefault="True" Content="Save" Height="30"  Width="75" />
-                <Button Name="btnCancel" IsCancel="True" Content="Cancel" Width="75" Margin="15,0,0,0" Click="btnCancel_Click"/>
+                <Button Name="btnSave" IsDefault="True" Content="Save" Height="30"  Width="75" FontSize="14" />
+                <Button Name="btnCancel" IsCancel="True" Content="Cancel" Width="75" Margin="15,0,0,0" Click="btnCancel_Click" FontSize="14"/>
             </StackPanel>
         </StackPanel>
     </Grid>

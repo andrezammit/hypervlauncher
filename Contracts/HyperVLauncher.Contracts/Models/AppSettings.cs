@@ -1,17 +1,14 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-
+﻿
 namespace HyperVLauncher.Contracts.Models
 {
     public class AppSettings
     {
         public List<Shortcut> Shortcuts { get; } = new();
 
-        public void AddShortcut(string vmName)
+        public void AddShortcut(string name, string vmName)
         {
             var id = Guid.NewGuid().ToString();
-            var shortcut = new Shortcut(id, vmName);
+            var shortcut = new Shortcut(id, name, vmName);
 
             Shortcuts.Add(shortcut);
         }

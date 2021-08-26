@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-using MahApps.Metro.Controls;
+using HyperVLauncher.Contracts.Models;
 
 namespace HyperVLauncher.Modals
 {
@@ -9,26 +9,25 @@ namespace HyperVLauncher.Modals
     /// </summary>
     public partial class ShortcutWindow : Window
     {
-        public ShortcutWindow()
+        private Shortcut _shortcut;
+
+        public ShortcutWindow(
+            bool editMode,
+            Shortcut shortcut)
         {
             InitializeComponent();
-        }
 
-        private void ToggleSwitch_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (sender is not ToggleSwitch toggleSwitch)
-            {
-                return;
-            }
+            _shortcut = shortcut;
 
-            if (toggleSwitch != null)
+            txtName.Text = shortcut.Name;
+            lblVmName.Content = shortcut.VmName;
+
+            if (editMode)
             {
-                if (toggleSwitch.IsOn == true)
-                {
-                }
-                else
-                {
-                }
+                lblTitle.Content = "Edit Shortcut";
+
+                stackPanel.Children.Remove(chkDesktopShortcut);
+                stackPanel.Children.Remove(chkStartMenuShortcut);
             }
         }
 

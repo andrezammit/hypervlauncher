@@ -9,6 +9,7 @@ using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
 
 using HyperVLauncher.Providers.HyperV;
+
 using HyperVLauncher.Modals;
 
 namespace HyperVLauncher.Pages
@@ -106,7 +107,12 @@ namespace HyperVLauncher.Pages
 
         private void btnEdit_Click(object sender, RoutedEventArgs e)
         {
-            var shortcutWindow = new ShortcutWindow();
+            if (lstShortcuts.SelectedItem is not Shortcut shortcut)
+            {
+                throw new InvalidCastException("Invalid selected item type.");
+            }
+
+            var shortcutWindow = new ShortcutWindow(true, shortcut);
             shortcutWindow.ShowDialog();
         }
     }
