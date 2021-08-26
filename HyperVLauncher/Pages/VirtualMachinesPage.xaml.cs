@@ -76,10 +76,12 @@ namespace HyperVLauncher.Pages
                 throw new InvalidCastException("Invalid selected item type.");
             }
 
+            var vmId = vm.Id;
             var vmName = vm.Name;
+
             var appSettings = await _settingsProvider.Get();
 
-            appSettings.AddShortcut(vmName, vmName);
+            appSettings.AddShortcut(vmName, vmId);
 
             await _settingsProvider.Save();
         }

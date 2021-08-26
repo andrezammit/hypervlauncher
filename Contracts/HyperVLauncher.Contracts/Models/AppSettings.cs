@@ -5,10 +5,10 @@ namespace HyperVLauncher.Contracts.Models
     {
         public List<Shortcut> Shortcuts { get; } = new();
 
-        public void AddShortcut(string name, string vmName)
+        public void AddShortcut(string name, string vmId)
         {
             var id = Guid.NewGuid().ToString();
-            var shortcut = new Shortcut(id, name, vmName);
+            var shortcut = new Shortcut(id, vmId, name);
 
             Shortcuts.Add(shortcut);
         }

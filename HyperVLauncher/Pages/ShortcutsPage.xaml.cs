@@ -14,6 +14,16 @@ using HyperVLauncher.Modals;
 
 namespace HyperVLauncher.Pages
 {
+    internal class ShortcutItem : Shortcut
+    {
+        public ShortcutItem(Shortcut shortcut)
+            : base(shortcut.Id, shortcut.VmId, shortcut.VmId)
+        {
+        }
+
+        public string VmName => HyperVProvider.GetVmName(VmId);
+    }
+
     /// <summary>
     /// Interaction logic for ShortcutsPage.xaml
     /// </summary>
@@ -21,7 +31,7 @@ namespace HyperVLauncher.Pages
     {
         private readonly ISettingsProvider _settingsProvider;
 
-        private readonly ObservableCollection<Shortcut> _shortcuts = new();
+        private readonly ObservableCollection<ShortcutItem> _shortcuts = new();
 
         public ShortcutsPage(
             ISettingsProvider settingsProvider)
@@ -41,7 +51,7 @@ namespace HyperVLauncher.Pages
 
             foreach (var shortcut in appSettings.Shortcuts)
             {
-                _shortcuts.Add(shortcut);
+                _shortcuts.Add(new ShortcutItem(shortcut));
             }
 
             EnableControls();
@@ -74,7 +84,7 @@ namespace HyperVLauncher.Pages
             }
 
             var result = MessageBox.Show(
-                $"Are you sure you want to delete shortcut {shortcut.VmName}?",
+                $"Are you sure you want to delete shortcut {shortcut.Name}?",
                 "Hyper-V Launcher - Delete shortcut",
                 MessageBoxButton.YesNo);
 
@@ -99,7 +109,7 @@ namespace HyperVLauncher.Pages
                 throw new InvalidCastException("Invalid selected item type.");
             }
 
-            var vmName = shortcut.VmName;
+            var vmName = shortcut.Name;
 
             HyperVProvider.StartVirtualMachine(vmName);
             HyperVProvider.ConnectVirtualMachine(vmName);

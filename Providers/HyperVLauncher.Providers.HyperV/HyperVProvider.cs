@@ -1,6 +1,5 @@
 ﻿using System.Management;
 using System.Diagnostics;
-using System.Collections.Generic;
 
 using HyperVLauncher.Contracts.Models;
 
@@ -19,36 +18,71 @@ namespace HyperVLauncher.Providers.HyperV
 
             foreach (var queryObj in searcher.Get())
             {
+                var vmId = queryObj["Name"].ToString();
                 var vmName = queryObj["ElementName"].ToString();
 
-                if (!string.IsNullOrEmpty(vmName))
+                if (!string.IsNullOrEmpty(vmId) &&
+                    !string.IsNullOrEmpty(vmName))
                 {
-                    yield return new VirtualMachine(vmName);
+                    yield return new VirtualMachine(vmId, vmName);
                 }
             }
         }
 
-        public static void StartVirtualMachine(string vmName)
+        public static void StartVirtualMachine(string vmId)
+        {
+            var vmObject = GetVmObject(vmId);
+
+            if (vmObject == null)
+            {
+                return;
+            }
+
+            var inParams = vmObject.GetMethodParameters("RequestStateChange");
+
+            inParams["RequestedState"] = 2;
+
+            var outParams = vmObject.InvokeMethod(
+                "RequestStateChange",
+                inParams,
+                null);
+        }
+
+        public static string GetVmName(string vmId)
+        {
+            var vmObject = GetVmObject(vmId);
+
+            if (vmObject == null)
+            {
+                throw new InvalidOperationException($"Virtual machine {vmId} was not found.");
+            }
+
+            var vmName = vmObject["ElementName"].ToString();
+
+            if (string.IsNullOrEmpty(vmName))
+            {
+                throw new InvalidOperationException($"Could not find name for virtual machine {vmId}.");
+            }
+
+            return vmName;
+        }
+
+        private static ManagementObject? GetVmObject(string vmId)
         {
             var scope = new ManagementScope("\\\\.\\root\\virtualization\\v2");
             scope.Connect();
 
-            var query = new SelectQuery($"SELECT * FROM Msvm_ComputerSystem WHERE ElementName = \"{vmName}\"");
+            var query = new SelectQuery($"SELECT * FROM Msvm_ComputerSystem WHERE Name = \"{vmId}\"");
 
             using var searcher = new ManagementObjectSearcher(scope, query);
             using var searchResults = searcher.Get();
 
             foreach (ManagementObject vmObject in searchResults)
             {
-                var inParams = vmObject.GetMethodParameters("RequestStateChange");
-
-                inParams["RequestedState"] = 2;
-
-                var outParams = vmObject.InvokeMethod(
-                    "RequestStateChange",
-                    inParams,
-                    null);
+                return vmObject;
             }
+
+            return null;
         }
 
         public static void ConnectVirtualMachine(string vmName)
