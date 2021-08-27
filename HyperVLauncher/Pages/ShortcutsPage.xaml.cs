@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 
@@ -17,7 +18,7 @@ namespace HyperVLauncher.Pages
     internal class ShortcutItem : Shortcut
     {
         public ShortcutItem(Shortcut shortcut)
-            : base(shortcut.Id, shortcut.VmId, shortcut.VmId)
+            : base(shortcut.Id, shortcut.VmId, shortcut.Name)
         {
         }
 
@@ -115,7 +116,7 @@ namespace HyperVLauncher.Pages
             HyperVProvider.ConnectVirtualMachine(vmName);
         }
 
-        private void btnEdit_Click(object sender, RoutedEventArgs e)
+        private async void btnEdit_Click(object sender, RoutedEventArgs e)
         {
             if (lstShortcuts.SelectedItem is not Shortcut shortcut)
             {
@@ -123,7 +124,24 @@ namespace HyperVLauncher.Pages
             }
 
             var shortcutWindow = new ShortcutWindow(true, shortcut);
-            shortcutWindow.ShowDialog();
+
+            if (shortcutWindow.ShowDialog() is not null and false)
+            {
+                return;
+            }
+
+            var appSettings = await _settingsProvider.Get();
+
+            var savedShortcut = appSettings.Shortcuts.FirstOrDefault(x => x.Id == shortcut.Id);
+
+            if (savedShortcut is null)
+            {
+                return;
+            }
+
+            savedShortcut.Name = shortcutWindow.txtName.Text;
+
+            await _settingsProvider.Save();
         }
     }
 }

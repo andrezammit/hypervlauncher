@@ -56,7 +56,7 @@
             <CheckBox x:Name="chkDesktopShortcut" Margin="0,15,0,0" VerticalContentAlignment="Center" Content="Desktop Shortcut" FontSize="14" />
             <CheckBox x:Name="chkStartMenuShortcut" Margin="0,15,0,0" VerticalContentAlignment="Center" Content="Start Menu Shortcut" FontSize="14" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,40,20,15">
-                <Button Name="btnSave" IsDefault="True" Content="Save" Height="30"  Width="75" FontSize="14" />
+                <Button Name="btnSave" IsDefault="True" Content="Save" Height="30"  Width="75" FontSize="14" Click="btnSave_Click" />
                 <Button Name="btnCancel" IsCancel="True" Content="Cancel" Width="75" Margin="15,0,0,0" Click="btnCancel_Click" FontSize="14"/>
             </StackPanel>
         </StackPanel>

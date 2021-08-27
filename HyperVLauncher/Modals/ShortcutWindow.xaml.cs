@@ -37,5 +37,10 @@ namespace HyperVLauncher.Modals
         {
             Close();
         }
+
+        private void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = true;
+        }
     }
 }
