@@ -66,13 +66,13 @@
             <Button Style="{StaticResource ActionButton}" x:Name="btnLaunch" Click="btnLaunch_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="../Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
-                    <TextBlock Text="Launch" VerticalAlignment="Center" />
+                    <TextBlock Text="Launch" VerticalAlignment="Center" Margin="0,-3,0,0" />
                 </StackPanel>
             </Button>
             <Button Style="{StaticResource ActionButton}" x:Name="btnCreateShortcut" Click="btnCreateShortcut_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="../Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
-                    <TextBlock Text="Create Shortcut" VerticalAlignment="Center" />
+                    <TextBlock Text="Create Shortcut" VerticalAlignment="Center" Margin="0,-3,0,0" />
                 </StackPanel>
             </Button>
         </StackPanel>

@@ -97,19 +97,19 @@
             <Button Style="{StaticResource ActionButton}" x:Name="btnLaunch" Click="btnLaunch_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="../Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
-                    <TextBlock Text="Launch" VerticalAlignment="Center" />
+                    <TextBlock Text="Launch" VerticalAlignment="Center" Margin="0,-3,0,0" />
                 </StackPanel>
             </Button>
             <Button Style="{StaticResource ActionButton}" x:Name="btnEdit" Click="btnEdit_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="../Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
-                    <TextBlock Text="Edit" VerticalAlignment="Center" />
+                    <TextBlock Text="Edit" VerticalAlignment="Center" Margin="0,-2,0,0" />
                 </StackPanel>
             </Button>
             <Button Style="{StaticResource ActionButton}" x:Name="btnDelete" Click="btnDelete_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="../Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
-                    <TextBlock Text="Delete" VerticalAlignment="Center" />
+                    <TextBlock Text="Delete" VerticalAlignment="Center" Margin="0,-3,0,0" />
                 </StackPanel>
             </Button>
         </StackPanel>
