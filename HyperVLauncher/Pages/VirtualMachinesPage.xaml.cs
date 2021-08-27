@@ -7,6 +7,8 @@ using HyperVLauncher.Contracts.Interfaces;
 
 using HyperVLauncher.Providers.HyperV;
 
+using HyperVLauncher.Modals;
+
 namespace HyperVLauncher.Pages
 {
     /// <summary>
@@ -75,13 +77,20 @@ namespace HyperVLauncher.Pages
             {
                 throw new InvalidCastException("Invalid selected item type.");
             }
+            
+            var shortcut = AppSettings.CreateShortcut(vm.Name, vm.Id);
 
-            var vmId = vm.Id;
-            var vmName = vm.Name;
+            var shortcutWindow = new ShortcutWindow(false, shortcut);
+
+            if (shortcutWindow.ShowDialog() is not null and false)
+            {
+                return;
+            }
+
+            shortcut.Name = shortcutWindow.txtName.Text;
 
             var appSettings = await _settingsProvider.Get();
-
-            appSettings.AddShortcut(vmName, vmId);
+            appSettings.Shortcuts.Add(shortcut);
 
             await _settingsProvider.Save();
         }
