@@ -25,6 +25,33 @@ namespace HyperVLauncher.Pages
         public string VmName => HyperVProvider.GetVmName(VmId);
     }
 
+    public class ShortcutTemplateSelector : DataTemplateSelector
+    {
+        public DataTemplate? VmNameTemplate { get; set; }
+        public DataTemplate? DefaultTemplate { get; set; }
+
+        public override DataTemplate SelectTemplate(object item, DependencyObject container)
+        {
+            if (DefaultTemplate is null ||
+                VmNameTemplate is null)
+            {
+                throw new InvalidOperationException("DataTemplates are not initialized.");
+            }
+
+            var selectedTemplate = DefaultTemplate;
+
+            if (item is not null and ShortcutItem shortcutItem)
+            {
+                if (shortcutItem.Name != shortcutItem.VmName)
+                {
+                    selectedTemplate = VmNameTemplate;
+                }
+            }
+
+            return selectedTemplate;
+        }
+    }
+
     /// <summary>
     /// Interaction logic for ShortcutsPage.xaml
     /// </summary>
@@ -142,6 +169,8 @@ namespace HyperVLauncher.Pages
             savedShortcut.Name = shortcutWindow.txtName.Text;
 
             await _settingsProvider.Save();
+
+            await RefreshShortcuts();
         }
     }
 }
