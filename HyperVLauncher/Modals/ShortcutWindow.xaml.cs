@@ -1,8 +1,7 @@
 ﻿using System.Windows;
 
 using HyperVLauncher.Contracts.Models;
-
-using HyperVLauncher.Providers.HyperV;
+using HyperVLauncher.Contracts.Interfaces;
 
 namespace HyperVLauncher.Modals
 {
@@ -11,18 +10,15 @@ namespace HyperVLauncher.Modals
     /// </summary>
     public partial class ShortcutWindow : Window
     {
-        private readonly Shortcut _shortcut;
-
         public ShortcutWindow(
             bool editMode,
-            Shortcut shortcut)
+            Shortcut shortcut,
+            IHyperVProvider hyperVProvider)
         {
             InitializeComponent();
 
-            _shortcut = shortcut;
-            
             txtName.Text = shortcut.Name;
-            lblVmName.Content = HyperVProvider.GetVmName(shortcut.VmId);
+            lblVmName.Content = hyperVProvider.GetVmName(shortcut.VmId);
 
             if (editMode)
             {

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using HyperVLauncher.Contracts.Interfaces;
 
 using HyperVLauncher.Providers.Path;
+using HyperVLauncher.Providers.HyperV;
 using HyperVLauncher.Providers.Settings;
 
 using HyperVLauncher.Pages;
@@ -36,6 +37,7 @@ namespace HyperVLauncher
             services.AddSingleton<MainWindow>();
             services.AddSingleton<ShortcutsPage>();
             services.AddSingleton<VirtualMachinesPage>();
+            services.AddSingleton<IHyperVProvider, HyperVProvider>();
             services.AddSingleton<ISettingsProvider, SettingsProvider>();
             services.AddSingleton<IPathProvider>(provider => new PathProvider(profilePath));
         }

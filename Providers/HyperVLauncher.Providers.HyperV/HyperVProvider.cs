@@ -2,12 +2,13 @@
 using System.Diagnostics;
 
 using HyperVLauncher.Contracts.Models;
+using HyperVLauncher.Contracts.Interfaces;
 
 namespace HyperVLauncher.Providers.HyperV
 {
-    public class HyperVProvider
+    public class HyperVProvider : IHyperVProvider
     {
-        public static IEnumerable<VirtualMachine> GetVirtualMachineList()
+        public IEnumerable<VirtualMachine> GetVirtualMachineList()
         {
             var scope = new ManagementScope("\\\\.\\root\\virtualization\\v2");
             scope.Connect();
@@ -29,7 +30,7 @@ namespace HyperVLauncher.Providers.HyperV
             }
         }
 
-        public static void StartVirtualMachine(string vmId)
+        public void StartVirtualMachine(string vmId)
         {
             var vmObject = GetVmObject(vmId);
 
@@ -48,7 +49,7 @@ namespace HyperVLauncher.Providers.HyperV
                 null);
         }
 
-        public static string GetVmName(string vmId)
+        public string GetVmName(string vmId)
         {
             var vmObject = GetVmObject(vmId);
 
@@ -85,7 +86,7 @@ namespace HyperVLauncher.Providers.HyperV
             return null;
         }
 
-        public static void ConnectVirtualMachine(string vmName)
+        public void ConnectVirtualMachine(string vmName)
         {
             var startInfo = new ProcessStartInfo("vmconnect.exe", $"localhost \"{vmName}\"");
 

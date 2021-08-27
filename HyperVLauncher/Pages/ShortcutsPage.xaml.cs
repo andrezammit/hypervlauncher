@@ -17,12 +17,17 @@ namespace HyperVLauncher.Pages
 {
     internal class ShortcutItem : Shortcut
     {
-        public ShortcutItem(Shortcut shortcut)
+        private readonly IHyperVProvider _hyperVProvider;
+
+        public ShortcutItem(
+            Shortcut shortcut,
+            IHyperVProvider hyperVProvider)
             : base(shortcut.Id, shortcut.VmId, shortcut.Name)
         {
+            _hyperVProvider = hyperVProvider;
         }
 
-        public string VmName => HyperVProvider.GetVmName(VmId);
+        public string VmName => _hyperVProvider.GetVmName(VmId);
     }
 
     public class ShortcutTemplateSelector : DataTemplateSelector
@@ -57,15 +62,18 @@ namespace HyperVLauncher.Pages
     /// </summary>
     public partial class ShortcutsPage : Page
     {
+        private readonly IHyperVProvider _hyperVProvider;
         private readonly ISettingsProvider _settingsProvider;
 
         private readonly ObservableCollection<ShortcutItem> _shortcuts = new();
 
         public ShortcutsPage(
+            IHyperVProvider hyperVProvider,
             ISettingsProvider settingsProvider)
         {
             InitializeComponent();
 
+            _hyperVProvider = hyperVProvider;
             _settingsProvider = settingsProvider;
 
             lstShortcuts.ItemsSource = _shortcuts;
@@ -79,7 +87,7 @@ namespace HyperVLauncher.Pages
 
             foreach (var shortcut in appSettings.Shortcuts)
             {
-                _shortcuts.Add(new ShortcutItem(shortcut));
+                _shortcuts.Add(new ShortcutItem(shortcut, _hyperVProvider));
             }
 
             EnableControls();
@@ -139,8 +147,8 @@ namespace HyperVLauncher.Pages
 
             var vmName = shortcut.Name;
 
-            HyperVProvider.StartVirtualMachine(vmName);
-            HyperVProvider.ConnectVirtualMachine(vmName);
+            _hyperVProvider.StartVirtualMachine(vmName);
+            _hyperVProvider.ConnectVirtualMachine(vmName);
         }
 
         private async void btnEdit_Click(object sender, RoutedEventArgs e)
@@ -150,7 +158,7 @@ namespace HyperVLauncher.Pages
                 throw new InvalidCastException("Invalid selected item type.");
             }
 
-            var shortcutWindow = new ShortcutWindow(true, shortcut);
+            var shortcutWindow = new ShortcutWindow(true, shortcut, _hyperVProvider);
 
             if (shortcutWindow.ShowDialog() is not null and false)
             {
