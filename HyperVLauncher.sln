@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31521.260
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperVLauncher", "HyperVLauncher\HyperVLauncher.csproj", "{51A05913-0BDF-41A8-AA60-FBC2F4CC45BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperVLauncher.Apps.Console", "Apps\HyperVLauncher.Apps.Console\HyperVLauncher.Apps.Console.csproj", "{51A05913-0BDF-41A8-AA60-FBC2F4CC45BE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperVLauncher.Contracts", "Contracts\HyperVLauncher.Contracts\HyperVLauncher.Contracts.csproj", "{15B5F66F-DAEE-4085-B41C-7175EA63E47D}"
 EndProject
@@ -21,7 +21,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperVLauncher.Providers.Se
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperVLauncher.Providers.Path", "Providers\HyperVLauncher.Providers.Path\HyperVLauncher.Providers.Path.csproj", "{263D067D-8E84-4EC7-A241-D079F918AF61}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperVLauncher.Apps.LaunchPad", "Apps\HyperVLauncher.Apps.LaunchPad\HyperVLauncher.Apps.LaunchPad.csproj", "{CD0B64FB-64E1-41F9-B4D3-D1AD0FF63FF6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperVLauncher.Apps.LaunchPad", "Apps\HyperVLauncher.Apps.LaunchPad\HyperVLauncher.Apps.LaunchPad.csproj", "{CD0B64FB-64E1-41F9-B4D3-D1AD0FF63FF6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Soultion Items", "Soultion Items", "{DD802C0D-59D3-479A-A13E-B7D209B8BA57}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared Project Files", "Shared Project Files", "{46A6A4F9-9503-4C8F-AC7C-90FE13974BF6}"
+	ProjectSection(SolutionItems) = preProject
+		Misc\Shared Project Files\App.csproj = Misc\Shared Project Files\App.csproj
+		Misc\Shared Project Files\Global.csproj = Misc\Shared Project Files\Global.csproj
+		Misc\Shared Project Files\Library.csproj = Misc\Shared Project Files\Library.csproj
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +78,7 @@ Global
 		{0199F719-63B4-45D0-A0D3-5F79E5CEE584} = {815E69A0-71BA-4F1C-B3FC-840F79D299E9}
 		{263D067D-8E84-4EC7-A241-D079F918AF61} = {815E69A0-71BA-4F1C-B3FC-840F79D299E9}
 		{CD0B64FB-64E1-41F9-B4D3-D1AD0FF63FF6} = {7DCA7144-E251-463F-9F53-9837154CCED3}
+		{46A6A4F9-9503-4C8F-AC7C-90FE13974BF6} = {DD802C0D-59D3-479A-A13E-B7D209B8BA57}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B641A9CA-559C-474E-ACD7-F94421915AB2}
