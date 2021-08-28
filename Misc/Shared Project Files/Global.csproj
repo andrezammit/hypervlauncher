@@ -6,5 +6,7 @@
   
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
+
+    <BaseOutputPath>..\..\Bin\</BaseOutputPath>
   </PropertyGroup>
 </Project>
