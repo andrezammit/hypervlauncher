@@ -31,7 +31,7 @@ namespace HyperVLauncher
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            var profilePath = GetProfileFolder();
+            var profilePath = PathProvider.GetProfileFolder();
             Directory.CreateDirectory(profilePath);
 
             services.AddSingleton<MainWindow>();
@@ -46,12 +46,6 @@ namespace HyperVLauncher
         {
             var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
-        }
-
-        private static string GetProfileFolder()
-        {
-            var programDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-            return Path.Combine(programDataPath, "HyperVLauncher");
         }
     }
 }

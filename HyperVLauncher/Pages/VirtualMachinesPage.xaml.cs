@@ -67,10 +67,10 @@ namespace HyperVLauncher.Pages
                 throw new InvalidCastException("Invalid selected item type.");
             }
 
-            var vmName = vm.Name;
+            var vmId = vm.Id;
 
-            _hyperVProvider.StartVirtualMachine(vmName);
-            _hyperVProvider.ConnectVirtualMachine(vmName);
+            _hyperVProvider.StartVirtualMachine(vmId);
+            _hyperVProvider.ConnectVirtualMachine(vmId);
         }
 
         private async void btnCreateShortcut_Click(object sender, System.Windows.RoutedEventArgs e)

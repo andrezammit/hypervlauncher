@@ -86,9 +86,9 @@ namespace HyperVLauncher.Providers.HyperV
             return null;
         }
 
-        public void ConnectVirtualMachine(string vmName)
+        public void ConnectVirtualMachine(string vmId)
         {
-            var startInfo = new ProcessStartInfo("vmconnect.exe", $"localhost \"{vmName}\"");
+            var startInfo = new ProcessStartInfo("vmconnect.exe", $"{Environment.MachineName} -G \"{vmId}\"");
 
             using (Process.Start(startInfo))
             {

@@ -17,5 +17,11 @@ namespace HyperVLauncher.Providers.Path
         {
             return System.IO.Path.Combine(_profilePath, _settingsFileName);
         }
+
+        public static string GetProfileFolder()
+        {
+            var programDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            return System.IO.Path.Combine(programDataPath, "HyperVLauncher");
+        }
     }
 }
