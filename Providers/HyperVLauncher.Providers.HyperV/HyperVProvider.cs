@@ -1,5 +1,7 @@
-﻿using System.Management;
+﻿using System;
+using System.Management;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;

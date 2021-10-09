@@ -1,4 +1,7 @@
-﻿
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+
 namespace HyperVLauncher.Contracts.Models
 {
     public class AppSettings

@@ -1,4 +1,6 @@
-﻿using HyperVLauncher.Contracts.Models;
+﻿using System.Collections.Generic;
+
+using HyperVLauncher.Contracts.Models;
 
 namespace HyperVLauncher.Contracts.Interfaces
 {

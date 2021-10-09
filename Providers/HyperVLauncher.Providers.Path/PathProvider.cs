@@ -1,4 +1,6 @@
-﻿using HyperVLauncher.Contracts.Interfaces;
+﻿using System;
+
+using HyperVLauncher.Contracts.Interfaces;
 
 namespace HyperVLauncher.Providers.Path
 {
