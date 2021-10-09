@@ -26,7 +26,10 @@ namespace HyperVLauncher.Providers.Settings
 
                 try
                 {
-                    var appSettingsJson = await File.ReadAllTextAsync(settingsFilePath);
+                    var appSettingsJson = await File
+                        .ReadAllTextAsync(settingsFilePath)
+                        .ConfigureAwait(false);
+
                     _settings = JsonConvert.DeserializeObject<AppSettings>(appSettingsJson);
                 }
                 catch
