@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:HyperVLauncher.Modals"
         mc:Ignorable="d"
         Title="Hyper-V Launcher" 
-        Height="364" 
+        Height="414" 
         Width="520"
         Background="#FF2E3349"
         Foreground="White" ResizeMode="NoResize" WindowStyle="SingleBorderWindow" SizeToContent="Height">
@@ -47,17 +47,19 @@
                FontSize="24" 
                BorderThickness="0,0,0,1" 
                BorderBrush="#40007EEA" Grid.ColumnSpan="2" />
-        <StackPanel x:Name="stackPanel"
+        <StackPanel x:Name="stackPanel" HorizontalAlignment="Stretch"
             Margin="0,86,0,0" Grid.Column="1">
-            <Label x:Name="label" Content="Virtual Machine" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="12" />
-            <Label x:Name="lblVmName" Content="vmName" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" />
-            <Label x:Name="label2" Content="Shortcut Name" Padding="0,0,0,0" Margin="0,15,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="12" />
-            <TextBox x:Name="txtName" Margin="0,4,0,0" Padding="4,2,4,4" HorizontalAlignment="Left" TextWrapping="Wrap" Text="" Width="300" />
+            <Label x:Name="label" Content="Virtual Machine" Padding="0,0,0,0" VerticalAlignment="Top" FontSize="12" />
+            <Label x:Name="lblVmName" Content="vmName" Padding="0,0,0,0" VerticalAlignment="Top" FontSize="16" />
+            <Label x:Name="label2" Content="Shortcut Name" Padding="0,0,0,0" Margin="0,15,0,0" VerticalAlignment="Top" FontSize="12" />
+            <TextBox x:Name="txtName" Margin="0,4,0,0" Padding="4,2,4,4" HorizontalAlignment="Left" FontSize="16" TextWrapping="Wrap" Text="" Width="300" />
+            <Label x:Name="label3" Content="When the Virtual Machine connection is closed" Padding="0,0,0,0" Margin="0,15,0,0" VerticalAlignment="Top" FontSize="12" />
+            <ComboBox x:Name="cmbCloseAction" Margin="0,4,0,0" Padding="6,3,4,5" Width="300" HorizontalAlignment="Left" FontSize="16"/>
             <CheckBox x:Name="chkDesktopShortcut" Margin="0,15,0,0" VerticalContentAlignment="Center" Content="Desktop Shortcut" FontSize="14" />
             <CheckBox x:Name="chkStartMenuShortcut" Margin="0,15,0,0" VerticalContentAlignment="Center" Content="Start Menu Shortcut" FontSize="14" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,40,20,15">
-                <Button Name="btnSave" IsDefault="True" Content="Save" Height="30"  Width="75" FontSize="14" Click="btnSave_Click" />
-                <Button Name="btnCancel" IsCancel="True" Content="Cancel" Width="75" Margin="15,0,0,0" Click="btnCancel_Click" FontSize="14"/>
+                <Button Name="btnSave" IsDefault="True" Content="Save" Height="30"  Width="75" FontSize="14" Click="BtnSave_Click" />
+                <Button Name="btnCancel" IsCancel="True" Content="Cancel" Width="75" Margin="15,0,0,0" Click="BtnCancel_Click" FontSize="14"/>
             </StackPanel>
         </StackPanel>
     </Grid>

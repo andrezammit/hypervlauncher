@@ -9,8 +9,6 @@ using System.Windows.Controls;
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
 
-using HyperVLauncher.Providers.HyperV;
-
 using HyperVLauncher.Modals;
 
 namespace HyperVLauncher.Pages
@@ -22,7 +20,11 @@ namespace HyperVLauncher.Pages
         public ShortcutItem(
             Shortcut shortcut,
             IHyperVProvider hyperVProvider)
-            : base(shortcut.Id, shortcut.VmId, shortcut.Name)
+            : base(
+                shortcut.Id, 
+                shortcut.VmId, 
+                shortcut.Name, 
+                shortcut.CloseAction)
         {
             _hyperVProvider = hyperVProvider;
         }
@@ -107,12 +109,12 @@ namespace HyperVLauncher.Pages
             await RefreshShortcuts();
         }
 
-        private void lstShortcuts_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void LstShortcuts_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             EnableControls();
         }
 
-        private async void btnDelete_Click(object sender, RoutedEventArgs e)
+        private async void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
             if (lstShortcuts.SelectedItem is not Shortcut shortcut)
             {
@@ -138,7 +140,7 @@ namespace HyperVLauncher.Pages
             await RefreshShortcuts();
         }
 
-        private void btnLaunch_Click(object sender, RoutedEventArgs e)
+        private void BtnLaunch_Click(object sender, RoutedEventArgs e)
         {
             if (lstShortcuts.SelectedItem is not Shortcut shortcut)
             {
@@ -151,7 +153,7 @@ namespace HyperVLauncher.Pages
             _hyperVProvider.ConnectVirtualMachine(vmId);
         }
 
-        private async void btnEdit_Click(object sender, RoutedEventArgs e)
+        private async void BtnEdit_Click(object sender, RoutedEventArgs e)
         {
             if (lstShortcuts.SelectedItem is not Shortcut shortcut)
             {
@@ -175,6 +177,7 @@ namespace HyperVLauncher.Pages
             }
 
             savedShortcut.Name = shortcutWindow.txtName.Text;
+            savedShortcut.CloseAction = shortcutWindow.GetSelectedCloseAction();
 
             await _settingsProvider.Save();
 

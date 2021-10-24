@@ -87,26 +87,26 @@
                 HorizontalAlignment="Stretch"
                 ItemTemplateSelector="{StaticResource ShortcutTemplateSelector}"
                 ScrollViewer.VerticalScrollBarVisibility="Hidden" 
-                SelectionChanged="lstShortcuts_SelectionChanged">
+                SelectionChanged="LstShortcuts_SelectionChanged">
         </ListView>
         <StackPanel
                 Grid.Row="1"
                 Grid.Column="2"
                 HorizontalAlignment="Right"
                 Margin="0,19,50,0">
-            <Button Style="{StaticResource ActionButton}" x:Name="btnLaunch" Click="btnLaunch_Click">
+            <Button Style="{StaticResource ActionButton}" x:Name="btnLaunch" Click="BtnLaunch_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="../Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
                     <TextBlock Text="Launch" VerticalAlignment="Center" Margin="0,-3,0,0" />
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource ActionButton}" x:Name="btnEdit" Click="btnEdit_Click">
+            <Button Style="{StaticResource ActionButton}" x:Name="btnEdit" Click="BtnEdit_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="../Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
                     <TextBlock Text="Edit" VerticalAlignment="Center" Margin="0,-2,0,0" />
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource ActionButton}" x:Name="btnDelete" Click="btnDelete_Click">
+            <Button Style="{StaticResource ActionButton}" x:Name="btnDelete" Click="BtnDelete_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="../Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
                     <TextBlock Text="Delete" VerticalAlignment="Center" Margin="0,-3,0,0" />
