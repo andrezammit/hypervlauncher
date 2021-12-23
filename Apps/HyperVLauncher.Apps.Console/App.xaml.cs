@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Windows;
+using System.Diagnostics;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,6 +9,7 @@ using HyperVLauncher.Contracts.Interfaces;
 
 using HyperVLauncher.Providers.Path;
 using HyperVLauncher.Providers.HyperV;
+using HyperVLauncher.Providers.Common;
 using HyperVLauncher.Providers.Settings;
 
 using HyperVLauncher.Pages;
@@ -27,6 +29,13 @@ namespace HyperVLauncher
             ConfigureServices(serviceCollection);
 
             _serviceProvider = serviceCollection.BuildServiceProvider();
+
+            if (!GenericHelpers.IsUniqueInstance("HyperVLauncherConsoleMutex"))
+            {
+                base.Shutdown();
+
+                return;
+            }
         }
 
         private static void ConfigureServices(IServiceCollection services)
@@ -46,6 +55,17 @@ namespace HyperVLauncher
         {
             var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
+
+            LaunchTrayApp();
+        }
+
+        private static void LaunchTrayApp()
+        {
+            var startInfo = new ProcessStartInfo("HyperVLauncher.Apps.Tray.exe");
+
+            using (Process.Start(startInfo))
+            {
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading;
 using System.Diagnostics;
 
 using System.Windows;
@@ -7,6 +8,7 @@ using System.Windows.Controls;
 using Hardcodet.Wpf.TaskbarNotification;
 
 using HyperVLauncher.Providers.Path;
+using HyperVLauncher.Providers.Common;
 using HyperVLauncher.Providers.Settings;
 
 namespace HyperVLauncher.Apps.Tray
@@ -20,6 +22,13 @@ namespace HyperVLauncher.Apps.Tray
 
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
+            if (!GenericHelpers.IsUniqueInstance("HyperVLauncherTrayMutex"))
+            {
+                base.Shutdown();
+
+                return;
+            }
+
             taskbarIcon.ContextMenu = new ContextMenu();
             taskbarIcon.ToolTipText = "Hyper-V Launcher";
             taskbarIcon.Icon = new System.Drawing.Icon("Icons\\app.ico");
