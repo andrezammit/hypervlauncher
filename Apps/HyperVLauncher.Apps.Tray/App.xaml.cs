@@ -16,14 +16,16 @@ namespace HyperVLauncher.Apps.Tray
     /// </summary>
     public partial class App : Application
     {
+        private readonly TaskbarIcon taskbarIcon = new();
+
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
-            var taskbarIcon = new TaskbarIcon
-            {
-                ContextMenu = new ContextMenu(),
-                ToolTipText = "Hyper-V Launcher",
-                Icon = new System.Drawing.Icon("Icons\\app.ico"),
-            };
+            taskbarIcon.ContextMenu = new ContextMenu();
+            taskbarIcon.ToolTipText = "Hyper-V Launcher";
+            taskbarIcon.Icon = new System.Drawing.Icon("Icons\\app.ico");
+            taskbarIcon.MenuActivation = PopupActivationMode.LeftOrRightClick;
+
+            taskbarIcon.TrayMouseDoubleClick += TaskbarIcon_TrayMouseDoubleClick;
 
             var titleMenuItem = new MenuItem()
             {
@@ -63,6 +65,24 @@ namespace HyperVLauncher.Apps.Tray
 
                 taskbarIcon.ContextMenu.Items.Add(menuItem);
             }
+
+            var closeMenuItem = new MenuItem()
+            {
+                Header = "Close"
+            };
+
+            closeMenuItem.Click += (object sender, RoutedEventArgs e) =>
+            {
+                base.Shutdown();
+            };
+
+            taskbarIcon.ContextMenu.Items.Add(new Separator());
+            taskbarIcon.ContextMenu.Items.Add(closeMenuItem);
+        }
+
+        private void TaskbarIcon_TrayMouseDoubleClick(object sender, RoutedEventArgs e)
+        {
+            LaunchConsole();
         }
 
         private static void LaunchShortcut(string shortcutId)
