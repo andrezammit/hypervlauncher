@@ -22,7 +22,7 @@ namespace HyperVLauncher.Apps.Tray
             {
                 ContextMenu = new ContextMenu(),
                 ToolTipText = "Hyper-V Launcher",
-                Icon = new System.Drawing.Icon("Icons\\settings.ico"),
+                Icon = new System.Drawing.Icon("Icons\\app.ico"),
             };
 
             var titleMenuItem = new MenuItem()

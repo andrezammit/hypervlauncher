@@ -54,18 +54,18 @@
                 Click="btnBurger_Click"
                 Margin="0,20,0,0">
                 <StackPanel>
-                    <Image Source="Icons/settings.png" Height="32" Width="32" />
+                    <Image Source="Icons/menu.png" Height="32" Width="32" />
                 </StackPanel>
             </Button>
             <Button Style="{StaticResource NavButton}" x:Name="btnShortcuts" Click="btnShortcuts_Click">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
+                    <Image Source="Icons/shortcut.png" Height="32" Width="32" Margin="0,0,10,0" />
                     <TextBlock Text="Shortcuts" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>
             <Button Style="{StaticResource NavButton}" x:Name="btnVirtualMachines" Click="btnVirtualMachines_Click">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
+                    <Image Source="Icons/vm.png" Height="32" Width="32" Margin="0,0,10,0" />
                     <TextBlock Text="Virtual Machines" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>

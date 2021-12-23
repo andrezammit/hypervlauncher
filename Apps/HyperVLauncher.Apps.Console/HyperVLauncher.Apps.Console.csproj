@@ -3,16 +3,46 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <Import Project="..\..\Misc\Shared Project Files\App.csproj" />
 
   <ItemGroup>
+    <None Remove="Icons\create.png" />
+    <None Remove="Icons\delete.png" />
+    <None Remove="Icons\edit.png" />
+    <None Remove="Icons\launch.png" />
+    <None Remove="Icons\menu.png" />
     <None Remove="Icons\settings.png" />
+    <None Remove="Icons\shortcut.png" />
+    <None Remove="Icons\vm.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="app.ico" />
+    <Content Include="Icons\create.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\delete.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\edit.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\launch.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\menu.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\vm.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Icons\settings.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\shortcut.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
