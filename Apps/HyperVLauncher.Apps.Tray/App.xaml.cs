@@ -1,12 +1,14 @@
 ﻿using System.IO;
 using System.Threading;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 using System.Windows;
 using System.Windows.Controls;
 
 using Hardcodet.Wpf.TaskbarNotification;
 
+using HyperVLauncher.Providers.Ipc;
 using HyperVLauncher.Providers.Path;
 using HyperVLauncher.Providers.Common;
 using HyperVLauncher.Providers.Settings;
@@ -18,7 +20,11 @@ namespace HyperVLauncher.Apps.Tray
     /// </summary>
     public partial class App : Application
     {
-        private readonly TaskbarIcon taskbarIcon = new();
+        private Task? _ipcProcessor;
+
+        private readonly TaskbarIcon _taskbarIcon = new();
+        private readonly IpcProvider _ipcProvider = new("HyperVLauncherIpc");
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
 
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
@@ -29,12 +35,23 @@ namespace HyperVLauncher.Apps.Tray
                 return;
             }
 
-            taskbarIcon.ContextMenu = new ContextMenu();
-            taskbarIcon.ToolTipText = "Hyper-V Launcher";
-            taskbarIcon.Icon = new System.Drawing.Icon("Icons\\app.ico");
-            taskbarIcon.MenuActivation = PopupActivationMode.LeftOrRightClick;
+            _ipcProcessor = Task.Run(
+                () => ProcessIpcMessages(_cancellationTokenSource.Token));
 
-            taskbarIcon.TrayMouseDoubleClick += TaskbarIcon_TrayMouseDoubleClick;
+            _taskbarIcon.ContextMenu = new ContextMenu();
+            _taskbarIcon.ToolTipText = "Hyper-V Launcher";
+            _taskbarIcon.Icon = new System.Drawing.Icon("Icons\\app.ico");
+            _taskbarIcon.MenuActivation = PopupActivationMode.LeftOrRightClick;
+
+            _taskbarIcon.TrayMouseDoubleClick += TaskbarIcon_TrayMouseDoubleClick;
+
+            CreateContextMenu();
+            CreateContextMenu();
+        }
+
+        private void CreateContextMenu()
+        {
+            _taskbarIcon.ContextMenu.Items.Clear();
 
             var titleMenuItem = new MenuItem()
             {
@@ -46,8 +63,8 @@ namespace HyperVLauncher.Apps.Tray
                 LaunchConsole();
             };
 
-            taskbarIcon.ContextMenu.Items.Add(titleMenuItem);
-            taskbarIcon.ContextMenu.Items.Add(new Separator());
+            _taskbarIcon.ContextMenu.Items.Add(titleMenuItem);
+            _taskbarIcon.ContextMenu.Items.Add(new Separator());
 
             var profilePath = PathProvider.GetProfileFolder();
             Directory.CreateDirectory(profilePath);
@@ -56,7 +73,7 @@ namespace HyperVLauncher.Apps.Tray
             var settingsProvider = new SettingsProvider(pathProvider);
 
             var appSettings = settingsProvider
-                .Get()
+                .Get(true)
                 .GetAwaiter()
                 .GetResult();
 
@@ -72,7 +89,7 @@ namespace HyperVLauncher.Apps.Tray
                     LaunchShortcut(shortcut.Id);
                 };
 
-                taskbarIcon.ContextMenu.Items.Add(menuItem);
+                _taskbarIcon.ContextMenu.Items.Add(menuItem);
             }
 
             var closeMenuItem = new MenuItem()
@@ -85,8 +102,26 @@ namespace HyperVLauncher.Apps.Tray
                 base.Shutdown();
             };
 
-            taskbarIcon.ContextMenu.Items.Add(new Separator());
-            taskbarIcon.ContextMenu.Items.Add(closeMenuItem);
+            _taskbarIcon.ContextMenu.Items.Add(new Separator());
+            _taskbarIcon.ContextMenu.Items.Add(closeMenuItem);
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            _cancellationTokenSource.Cancel();
+
+            try
+            {
+                _ipcProcessor?
+                    .GetAwaiter()
+                    .GetResult();
+            }
+            catch
+            {
+                // Swallow any exception since we're closing anyway.
+            }
+
+            base.OnExit(e);
         }
 
         private void TaskbarIcon_TrayMouseDoubleClick(object sender, RoutedEventArgs e)
@@ -109,6 +144,22 @@ namespace HyperVLauncher.Apps.Tray
 
             using (Process.Start(startInfo))
             {
+            }
+        }
+
+        private async Task ProcessIpcMessages(CancellationToken cancellationToken)
+        {
+            await foreach (var ipcMessage in _ipcProvider.ReadMessages(cancellationToken).ConfigureAwait(true))
+            {
+                switch (ipcMessage.IpcCommand)
+                {
+                    case Contracts.Enums.IpcCommand.ReloadSettings:
+                        CreateContextMenu();
+                        break;
+
+                    default:
+                        throw new InvalidDataException($"Invalid IPC command: {ipcMessage.IpcCommand}");
+                }
             }
         }
     }
