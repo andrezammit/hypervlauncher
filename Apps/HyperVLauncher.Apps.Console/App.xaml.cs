@@ -61,7 +61,7 @@ namespace HyperVLauncher
             var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
 
-            //LaunchTrayApp();
+            LaunchTrayApp();
         }
 
         private static void LaunchTrayApp()
