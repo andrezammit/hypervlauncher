@@ -1,6 +1,9 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+
+using System.Threading;
+using System.Threading.Tasks;
 
 using System.IO;
 using System.IO.Pipes;
@@ -8,23 +11,17 @@ using System.IO.Pipes;
 using Newtonsoft.Json;
 
 using HyperVLauncher.Contracts.Models;
+using HyperVLauncher.Contracts.Interfaces;
 
 namespace HyperVLauncher.Providers.Ipc
 {
-    public class IpcProvider
+    public class IpcProvider : IIpcProvider
     {
-        private readonly PipeStream _namedPipeStream;
+        private readonly string _pipeName;
 
-        public IpcProvider(string pipeName, bool serverMode)
+        public IpcProvider(string pipeName)
         {
-            if (serverMode)
-            {
-                _namedPipeStream = CreateServerStream(pipeName);
-            }
-            else
-            {
-                _namedPipeStream = CreateClientStream(pipeName);
-            }
+            _pipeName = pipeName;
         }
 
         private static NamedPipeServerStream CreateServerStream(string pipeName)
@@ -37,29 +34,13 @@ namespace HyperVLauncher.Providers.Ipc
             return new NamedPipeClientStream(".", pipeName, PipeDirection.InOut);
         }
 
-        public async Task Connect()
-        {
-            if (_namedPipeStream is not NamedPipeClientStream namedPipeClientStream)
-            {
-                throw new InvalidOperationException("Client stream not created.");
-            }
-
-            await namedPipeClientStream.ConnectAsync();
-        }
-
-        public async Task WaitForConnection()
-        {
-            if (_namedPipeStream is not NamedPipeServerStream namedPipeServerStream)
-            {
-                throw new InvalidOperationException("Server stream not created.");
-            }
-
-            await namedPipeServerStream.WaitForConnectionAsync();
-        }
-
         public async Task SendMessage(IpcMessage ipcMessage)
         {
-            using var streamWriter = new StreamWriter(_namedPipeStream)
+            using var namedPipeStream = CreateClientStream(_pipeName);
+            
+            await namedPipeStream.ConnectAsync();
+
+            using var streamWriter = new StreamWriter(namedPipeStream)
             {
                 AutoFlush = true
             };
@@ -69,13 +50,20 @@ namespace HyperVLauncher.Providers.Ipc
             await streamWriter.WriteAsync(jsonMessage);
         }
 
-        public async IAsyncEnumerable<IpcMessage> ReadMessages()
+        public async IAsyncEnumerable<IpcMessage> ReadMessages(
+            [EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            using var streamReader = new StreamReader(_namedPipeStream);
-
             do
             {
-                var jsonMessage = await streamReader.ReadLineAsync();
+                using var namedPipeServerStream = CreateServerStream(_pipeName);
+
+                await namedPipeServerStream.WaitForConnectionAsync(cancellationToken);
+
+                using var streamReader = new StreamReader(namedPipeServerStream);
+
+                var jsonMessage = await streamReader
+                    .ReadLineAsync()
+                    .WaitAsync(cancellationToken);
 
                 if (jsonMessage is null)
                 {
@@ -91,7 +79,7 @@ namespace HyperVLauncher.Providers.Ipc
 
                 yield return ipcMessage;
             }
-            while (true);
+            while (!cancellationToken.IsCancellationRequested);
         }
     }
 }

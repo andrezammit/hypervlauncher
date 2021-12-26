@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 
+using HyperVLauncher.Contracts.Enums;
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
 
@@ -64,17 +65,20 @@ namespace HyperVLauncher.Pages
     /// </summary>
     public partial class ShortcutsPage : Page
     {
+        private readonly IIpcProvider _ipcProvider;
         private readonly IHyperVProvider _hyperVProvider;
         private readonly ISettingsProvider _settingsProvider;
 
         private readonly ObservableCollection<ShortcutItem> _shortcuts = new();
 
         public ShortcutsPage(
+            IIpcProvider ipcProvider,
             IHyperVProvider hyperVProvider,
             ISettingsProvider settingsProvider)
         {
             InitializeComponent();
 
+            _ipcProvider = ipcProvider;
             _hyperVProvider = hyperVProvider;
             _settingsProvider = settingsProvider;
 
@@ -182,6 +186,13 @@ namespace HyperVLauncher.Pages
             await _settingsProvider.Save();
 
             await RefreshShortcuts();
+
+            var ipcMessage = new IpcMessage()
+            {
+                IpcCommand = IpcCommand.ReloadSettings
+            };
+
+            await _ipcProvider.SendMessage(ipcMessage);
         }
     }
 }

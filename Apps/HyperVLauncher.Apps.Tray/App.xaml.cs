@@ -1,13 +1,17 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 using System.Windows;
 using System.Windows.Controls;
 
 using Hardcodet.Wpf.TaskbarNotification;
 
+using HyperVLauncher.Providers.Ipc;
 using HyperVLauncher.Providers.Path;
+using HyperVLauncher.Contracts.Enums;
 using HyperVLauncher.Providers.Common;
 using HyperVLauncher.Providers.Settings;
 
@@ -18,7 +22,37 @@ namespace HyperVLauncher.Apps.Tray
     /// </summary>
     public partial class App : Application
     {
-        private readonly TaskbarIcon taskbarIcon = new();
+        private Task? _ipcProcessor;
+
+        private readonly TaskbarIcon _taskbarIcon = new();
+        private readonly IpcProvider _ipcProvider = new("HyperVLauncherIpc");
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
+
+        private readonly MenuItem _titleMenuItem;
+        private readonly MenuItem _closeMenuItem;
+
+        public App()
+        {
+            _titleMenuItem = new MenuItem()
+            {
+                Header = "Hyper-V Launcher Console"
+            };
+
+            _titleMenuItem.Click += (object sender, RoutedEventArgs e) =>
+            {
+                LaunchConsole();
+            };
+
+            _closeMenuItem = new MenuItem()
+            {
+                Header = "Close"
+            };
+
+            _closeMenuItem.Click += (object sender, RoutedEventArgs e) =>
+            {
+                base.Shutdown();
+            };
+        }
 
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
@@ -29,25 +63,25 @@ namespace HyperVLauncher.Apps.Tray
                 return;
             }
 
-            taskbarIcon.ContextMenu = new ContextMenu();
-            taskbarIcon.ToolTipText = "Hyper-V Launcher";
-            taskbarIcon.Icon = new System.Drawing.Icon("Icons\\app.ico");
-            taskbarIcon.MenuActivation = PopupActivationMode.LeftOrRightClick;
+            _ipcProcessor = Task.Run(
+                () => ProcessIpcMessages(_cancellationTokenSource.Token));
 
-            taskbarIcon.TrayMouseDoubleClick += TaskbarIcon_TrayMouseDoubleClick;
+            _taskbarIcon.ContextMenu = new ContextMenu();
+            _taskbarIcon.ToolTipText = "Hyper-V Launcher";
+            _taskbarIcon.Icon = new System.Drawing.Icon("Icons\\app.ico");
+            _taskbarIcon.MenuActivation = PopupActivationMode.LeftOrRightClick;
 
-            var titleMenuItem = new MenuItem()
-            {
-                Header = "Hyper-V Launcher Console"
-            };
+            _taskbarIcon.TrayMouseDoubleClick += TaskbarIcon_TrayMouseDoubleClick;
 
-            titleMenuItem.Click += (object sender, RoutedEventArgs e) =>
-            {
-                LaunchConsole();
-            };
+            CreateContextMenu();
+        }
 
-            taskbarIcon.ContextMenu.Items.Add(titleMenuItem);
-            taskbarIcon.ContextMenu.Items.Add(new Separator());
+        private void CreateContextMenu()
+        {
+            _taskbarIcon.ContextMenu.Items.Clear();
+
+            _taskbarIcon.ContextMenu.Items.Add(_titleMenuItem);
+            _taskbarIcon.ContextMenu.Items.Add(new Separator());
 
             var profilePath = PathProvider.GetProfileFolder();
             Directory.CreateDirectory(profilePath);
@@ -56,7 +90,7 @@ namespace HyperVLauncher.Apps.Tray
             var settingsProvider = new SettingsProvider(pathProvider);
 
             var appSettings = settingsProvider
-                .Get()
+                .Get(true)
                 .GetAwaiter()
                 .GetResult();
 
@@ -72,21 +106,29 @@ namespace HyperVLauncher.Apps.Tray
                     LaunchShortcut(shortcut.Id);
                 };
 
-                taskbarIcon.ContextMenu.Items.Add(menuItem);
+                _taskbarIcon.ContextMenu.Items.Add(menuItem);
             }
 
-            var closeMenuItem = new MenuItem()
-            {
-                Header = "Close"
-            };
+            _taskbarIcon.ContextMenu.Items.Add(new Separator());
+            _taskbarIcon.ContextMenu.Items.Add(_closeMenuItem);
+        }
 
-            closeMenuItem.Click += (object sender, RoutedEventArgs e) =>
-            {
-                base.Shutdown();
-            };
+        protected override void OnExit(ExitEventArgs e)
+        {
+            _cancellationTokenSource.Cancel();
 
-            taskbarIcon.ContextMenu.Items.Add(new Separator());
-            taskbarIcon.ContextMenu.Items.Add(closeMenuItem);
+            try
+            {
+                _ipcProcessor?
+                    .GetAwaiter()
+                    .GetResult();
+            }
+            catch
+            {
+                // Swallow any exception since we're closing anyway.
+            }
+
+            base.OnExit(e);
         }
 
         private void TaskbarIcon_TrayMouseDoubleClick(object sender, RoutedEventArgs e)
@@ -109,6 +151,22 @@ namespace HyperVLauncher.Apps.Tray
 
             using (Process.Start(startInfo))
             {
+            }
+        }
+
+        private async Task ProcessIpcMessages(CancellationToken cancellationToken)
+        {
+            await foreach (var ipcMessage in _ipcProvider.ReadMessages(cancellationToken))
+            {
+                switch (ipcMessage.IpcCommand)
+                {
+                    case IpcCommand.ReloadSettings:
+                        Current.Dispatcher.Invoke(new Action(() => CreateContextMenu()));
+                        break;
+
+                    default:
+                        throw new InvalidDataException($"Invalid IPC command: {ipcMessage.IpcCommand}");
+                }
             }
         }
     }

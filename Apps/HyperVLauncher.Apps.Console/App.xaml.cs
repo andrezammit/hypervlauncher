@@ -2,6 +2,7 @@
 using System.IO;
 using System.Windows;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,6 +14,7 @@ using HyperVLauncher.Providers.Common;
 using HyperVLauncher.Providers.Settings;
 
 using HyperVLauncher.Pages;
+using HyperVLauncher.Providers.Ipc;
 
 namespace HyperVLauncher
 {
@@ -38,7 +40,7 @@ namespace HyperVLauncher
             }
         }
 
-        private static void ConfigureServices(IServiceCollection services)
+        private void ConfigureServices(IServiceCollection services)
         {
             var profilePath = PathProvider.GetProfileFolder();
             Directory.CreateDirectory(profilePath);
@@ -46,9 +48,12 @@ namespace HyperVLauncher
             services.AddSingleton<MainWindow>();
             services.AddSingleton<ShortcutsPage>();
             services.AddSingleton<VirtualMachinesPage>();
+            
             services.AddSingleton<IHyperVProvider, HyperVProvider>();
             services.AddSingleton<ISettingsProvider, SettingsProvider>();
+         
             services.AddSingleton<IPathProvider>(provider => new PathProvider(profilePath));
+            services.AddSingleton<IIpcProvider>(provider => new IpcProvider("HyperVLauncherIpc"));
         }
 
         private void App_OnStartup(object sender, StartupEventArgs e)
