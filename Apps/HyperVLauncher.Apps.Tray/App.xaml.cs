@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Hardcodet.Wpf.TaskbarNotification;
 
 using HyperVLauncher.Providers.Ipc;
 using HyperVLauncher.Providers.Path;
+using HyperVLauncher.Contracts.Enums;
 using HyperVLauncher.Providers.Common;
 using HyperVLauncher.Providers.Settings;
 
@@ -25,6 +27,32 @@ namespace HyperVLauncher.Apps.Tray
         private readonly TaskbarIcon _taskbarIcon = new();
         private readonly IpcProvider _ipcProvider = new("HyperVLauncherIpc");
         private readonly CancellationTokenSource _cancellationTokenSource = new();
+
+        private readonly MenuItem _titleMenuItem;
+        private readonly MenuItem _closeMenuItem;
+
+        public App()
+        {
+            _titleMenuItem = new MenuItem()
+            {
+                Header = "Hyper-V Launcher Console"
+            };
+
+            _titleMenuItem.Click += (object sender, RoutedEventArgs e) =>
+            {
+                LaunchConsole();
+            };
+
+            _closeMenuItem = new MenuItem()
+            {
+                Header = "Close"
+            };
+
+            _closeMenuItem.Click += (object sender, RoutedEventArgs e) =>
+            {
+                base.Shutdown();
+            };
+        }
 
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
@@ -46,24 +74,13 @@ namespace HyperVLauncher.Apps.Tray
             _taskbarIcon.TrayMouseDoubleClick += TaskbarIcon_TrayMouseDoubleClick;
 
             CreateContextMenu();
-            CreateContextMenu();
         }
 
         private void CreateContextMenu()
         {
             _taskbarIcon.ContextMenu.Items.Clear();
 
-            var titleMenuItem = new MenuItem()
-            {
-                Header = "Hyper-V Launcher Console"
-            };
-
-            titleMenuItem.Click += (object sender, RoutedEventArgs e) =>
-            {
-                LaunchConsole();
-            };
-
-            _taskbarIcon.ContextMenu.Items.Add(titleMenuItem);
+            _taskbarIcon.ContextMenu.Items.Add(_titleMenuItem);
             _taskbarIcon.ContextMenu.Items.Add(new Separator());
 
             var profilePath = PathProvider.GetProfileFolder();
@@ -92,18 +109,8 @@ namespace HyperVLauncher.Apps.Tray
                 _taskbarIcon.ContextMenu.Items.Add(menuItem);
             }
 
-            var closeMenuItem = new MenuItem()
-            {
-                Header = "Close"
-            };
-
-            closeMenuItem.Click += (object sender, RoutedEventArgs e) =>
-            {
-                base.Shutdown();
-            };
-
             _taskbarIcon.ContextMenu.Items.Add(new Separator());
-            _taskbarIcon.ContextMenu.Items.Add(closeMenuItem);
+            _taskbarIcon.ContextMenu.Items.Add(_closeMenuItem);
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -149,12 +156,12 @@ namespace HyperVLauncher.Apps.Tray
 
         private async Task ProcessIpcMessages(CancellationToken cancellationToken)
         {
-            await foreach (var ipcMessage in _ipcProvider.ReadMessages(cancellationToken).ConfigureAwait(true))
+            await foreach (var ipcMessage in _ipcProvider.ReadMessages(cancellationToken))
             {
                 switch (ipcMessage.IpcCommand)
                 {
-                    case Contracts.Enums.IpcCommand.ReloadSettings:
-                        CreateContextMenu();
+                    case IpcCommand.ReloadSettings:
+                        Current.Dispatcher.Invoke(new Action(() => CreateContextMenu()));
                         break;
 
                     default:
