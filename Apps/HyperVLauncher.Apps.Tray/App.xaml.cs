@@ -7,13 +7,19 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
+using Newtonsoft.Json;
+
 using Hardcodet.Wpf.TaskbarNotification;
+
+using HyperVLauncher.Contracts.Enums;
+using HyperVLauncher.Contracts.Models;
+using HyperVLauncher.Contracts.Constants;
 
 using HyperVLauncher.Providers.Ipc;
 using HyperVLauncher.Providers.Path;
-using HyperVLauncher.Contracts.Enums;
 using HyperVLauncher.Providers.Common;
 using HyperVLauncher.Providers.Settings;
+using Newtonsoft.Json.Linq;
 
 namespace HyperVLauncher.Apps.Tray
 {
@@ -25,8 +31,8 @@ namespace HyperVLauncher.Apps.Tray
         private Task? _ipcProcessor;
 
         private readonly TaskbarIcon _taskbarIcon = new();
-        private readonly IpcProvider _ipcProvider = new("HyperVLauncherIpc");
         private readonly CancellationTokenSource _cancellationTokenSource = new();
+        private readonly IpcProvider _ipcProvider = new(GeneralConstants.IpcPipeName);
 
         private readonly MenuItem _titleMenuItem;
         private readonly MenuItem _closeMenuItem;
@@ -56,7 +62,7 @@ namespace HyperVLauncher.Apps.Tray
 
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
-            if (!GenericHelpers.IsUniqueInstance("HyperVLauncherTrayMutex"))
+            if (!GenericHelpers.IsUniqueInstance(GeneralConstants.TrayMutexName))
             {
                 base.Shutdown();
 
@@ -154,6 +160,26 @@ namespace HyperVLauncher.Apps.Tray
             }
         }
 
+        private void ShowMessage(JObject? ipcMessageData)
+        {
+            if (ipcMessageData is null)
+            {
+                return;
+            }
+
+            var trayMessageData = ipcMessageData.ToObject<TrayMessageData>();
+
+            if (trayMessageData is null)
+            {
+                return;
+            }
+
+            _taskbarIcon.ShowBalloonTip(
+                trayMessageData.Title, 
+                trayMessageData.Message, 
+                BalloonIcon.Info);
+        }
+
         private async Task ProcessIpcMessages(CancellationToken cancellationToken)
         {
             await foreach (var ipcMessage in _ipcProvider.ReadMessages(cancellationToken))
@@ -162,6 +188,10 @@ namespace HyperVLauncher.Apps.Tray
                 {
                     case IpcCommand.ReloadSettings:
                         Current.Dispatcher.Invoke(new Action(() => CreateContextMenu()));
+                        break;
+
+                    case IpcCommand.ShowTrayMessage:
+                        Current.Dispatcher.Invoke(new Action(() => ShowMessage(ipcMessage.Data as JObject)));
                         break;
 
                     default:

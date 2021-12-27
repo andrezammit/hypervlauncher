@@ -1,30 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <UseWPF>true</UseWPF>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<UseWPF>true</UseWPF>
+		<AssemblyTitle>Hyper-V Launcher</AssemblyTitle>
+	</PropertyGroup>
 
-  <Import Project="..\..\Misc\Shared Project Files\App.csproj" />
+	<Import Project="..\..\Misc\Shared Project Files\App.csproj" />
 
-  <ItemGroup>
-    <None Remove="Icons\app.ico" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="Icons\app.ico" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Common\HyperVLauncher.Providers.Common.csproj" />
-    <ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Ipc\HyperVLauncher.Providers.Ipc.csproj" />
-    <ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Settings\HyperVLauncher.Providers.Settings.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Common\HyperVLauncher.Providers.Common.csproj" />
+		<ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Ipc\HyperVLauncher.Providers.Ipc.csproj" />
+		<ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Settings\HyperVLauncher.Providers.Settings.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Include="Icons\app.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+	<ItemGroup>
+		<Content Include="Icons\app.ico">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 
 </Project>
