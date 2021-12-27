@@ -1,11 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
+	<Import Project="..\..\Misc\Shared Project Files\App.csproj" />
+
+	<PropertyGroup>
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
+	<Product>Hyper-V Launcher</Product>
+	<Version>1.0.0</Version>
+		<ProductName>Hyper-V Launcher</ProductName>
   </PropertyGroup>
-
-  <Import Project="..\..\Misc\Shared Project Files\App.csproj" />
 
   <ItemGroup>
     <None Remove="Icons\app.ico" />

@@ -2,11 +2,15 @@
 using System.IO;
 using System.Linq;
 
-using HyperVLauncher.Providers.Path;
 using HyperVLauncher.Contracts.Models;
+using HyperVLauncher.Contracts.Constants;
+using HyperVLauncher.Contracts.Interfaces;
+
+using HyperVLauncher.Providers.Ipc;
+using HyperVLauncher.Providers.Path;
 using HyperVLauncher.Providers.HyperV;
 using HyperVLauncher.Providers.Settings;
-using HyperVLauncher.Contracts.Interfaces;
+using System.Threading.Tasks;
 
 if (args.Length < 1)
 {
@@ -20,6 +24,7 @@ Directory.CreateDirectory(profilePath);
 
 var pathProvider = new PathProvider(profilePath);
 var settingsProvider = new SettingsProvider(pathProvider);
+var ipcProvider = new IpcProvider(GeneralConstants.IpcPipeName);
 
 var appSettings = await settingsProvider.Get();
 var shortcut = appSettings.Shortcuts.FirstOrDefault(x => x.Id == shortcutId);
@@ -40,19 +45,26 @@ if (process is not null)
 {
     await process.WaitForExitAsync();
 
-    HandleShortcutExitBehaviour(hyperVProvider, shortcut);
+    await HandleShortcutExitBehaviour(hyperVProvider, ipcProvider, shortcut);
 }
 
-static void HandleShortcutExitBehaviour(IHyperVProvider hyperVProvider, Shortcut shortcut)
+static async Task HandleShortcutExitBehaviour(
+    IHyperVProvider hyperVProvider, 
+    IIpcProvider ipcProvider,
+    Shortcut shortcut)
 {
     switch (shortcut.CloseAction)
     {
         case HyperVLauncher.Contracts.Enums.CloseAction.Pause:
+            await ipcProvider.SendShowTrayMessage("Virtual Machine State Change", $"Pausing {shortcut.Name}...");
             hyperVProvider.PauseVirtualMachine(shortcut.VmId);
+            
             break;
 
         case HyperVLauncher.Contracts.Enums.CloseAction.Shutdown:
+            await ipcProvider.SendShowTrayMessage("Virtual Machine State Change", $"Shutting down {shortcut.Name}...");
             hyperVProvider.ShutdownVirtualMachine(shortcut.VmId);
+
             break;
 
         default:

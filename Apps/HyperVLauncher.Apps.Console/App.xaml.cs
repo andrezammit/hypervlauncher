@@ -15,6 +15,7 @@ using HyperVLauncher.Providers.Settings;
 
 using HyperVLauncher.Pages;
 using HyperVLauncher.Providers.Ipc;
+using HyperVLauncher.Contracts.Constants;
 
 namespace HyperVLauncher
 {
@@ -53,7 +54,7 @@ namespace HyperVLauncher
             services.AddSingleton<ISettingsProvider, SettingsProvider>();
          
             services.AddSingleton<IPathProvider>(provider => new PathProvider(profilePath));
-            services.AddSingleton<IIpcProvider>(provider => new IpcProvider("HyperVLauncherIpc"));
+            services.AddSingleton<IIpcProvider>(provider => new IpcProvider(GeneralConstants.IpcPipeName));
         }
 
         private void App_OnStartup(object sender, StartupEventArgs e)

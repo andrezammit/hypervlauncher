@@ -42,9 +42,14 @@ namespace HyperVLauncher.Providers.HyperV
                 return;
             }
 
+            if ((UInt16)vmObject.GetPropertyValue("EnabledState") == (UInt16)WmiVmState.Started)
+            {
+                return;
+            }
+
             var inParams = vmObject.GetMethodParameters("RequestStateChange");
 
-            inParams["RequestedState"] = 2;
+            inParams["RequestedState"] = WmiVmState.Started;
 
             var outParams = vmObject.InvokeMethod(
                 "RequestStateChange",
@@ -65,7 +70,7 @@ namespace HyperVLauncher.Providers.HyperV
 
             var inParams = vmObject.GetMethodParameters("RequestStateChange");
 
-            inParams["RequestedState"] = 6;
+            inParams["RequestedState"] = WmiVmState.Saved;
 
             var outParams = vmObject.InvokeMethod(
                 "RequestStateChange",

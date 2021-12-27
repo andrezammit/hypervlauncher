@@ -10,6 +10,7 @@ using System.IO.Pipes;
 
 using Newtonsoft.Json;
 
+using HyperVLauncher.Contracts.Enums;
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
 
@@ -36,18 +37,46 @@ namespace HyperVLauncher.Providers.Ipc
 
         public async Task SendMessage(IpcMessage ipcMessage)
         {
-            using var namedPipeStream = CreateClientStream(_pipeName);
-            
-            await namedPipeStream.ConnectAsync();
-
-            using var streamWriter = new StreamWriter(namedPipeStream)
+            try
             {
-                AutoFlush = true
+                using var namedPipeStream = CreateClientStream(_pipeName);
+
+                await namedPipeStream.ConnectAsync(TimeSpan.FromSeconds(1).Milliseconds);
+
+                using var streamWriter = new StreamWriter(namedPipeStream)
+                {
+                    AutoFlush = true
+                };
+
+                var jsonMessage = JsonConvert.SerializeObject(ipcMessage);
+
+                await streamWriter.WriteAsync(jsonMessage);
+            }
+            catch
+            {
+                // Failed to send tray message.
+            }
+        }
+
+        public Task SendReloadSettings()
+        {
+            var ipcMessage = new IpcMessage()
+            {
+                IpcCommand = IpcCommand.ReloadSettings
             };
 
-            var jsonMessage = JsonConvert.SerializeObject(ipcMessage);
+            return SendMessage(ipcMessage);
+        }
 
-            await streamWriter.WriteAsync(jsonMessage);
+        public Task SendShowTrayMessage(string title, string message)
+        {
+            var ipcMessage = new IpcMessage()
+            {
+                IpcCommand = IpcCommand.ShowTrayMessage,
+                Data = new TrayMessageData(title, message)
+            };
+
+            return SendMessage(ipcMessage);
         }
 
         public async IAsyncEnumerable<IpcMessage> ReadMessages(
