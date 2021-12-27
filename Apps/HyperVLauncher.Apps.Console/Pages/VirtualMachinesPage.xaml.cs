@@ -47,7 +47,7 @@ namespace HyperVLauncher.Pages
             EnableControls();
         }
 
-        private void lstVirtualMachines_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void LstVirtualMachines_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             EnableControls();
         }
@@ -60,7 +60,7 @@ namespace HyperVLauncher.Pages
             btnCreateShortcut.IsEnabled = enable;
         }
 
-        private void btnLaunch_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void BtnLaunch_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (lstVirtualMachines.SelectedItem is not VirtualMachine vm)
             {
@@ -70,10 +70,10 @@ namespace HyperVLauncher.Pages
             var vmId = vm.Id;
 
             _hyperVProvider.StartVirtualMachine(vmId);
-            _hyperVProvider.ConnectVirtualMachine(vmId);
+            using var process = _hyperVProvider.ConnectVirtualMachine(vmId);
         }
 
-        private async void btnCreateShortcut_Click(object sender, System.Windows.RoutedEventArgs e)
+        private async void BtnCreateShortcut_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (lstVirtualMachines.SelectedItem is not VirtualMachine vm)
             {
