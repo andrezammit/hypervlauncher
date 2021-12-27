@@ -45,8 +45,61 @@ namespace HyperVLauncher.Providers.HyperV
 
             inParams["RequestedState"] = 2;
 
-            var outParams = vmObject.InvokeMethod(
+            _ = vmObject.InvokeMethod(
                 "RequestStateChange",
+                inParams,
+                null);
+        }
+
+        public void PauseVirtualMachine(string vmId)
+        {
+            var vmObject = GetVmObject(vmId);
+
+            if (vmObject == null)
+            {
+                return;
+            }
+
+            var inParams = vmObject.GetMethodParameters("RequestStateChange");
+
+            inParams["RequestedState"] = 6;
+
+            _ = vmObject.InvokeMethod(
+                "RequestStateChange",
+                inParams,
+                null);
+        }
+
+        public void ShutdownVirtualMachine(string vmId)
+        {
+            var vmObject = GetVmObject(vmId);
+
+            if (vmObject is null)
+            {
+                return;
+            }
+
+            var relPath = vmObject.GetPropertyValue("__RELPATH").ToString();
+
+            if (relPath is null)
+            {
+                return;
+            }
+
+            var shutdownComponent = GetVmShutdownComponent(relPath);
+
+            if (shutdownComponent is null)
+            {
+                return;
+            }
+
+            var inParams = shutdownComponent.GetMethodParameters("InitiateShutdown");
+
+            inParams["Force"] = true;
+            inParams["Reason"] = "Hyper-V Launcher shutdown.";
+
+            _ = shutdownComponent.InvokeMethod(
+                "InitiateShutdown",
                 inParams,
                 null);
         }
@@ -72,12 +125,10 @@ namespace HyperVLauncher.Providers.HyperV
 
         private static ManagementObject? GetVmObject(string vmId)
         {
-            var scope = new ManagementScope("\\\\.\\root\\virtualization\\v2");
-            scope.Connect();
+            using var searcher = new ManagementObjectSearcher(
+                "\\\\.\\root\\virtualization\\v2", 
+                $"SELECT * FROM Msvm_ComputerSystem WHERE Name = \"{vmId}\"");
 
-            var query = new SelectQuery($"SELECT * FROM Msvm_ComputerSystem WHERE Name = \"{vmId}\"");
-
-            using var searcher = new ManagementObjectSearcher(scope, query);
             using var searchResults = searcher.Get();
 
             foreach (ManagementObject vmObject in searchResults)
@@ -88,14 +139,27 @@ namespace HyperVLauncher.Providers.HyperV
             return null;
         }
 
-        public void ConnectVirtualMachine(string vmId)
+        private static ManagementObject? GetVmShutdownComponent(string relPath)
+        {
+            using var searcher = new ManagementObjectSearcher(
+                "\\\\.\\root\\virtualization\\v2", 
+                $"Associators of {{{relPath}}} where AssocClass=Msvm_SystemDevice ResultClass=Msvm_ShutdownComponent");
+
+            using var searchResults = searcher.Get();
+
+            foreach (ManagementObject shutdownComponent in searchResults)
+            {
+                return shutdownComponent;
+            }
+
+            return null;
+        }
+
+        public Process? ConnectVirtualMachine(string vmId)
         {
             var startInfo = new ProcessStartInfo("vmconnect.exe", $"{Environment.MachineName} -G \"{vmId}\"");
 
-            using (Process.Start(startInfo))
-            {
-
-            }
+            return Process.Start(startInfo);
         }
     }
 }

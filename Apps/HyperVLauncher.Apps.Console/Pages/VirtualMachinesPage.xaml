@@ -39,7 +39,7 @@
                 Padding="20,10,0,0"
                 Background="#FF2E3349"
                 HorizontalAlignment="Stretch"
-                ScrollViewer.VerticalScrollBarVisibility="Hidden" SelectionChanged="lstVirtualMachines_SelectionChanged">
+                ScrollViewer.VerticalScrollBarVisibility="Hidden" SelectionChanged="LstVirtualMachines_SelectionChanged">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <DockPanel Margin="2" Height="50">
@@ -63,13 +63,13 @@
                 Grid.Column="2"
                 HorizontalAlignment="Right"
                 Margin="0,19,50,0">
-            <Button Style="{StaticResource ActionButton}" x:Name="btnLaunch" Click="btnLaunch_Click">
+            <Button Style="{StaticResource ActionButton}" x:Name="btnLaunch" Click="BtnLaunch_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="../Icons/launch.png" Height="32" Width="32" Margin="0,0,10,0" />
                     <TextBlock Text="Launch" VerticalAlignment="Center" Margin="0,-3,0,0" />
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource ActionButton}" x:Name="btnCreateShortcut" Click="btnCreateShortcut_Click">
+            <Button Style="{StaticResource ActionButton}" x:Name="btnCreateShortcut" Click="BtnCreateShortcut_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="../Icons/create.png" Height="32" Width="32" Margin="0,0,10,0" />
                     <TextBlock Text="Create Shortcut" VerticalAlignment="Center" Margin="0,-3,0,0" />

@@ -154,7 +154,7 @@ namespace HyperVLauncher.Pages
             var vmId = shortcut.VmId;
 
             _hyperVProvider.StartVirtualMachine(vmId);
-            _hyperVProvider.ConnectVirtualMachine(vmId);
+            using var process = _hyperVProvider.ConnectVirtualMachine(vmId);
         }
 
         private async void BtnEdit_Click(object sender, RoutedEventArgs e)
