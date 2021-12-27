@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Constants;
@@ -10,7 +11,6 @@ using HyperVLauncher.Providers.Ipc;
 using HyperVLauncher.Providers.Path;
 using HyperVLauncher.Providers.HyperV;
 using HyperVLauncher.Providers.Settings;
-using System.Threading.Tasks;
 
 if (args.Length < 1)
 {
