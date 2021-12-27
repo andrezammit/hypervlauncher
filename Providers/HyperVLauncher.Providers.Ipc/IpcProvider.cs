@@ -27,12 +27,12 @@ namespace HyperVLauncher.Providers.Ipc
 
         private static NamedPipeServerStream CreateServerStream(string pipeName)
         {
-            return new NamedPipeServerStream(pipeName, PipeDirection.InOut);
+            return new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
         }
 
         private static NamedPipeClientStream CreateClientStream(string pipeName)
         {
-            return new NamedPipeClientStream(".", pipeName, PipeDirection.InOut);
+            return new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
         }
 
         public async Task SendMessage(IpcMessage ipcMessage)
