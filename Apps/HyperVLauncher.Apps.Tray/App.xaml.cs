@@ -74,8 +74,8 @@ namespace HyperVLauncher.Apps.Tray
 
             _taskbarIcon.ContextMenu = new ContextMenu();
             _taskbarIcon.ToolTipText = "Hyper-V Launcher";
-            _taskbarIcon.Icon = new System.Drawing.Icon("Icons\\app.ico");
             _taskbarIcon.MenuActivation = PopupActivationMode.LeftOrRightClick;
+            _taskbarIcon.Icon = new System.Drawing.Icon($"{AppContext.BaseDirectory}\\Icons\\app.ico");
 
             _taskbarIcon.TrayMouseDoubleClick += TaskbarIcon_TrayMouseDoubleClick;
 
@@ -148,7 +148,11 @@ namespace HyperVLauncher.Apps.Tray
 
         private static void LaunchShortcut(string shortcutId)
         {
-            var startInfo = new ProcessStartInfo("HyperVLauncher.Apps.LaunchPad.exe", shortcutId);
+            var startInfo = new ProcessStartInfo($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.LaunchPad.exe", shortcutId)
+            {
+                Verb = "runas",
+                UseShellExecute = true
+            };
 
             using (Process.Start(startInfo))
             {
@@ -157,7 +161,11 @@ namespace HyperVLauncher.Apps.Tray
 
         private static void LaunchConsole()
         {
-            var startInfo = new ProcessStartInfo("HyperVLauncher.Apps.Console.exe");
+            var startInfo = new ProcessStartInfo($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.Console.exe")
+            {
+                Verb = "runas",
+                UseShellExecute = true
+            };
 
             using (Process.Start(startInfo))
             {
