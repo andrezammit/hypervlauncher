@@ -8,8 +8,9 @@
 			UpgradeCode="a03e293f-46be-41a6-b1ba-7bfaef00d148"
 			IconSourceFile="Logo.ico">
 
+		<Variable Name="LaunchTarget" Value="[InstallFolder]\HyperVLauncher.Apps.Console.exe"/>
 		<Variable Name="InstallFolder" Type="string" Value="[ProgramFiles64Folder]Hyper-V Launcher\"/>
-		
+
 		<BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.HyperlinkLargeLicense">
 			<bal:WixStandardBootstrapperApplication
             ShowVersion="yes"
