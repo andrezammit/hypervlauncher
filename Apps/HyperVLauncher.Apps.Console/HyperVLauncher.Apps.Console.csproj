@@ -4,11 +4,13 @@
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>app.ico</ApplicationIcon>
+    <ApplicationManifest>HyperVLauncher.Apps.Console.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <Import Project="..\..\Misc\Shared Project Files\App.csproj" />
 
   <ItemGroup>
+    <None Remove="HyperVLauncher.Apps.Console.manifest" />
     <None Remove="Icons\create.png" />
     <None Remove="Icons\delete.png" />
     <None Remove="Icons\edit.png" />
@@ -21,6 +23,9 @@
 
   <ItemGroup>
     <Content Include="app.ico" />
+    <Content Include="HyperVLauncher.Apps.Console.manifest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Icons\create.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

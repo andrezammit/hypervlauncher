@@ -2,9 +2,20 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <ApplicationManifest>HyperVLauncher.Apps.LaunchPad.manifest</ApplicationManifest>
   </PropertyGroup>
   
   <Import Project="..\..\Misc\Shared Project Files\App.csproj" />
+  
+  <ItemGroup>
+    <None Remove="HyperVLauncher.Apps.LaunchPad.manifest" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="HyperVLauncher.Apps.LaunchPad.manifest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Common\HyperVLauncher.Providers.Common.csproj" />
