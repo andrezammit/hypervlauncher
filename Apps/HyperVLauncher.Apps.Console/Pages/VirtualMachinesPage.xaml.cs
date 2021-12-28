@@ -37,11 +37,23 @@ namespace HyperVLauncher.Pages
         {
             _virtualMachines.Clear();
 
-            var vmList = _hyperVProvider.GetVirtualMachineList();
-            
-            foreach (var vm in vmList)
+            try
             {
-                _virtualMachines.Add(vm);
+                var vmList = _hyperVProvider.GetVirtualMachineList();
+
+                foreach (var vm in vmList)
+                {
+                    _virtualMachines.Add(vm);
+                }
+            }
+            catch
+            {
+                // Failed to get VM list from Hyper-V.
+            }
+
+            if (_virtualMachines.Count == 0)
+            {
+                _virtualMachines.Add(new VirtualMachine(Guid.Empty.ToString(), "No Virtual Machines found."));
             }
 
             EnableControls();
@@ -54,7 +66,8 @@ namespace HyperVLauncher.Pages
 
         private void EnableControls()
         {
-            var enable = lstVirtualMachines.SelectedIndex != -1;
+            var enable = (lstVirtualMachines.SelectedItem is VirtualMachine vm)
+                && (vm.Id != Guid.Empty.ToString());
 
             btnLaunch.IsEnabled = enable;
             btnCreateShortcut.IsEnabled = enable;
