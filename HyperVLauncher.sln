@@ -40,6 +40,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Setup", "Setup", "{F13DB580
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "HyperVLauncher.Setup.Installer", "Setup\HyperVLauncher.Setup.Installer\HyperVLauncher.Setup.Installer.wixproj", "{A1B9B22E-924B-40C4-BE55-69036B629E57}"
 EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "HyperVLauncher.Setup.Bootstrapper", "Setup\HyperVLauncher.Setup.Bootstrapper\HyperVLauncher.Setup.Bootstrapper.wixproj", "{A03E293F-46BE-41A6-B1BA-7BFAEF00D148}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A1B9B22E-924B-40C4-BE55-69036B629E57} = {A1B9B22E-924B-40C4-BE55-69036B629E57}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -123,9 +128,15 @@ Global
 		{A1B9B22E-924B-40C4-BE55-69036B629E57}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{A1B9B22E-924B-40C4-BE55-69036B629E57}.Debug|x64.ActiveCfg = Debug|x64
 		{A1B9B22E-924B-40C4-BE55-69036B629E57}.Debug|x64.Build.0 = Debug|x64
-		{A1B9B22E-924B-40C4-BE55-69036B629E57}.Release|Any CPU.ActiveCfg = Release|x86
+		{A1B9B22E-924B-40C4-BE55-69036B629E57}.Release|Any CPU.ActiveCfg = Release|x64
 		{A1B9B22E-924B-40C4-BE55-69036B629E57}.Release|x64.ActiveCfg = Release|x64
 		{A1B9B22E-924B-40C4-BE55-69036B629E57}.Release|x64.Build.0 = Release|x64
+		{A03E293F-46BE-41A6-B1BA-7BFAEF00D148}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{A03E293F-46BE-41A6-B1BA-7BFAEF00D148}.Debug|x64.ActiveCfg = Debug|x64
+		{A03E293F-46BE-41A6-B1BA-7BFAEF00D148}.Debug|x64.Build.0 = Debug|x64
+		{A03E293F-46BE-41A6-B1BA-7BFAEF00D148}.Release|Any CPU.ActiveCfg = Release|x64
+		{A03E293F-46BE-41A6-B1BA-7BFAEF00D148}.Release|x64.ActiveCfg = Release|x64
+		{A03E293F-46BE-41A6-B1BA-7BFAEF00D148}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -142,6 +153,7 @@ Global
 		{155ABA43-309F-4475-852A-A9314CC18C6B} = {7DCA7144-E251-463F-9F53-9837154CCED3}
 		{5A2D9035-5F77-4EB4-A6E1-E0CBD7611749} = {815E69A0-71BA-4F1C-B3FC-840F79D299E9}
 		{A1B9B22E-924B-40C4-BE55-69036B629E57} = {F13DB580-134D-4952-9B69-4AC91DFB71AA}
+		{A03E293F-46BE-41A6-B1BA-7BFAEF00D148} = {F13DB580-134D-4952-9B69-4AC91DFB71AA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B641A9CA-559C-474E-ACD7-F94421915AB2}

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+	 xmlns:bal="http://schemas.microsoft.com/wix/BalExtension">
+	
+	<Bundle Name="Hyper-V Launcher" 
+			Version="!(bind.packageVersion.HyperVLauncherInstaller)" 
+			Manufacturer="!(bind.packageManufacturer.HyperVLauncherInstaller)" 
+			UpgradeCode="a03e293f-46be-41a6-b1ba-7bfaef00d148"
+			IconSourceFile="Logo.ico">
+
+		<Variable Name="InstallFolder" Type="string" Value="[ProgramFiles64Folder]Hyper-V Launcher\"/>
+		
+		<BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.HyperlinkLargeLicense">
+			<bal:WixStandardBootstrapperApplication
+            ShowVersion="yes"
+			LogoFile="Logo.png"
+			LicenseUrl=""
+            />
+		</BootstrapperApplicationRef>
+
+		<Chain>
+			 <MsiPackage 
+				 Id="HyperVLauncherInstaller" 
+				 DisplayName="Hyper-V Launcher"
+				 Compressed="yes" 
+				 SourceFile="$(var.HyperVLauncher.Setup.Installer.TargetPath)" /> 
+		</Chain>
+		
+	</Bundle>
+</Wix>
