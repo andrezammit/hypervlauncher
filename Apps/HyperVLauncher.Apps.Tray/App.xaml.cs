@@ -115,7 +115,11 @@ namespace HyperVLauncher.Apps.Tray
                 _taskbarIcon.ContextMenu.Items.Add(menuItem);
             }
 
-            _taskbarIcon.ContextMenu.Items.Add(new Separator());
+            if (appSettings.Shortcuts.Count > 0)
+            {
+                _taskbarIcon.ContextMenu.Items.Add(new Separator());
+            }
+
             _taskbarIcon.ContextMenu.Items.Add(_closeMenuItem);
         }
 
