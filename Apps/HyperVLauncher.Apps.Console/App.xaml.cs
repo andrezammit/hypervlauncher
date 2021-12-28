@@ -67,7 +67,7 @@ namespace HyperVLauncher
 
         private static void LaunchTrayApp()
         {
-            var startInfo = new ProcessStartInfo("HyperVLauncher.Apps.Tray.exe");
+            var startInfo = new ProcessStartInfo($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.Tray.exe");
 
             using (Process.Start(startInfo))
             {

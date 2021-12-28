@@ -8,6 +8,8 @@
 		
 		<Feature Id="ProductFeature" Title="HyperVLauncher.Setup.Installer" Level="1">
 			<ComponentGroupRef Id="HyperVLauncher_Project" />
+			<ComponentGroupRef Id="StartMenuComponents" />
+			<ComponentGroupRef Id="AutoStartComponents" />
 		</Feature>
 	</Product>
 
@@ -16,15 +18,38 @@
 			<Directory Id="ProgramFiles64Folder">
 				<Directory Id="INSTALLFOLDER" Name="Hyper-V Launcher" />
 			</Directory>
+			<Directory Id="ProgramMenuFolder">
+				<Directory Id="ApplicationProgramsFolder" Name="Hyper-V Launcher"/>
+			</Directory>
+			<Directory Id="StartupFolder" />
 		</Directory>
 	</Fragment>
 
 	<Fragment>
-		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-			<!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
-			<!-- <Component Id="ProductComponent"> -->
-				<!-- TODO: Insert files, registry keys, and other resources here. -->
-			<!-- </Component> -->
+		<ComponentGroup Id="StartMenuComponents" Directory="ApplicationProgramsFolder">
+			<Component Id="ApplicationShortcut" Guid="46020F77-A1FF-4902-81C5-119ED7CD6B92">
+				<Shortcut Id="ApplicationStartMenuShortcut"
+						  Name="Hyper-V Launcher Console"
+						  Description="Hyper-V Launcher Console"
+						  Target="[INSTALLFOLDER]HyperVLauncher.Apps.Console.exe"
+						  WorkingDirectory="APPLICATIONROOTDIRECTORY"/>
+				
+				<RemoveFolder Id="CleanUpAppShortcut" Directory="ApplicationProgramsFolder" On="uninstall"/>
+				<RegistryValue Root="HKCU" Key="Software\Hyper-V Launcher" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+			</Component>
+		</ComponentGroup>
+		
+		<ComponentGroup Id="AutoStartComponents" Directory="StartupFolder">
+			<Component Id="TrayAutoStart" Guid="B4B04BC0-1FB1-436B-846D-FC3C06859D67">
+				<Shortcut Id="TrayAutoStartShortcut"
+						  Name="Hyper-V Launcher Tray App"
+						  Description="Hyper-V Launcher Tray App"
+						  Target="[INSTALLFOLDER]HyperVLauncher.Apps.Tray.exe"
+						  WorkingDirectory="APPLICATIONROOTDIRECTORY"/>
+				
+				<RemoveFolder Id="CleanUpAutoStartShortcut" Directory="StartupFolder" On="uninstall"/>
+				<RegistryValue Root="HKCU" Key="Software\Hyper-V Launcher" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+			</Component>
 		</ComponentGroup>
 	</Fragment>
 </Wix>
