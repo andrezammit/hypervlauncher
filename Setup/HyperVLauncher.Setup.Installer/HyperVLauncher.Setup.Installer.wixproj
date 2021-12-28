@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" InitialTargets="EnsureWixToolsetInstalled" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <ProductVersion>3.10</ProductVersion>
+    <ProjectGuid>a1b9b22e-924b-40c4-be55-69036b629e57</ProjectGuid>
+    <SchemaVersion>2.0</SchemaVersion>
+    <OutputName>HyperVLauncher.Setup.Installer</OutputName>
+    <OutputType>Package</OutputType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <DefineConstants>Debug</DefineConstants>
+    <OutputPath>..\..\bin\$(Configuration)\setup\</OutputPath>
+    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <OutputPath>..\..\bin\$(Configuration)\setup\</OutputPath>
+    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="HyperVLauncher.wxs" />
+    <Compile Include="Product.wxs" />
+  </ItemGroup>
+  <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />
+  <Target Name="EnsureWixToolsetInstalled" Condition=" '$(WixTargetsImported)' != 'true' ">
+    <Error Text="The WiX Toolset v3.11 (or newer) build tools must be installed to build this project. To download the WiX Toolset, see http://wixtoolset.org/releases/" />
+  </Target>
+  <Target Name="BeforeBuild">
+    <Exec Command="dotnet publish ..\..\Apps\HyperVLauncher.Apps.Console\HyperVLauncher.Apps.Console.csproj -o ..\..\Publish\$(Configuration) -c $(Configuration) -r win10-x64 --self-contained" />
+    <Exec Command="dotnet publish ..\..\Apps\HyperVLauncher.Apps.Tray\HyperVLauncher.Apps.Tray.csproj -o ..\..\Publish\$(Configuration) -c $(Configuration) -r win10-x64 --self-contained" />
+    <Exec Command="dotnet publish ..\..\Apps\HyperVLauncher.Apps.LaunchPad\HyperVLauncher.Apps.LaunchPad.csproj -o ..\..\Publish\$(Configuration) -c $(Configuration) -r win10-x64 --self-contained" />
+    <PropertyGroup>
+      <LinkerBaseInputPaths>..\..\Publish\$(Configuration)</LinkerBaseInputPaths>
+      <DefineConstants>BasePath=..\..\Publish\$(Configuration)</DefineConstants>
+    </PropertyGroup>
+    <HeatDirectory OutputFile="HyperVLauncher.wxs" DirectoryRefId="INSTALLFOLDER" ComponentGroupName="HyperVLauncher_Project" SuppressCom="true" Directory="..\..\Publish\$(Configuration)" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="false" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" RunAsSeparateProcess="true" />
+  </Target>
+  <!--
+	To modify your build process, add your task inside one of the targets below and uncomment it.
+	Other similar extension points exist, see Wix.targets.
+	<Target Name="BeforeBuild">
+	</Target>
+	<Target Name="AfterBuild">
+	</Target>
+	-->
+</Project>
