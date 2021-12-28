@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
+
 using HyperVLauncher.Providers.HyperV.Contracts.Enums;
 
 namespace HyperVLauncher.Providers.HyperV
