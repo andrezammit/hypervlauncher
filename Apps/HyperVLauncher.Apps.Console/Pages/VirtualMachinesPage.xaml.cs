@@ -6,6 +6,7 @@ using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
 
 using HyperVLauncher.Modals;
+using HyperVLauncher.Providers.Tracing;
 
 namespace HyperVLauncher.Pages
 {
@@ -35,6 +36,8 @@ namespace HyperVLauncher.Pages
 
         private void RefreshVirtualMachines()
         {
+            Tracer.Debug("Refresing virtual machine list...");
+
             _virtualMachines.Clear();
 
             try
@@ -43,6 +46,8 @@ namespace HyperVLauncher.Pages
 
                 foreach (var vm in vmList)
                 {
+                    Tracer.Debug($"Found virtual machine: {vm.Id} - {vm.Name}");
+
                     _virtualMachines.Add(vm);
                 }
             }
@@ -80,6 +85,8 @@ namespace HyperVLauncher.Pages
                 throw new InvalidCastException("Invalid selected item type.");
             }
 
+            Tracer.Debug($"Launching virtual machine {vm.Id} - {vm.Name}...");
+
             var vmId = vm.Id;
 
             _hyperVProvider.StartVirtualMachine(vmId);
@@ -92,7 +99,9 @@ namespace HyperVLauncher.Pages
             {
                 throw new InvalidCastException("Invalid selected item type.");
             }
-            
+
+            Tracer.Debug($"Creating new shortcut for {vm.Id} - {vm.Name}...");
+
             var shortcut = AppSettings.CreateShortcut(vm.Name, vm.Id);
 
             var shortcutWindow = new ShortcutWindow(false, shortcut, _hyperVProvider);
@@ -108,6 +117,8 @@ namespace HyperVLauncher.Pages
             appSettings.Shortcuts.Add(shortcut);
 
             await _settingsProvider.Save();
+
+            Tracer.Info($"New shortcut \"{shortcut.Name}\" created for {vm.Id} - {vm.Name}.");
         }
     }
 }
