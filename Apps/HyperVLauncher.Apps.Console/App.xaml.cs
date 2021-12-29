@@ -31,6 +31,7 @@ namespace HyperVLauncher
         public App()
         {
             _pathProvider = new PathProvider(GeneralConstants.ProfileName);
+            _pathProvider.CreateDirectories();
 
             TracingProvider.Init(_pathProvider.GetTracingPath(), "Console");
 
