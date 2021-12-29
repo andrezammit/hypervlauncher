@@ -4,6 +4,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HyperVLauncher.Providers.Path\HyperVLauncher.Providers.Path.csproj" />
+    <ProjectReference Include="..\HyperVLauncher.Providers.Tracing\HyperVLauncher.Providers.Tracing.csproj" />
   </ItemGroup>
 
 </Project>
