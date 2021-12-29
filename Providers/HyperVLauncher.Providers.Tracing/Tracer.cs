@@ -1,5 +1,6 @@
-﻿using HyperVLauncher.Contracts.Enums;
-using System;
+﻿using System;
+
+using HyperVLauncher.Contracts.Enums;
 
 namespace HyperVLauncher.Providers.Tracing
 {
@@ -29,7 +30,7 @@ namespace HyperVLauncher.Providers.Tracing
             }
         }
 
-        private static void Trace(TraceLevel traceLevel, string message)
+        private static void Trace(TraceLevel traceLevel, string message, Exception? exception = null)
         {
             if (string.IsNullOrEmpty(_defaultTracerName))
             {
@@ -41,27 +42,27 @@ namespace HyperVLauncher.Providers.Tracing
                 _defaultTracer = new(_defaultTracerName);
             }
 
-            _defaultTracer.Trace(traceLevel, message);
+            _defaultTracer.Trace(traceLevel, message, exception);
         }
 
-        public static void Debug(string message)
+        public static void Debug(string message, Exception? exception = null)
         {
-            Trace(TraceLevel.Debug, message);
+            Trace(TraceLevel.Debug, message, exception);
         }
 
-        public static void Info(string message)
+        public static void Info(string message, Exception? exception = null)
         {
-            Trace(TraceLevel.Info, message);
+            Trace(TraceLevel.Info, message, exception);
         }
 
-        public static void Warning(string message)
+        public static void Warning(string message, Exception? exception = null)
         {
-            Trace(TraceLevel.Warning, message);
+            Trace(TraceLevel.Warning, message, exception);
         }
 
-        public static void Error(string message)
+        public static void Error(string message, Exception? exception = null)
         {
-            Trace(TraceLevel.Error, message);
+            Trace(TraceLevel.Error, message, exception);
         }
     }
 }

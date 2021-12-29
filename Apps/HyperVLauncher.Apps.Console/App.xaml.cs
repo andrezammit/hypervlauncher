@@ -2,6 +2,7 @@
 using System.IO;
 using System.Windows;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -29,15 +30,13 @@ namespace HyperVLauncher
 
         public App()
         {
-            var profilePath = PathProvider.GetProfileFolder();
-            Directory.CreateDirectory(profilePath);
+            _pathProvider = new PathProvider(GeneralConstants.ProfileName);
 
-            var tracingPath = Path.Combine(profilePath, "Logs");
-            Directory.CreateDirectory(tracingPath);
+            TracingProvider.Init(_pathProvider.GetTracingPath(), "Console");
 
-            _pathProvider = new PathProvider(profilePath);
+            Tracer.Debug("Setting up exception handling...");
 
-            TracingProvider.Init(tracingPath, "Console");
+            SetupExceptionHandling();
 
             Tracer.Debug("Starting Console...");
 
@@ -52,6 +51,24 @@ namespace HyperVLauncher
 
                 return;
             }
+        }
+
+        private void SetupExceptionHandling()
+        {
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+                LogUnhandledException((Exception)e.ExceptionObject);
+
+            DispatcherUnhandledException += (s, e) =>
+            {
+                LogUnhandledException(e.Exception);
+                e.Handled = true;
+            };
+
+            TaskScheduler.UnobservedTaskException += (s, e) =>
+            {
+                LogUnhandledException(e.Exception);
+                e.SetObserved();
+            };
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -95,6 +112,11 @@ namespace HyperVLauncher
             using (Process.Start(startInfo))
             {
             }
+        }
+
+        private static void LogUnhandledException(Exception exception)
+        {
+            Tracer.Error("Unhandled exception.", exception);
         }
     }
 }

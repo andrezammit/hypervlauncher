@@ -1,4 +1,6 @@
-﻿using HyperVLauncher.Contracts.Enums;
+﻿using System;
+
+using HyperVLauncher.Contracts.Enums;
 
 namespace HyperVLauncher.Contracts.Interfaces
 {
@@ -7,11 +9,11 @@ namespace HyperVLauncher.Contracts.Interfaces
         string Name { get; }
         string FilePath { get; }
 
-        void Info(string message);
-        void Debug(string message);
-        void Error(string message);
-        void Warning(string message);
+        void Info(string message, Exception? exception = null);
+        void Debug(string message, Exception? exception = null);
+        void Error(string message, Exception? exception = null);
+        void Warning(string message, Exception? exception = null);
 
-        void Trace(TraceLevel traceLevel, string message);
+        void Trace(TraceLevel traceLevel, string message, Exception? exception = null);
     }
 }

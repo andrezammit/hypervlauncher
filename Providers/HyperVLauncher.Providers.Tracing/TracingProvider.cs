@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 using HyperVLauncher.Contracts.Enums;
 using HyperVLauncher.Contracts.Interfaces;
+
+using TraceLevel = HyperVLauncher.Contracts.Enums.TraceLevel;
 
 namespace HyperVLauncher.Providers.Tracing
 {
@@ -48,29 +51,44 @@ namespace HyperVLauncher.Providers.Tracing
             Debug("------------------");
         }
 
-        public void Debug(string message)
+        public void Debug(string message, Exception? exception = null)
         {
-            Trace(TraceLevel.Debug, message);
+            Trace(TraceLevel.Debug, message, exception);
         }
 
-        public void Info(string message)
+        public void Info(string message, Exception? exception = null)
         {
-            Trace(TraceLevel.Info, message);
+            Trace(TraceLevel.Info, message, exception);
         }
 
-        public void Warning(string message)
+        public void Warning(string message, Exception? exception = null)
         {
-            Trace(TraceLevel.Warning, message);
+            Trace(TraceLevel.Warning, message, exception);
         }
 
-        public void Error(string message)
+        public void Error(string message, Exception? exception = null)
         {
-            Trace(TraceLevel.Error, message);
+            Trace(TraceLevel.Error, message, exception);
         }
 
-        public void Trace(TraceLevel traceLevel, string message)
+        public void Trace(TraceLevel traceLevel, string message, Exception? exception = null)
         {
-            var formattedMessage = $"[{DateTime.UtcNow} - {traceLevel}]\t{message}";
+            var formattedMessage = $"[{DateTime.UtcNow} - {Environment.ProcessId} - {traceLevel}]\t{message}";
+
+            if (exception is not null)
+            {
+                formattedMessage += $"\nException: {exception.Message}\n{exception.StackTrace}";
+
+                var innerException = exception.InnerException;
+
+                while (innerException is not null)
+                {
+                    formattedMessage += $"\nInner Exception: {innerException.Message}\n{innerException.StackTrace}";
+                    innerException = innerException.InnerException;
+                }
+            }
+
+            Console.WriteLine(formattedMessage);
 
             lock (this)
             {
