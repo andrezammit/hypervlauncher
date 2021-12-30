@@ -5,8 +5,9 @@ using System.Collections.ObjectModel;
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
 
-using HyperVLauncher.Modals;
 using HyperVLauncher.Providers.Tracing;
+
+using HyperVLauncher.Modals;
 
 namespace HyperVLauncher.Pages
 {
