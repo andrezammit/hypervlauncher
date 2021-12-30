@@ -142,6 +142,8 @@ namespace HyperVLauncher.Pages
             await _settingsProvider.Save();
 
             await RefreshShortcuts();
+
+            await _ipcProvider.SendReloadSettings();
         }
 
         private void BtnLaunch_Click(object sender, RoutedEventArgs e)
@@ -186,13 +188,8 @@ namespace HyperVLauncher.Pages
             await _settingsProvider.Save();
 
             await RefreshShortcuts();
-
-            var ipcMessage = new IpcMessage()
-            {
-                IpcCommand = IpcCommand.ReloadSettings
-            };
-
-            await _ipcProvider.SendMessage(ipcMessage);
+            
+            await _ipcProvider.SendReloadSettings();
         }
     }
 }
