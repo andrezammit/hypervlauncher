@@ -5,8 +5,9 @@ using System.Collections.ObjectModel;
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
 
-using HyperVLauncher.Modals;
 using HyperVLauncher.Providers.Tracing;
+
+using HyperVLauncher.Modals;
 
 namespace HyperVLauncher.Pages
 {
@@ -15,17 +16,20 @@ namespace HyperVLauncher.Pages
     /// </summary>
     public partial class VirtualMachinesPage : Page
     {
+        private readonly IIpcProvider _ipcProvider;
         private readonly IHyperVProvider _hyperVProvider;
         private readonly ISettingsProvider _settingsProvider;
 
         private readonly ObservableCollection<VirtualMachine> _virtualMachines = new();
 
         public VirtualMachinesPage(
+            IIpcProvider ipcProvider,
             IHyperVProvider hyperVProvider,
             ISettingsProvider settingsProvider)
         {
             InitializeComponent();
 
+            _ipcProvider = ipcProvider;
             _hyperVProvider = hyperVProvider;
             _settingsProvider = settingsProvider;
 
@@ -119,6 +123,8 @@ namespace HyperVLauncher.Pages
             await _settingsProvider.Save();
 
             Tracer.Info($"New shortcut \"{shortcut.Name}\" created for {vm.Id} - {vm.Name}.");
+
+            await _ipcProvider.SendReloadSettings();
         }
     }
 }
