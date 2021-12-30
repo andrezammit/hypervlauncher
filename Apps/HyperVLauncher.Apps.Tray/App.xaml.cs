@@ -168,8 +168,13 @@ namespace HyperVLauncher.Apps.Tray
                 var startInfo = new ProcessStartInfo($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.LaunchPad.exe", shortcutId)
                 {
                     Verb = "runas",
-                    UseShellExecute = true
+                    UseShellExecute = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
                 };
+
+#if DEBUG
+                startInfo.WindowStyle = ProcessWindowStyle.Normal;
+#endif
 
                 using (Process.Start(startInfo))
                 {
