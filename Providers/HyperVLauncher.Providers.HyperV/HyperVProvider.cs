@@ -18,8 +18,8 @@ namespace HyperVLauncher.Providers.HyperV
         public IEnumerable<VirtualMachine> GetVirtualMachineList()
         {
             using var searcher = new ManagementObjectSearcher(
-                _virtualizationScope, 
-                "SELECT * FROM Msvm_ComputerSystem");
+                _virtualizationScope,
+                "SELECT * FROM Msvm_ComputerSystem WHERE Description='Microsoft Virtual Machine'");
 
             foreach (var queryObj in searcher.Get())
             {
@@ -156,7 +156,7 @@ namespace HyperVLauncher.Providers.HyperV
         {
             using var searcher = new ManagementObjectSearcher(
                 _virtualizationScope, 
-                $"Associators of {{{relPath}}} where AssocClass=Msvm_SystemDevice ResultClass=Msvm_ShutdownComponent");
+                $"ASSOCIATORS OF {{{relPath}}} WHERE AssocClass=Msvm_SystemDevice ResultClass=Msvm_ShutdownComponent");
 
             using var searchResults = searcher.Get();
 
