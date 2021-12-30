@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Linq;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 
 using System.Windows;
 using System.Windows.Controls;
 
-using HyperVLauncher.Contracts.Enums;
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
+
+using HyperVLauncher.Providers.Tracing;
 
 using HyperVLauncher.Modals;
 
@@ -153,10 +155,34 @@ namespace HyperVLauncher.Pages
                 throw new InvalidCastException("Invalid selected item type.");
             }
 
-            var vmId = shortcut.VmId;
+            LaunchShortcut(shortcut.Id);
+        }
 
-            _hyperVProvider.StartVirtualMachine(vmId);
-            using var process = _hyperVProvider.ConnectVirtualMachine(vmId);
+        private static void LaunchShortcut(string shortcutId)
+        {
+            try
+            {
+                Tracer.Info($"Launching shortcut {shortcutId}...");
+
+                var startInfo = new ProcessStartInfo($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.LaunchPad.exe", shortcutId)
+                {
+                    Verb = "runas",
+                    UseShellExecute = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
+
+#if DEBUG
+                startInfo.WindowStyle = ProcessWindowStyle.Normal;
+#endif
+
+                using (Process.Start(startInfo))
+                {
+                }
+            }
+            catch (Exception ex)
+            {
+                Tracer.Error($"Failed to launch shortcut {shortcutId}.", ex);
+            }
         }
 
         private async void BtnEdit_Click(object sender, RoutedEventArgs e)
