@@ -1,10 +1,13 @@
 ﻿using System;
+using System.IO;
 using System.Text;
 
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 
 using HyperVLauncher.Contracts.Interfaces;
+
+using HyperVLauncher.Providers.Tracing;
 
 using IoPath = System.IO.Path;
 using ShortcutModel = HyperVLauncher.Contracts.Models.Shortcut;
@@ -27,6 +30,60 @@ namespace HyperVLauncher.Providers.Shortcut
             var shortcutPath = IoPath.Combine(desktopPath, $"{shortcut.Name}.lnk");
 
             shortcutFile.Save(shortcutPath, false);
+        }
+
+        public void CreateStartMenuShortcut(ShortcutModel shortcut)
+        {
+            var shellLink = (IShellLink)new ShellLink();
+
+            shellLink.SetArguments(shortcut.Id);
+            shellLink.SetDescription($"Launch Hyper-V shortcut {shortcut.Name}.");
+            shellLink.SetIconLocation($"{AppContext.BaseDirectory}\\Icons\\shortcut.ico", 0);
+            shellLink.SetPath($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.LaunchPad.exe");
+
+            var shortcutFile = (IPersistFile)shellLink;
+            var startMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
+            var shortcutPath = IoPath.Combine(startMenuPath, "Programs", "Hyper-V Launcher", "Shortcuts");
+
+            Directory.CreateDirectory(shortcutPath);
+
+            shortcutPath = IoPath.Combine(shortcutPath, $"{shortcut.Name}.lnk");
+
+            shortcutFile.Save(shortcutPath, false);
+        }
+
+        public void DeleteDesktopShortcut(ShortcutModel shortcut)
+        {
+            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            var shortcutPath = IoPath.Combine(desktopPath, $"{shortcut.Name}.lnk");
+
+            try
+            {
+                File.Delete(shortcutPath);
+            }
+            catch (Exception ex)
+            {
+                Tracer.Warning($"Failed to delete start menu shorcut {shortcutPath}.", ex);
+
+                // Swallow.
+            }
+        }
+
+        public void DeleteStartMenuShortcut(ShortcutModel shortcut)
+        {
+            var startMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
+            var shortcutPath = IoPath.Combine(startMenuPath, "Programs", "Hyper-V Launcher", "Shortcuts", $"{shortcut.Name}.lnk");
+
+            try
+            {
+                File.Delete(shortcutPath);
+            }
+            catch (Exception ex)
+            {
+                Tracer.Warning($"Failed to delete start menu shorcut {shortcutPath}.", ex);
+
+                // Swallow.
+            }
         }
 
         [ComImport]
