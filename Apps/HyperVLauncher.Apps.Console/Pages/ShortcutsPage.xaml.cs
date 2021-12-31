@@ -70,12 +70,14 @@ namespace HyperVLauncher.Pages
         private readonly IIpcProvider _ipcProvider;
         private readonly IHyperVProvider _hyperVProvider;
         private readonly ISettingsProvider _settingsProvider;
+        private readonly IShortcutProvider _shortcutProvider;
 
         private readonly ObservableCollection<ShortcutItem> _shortcuts = new();
 
         public ShortcutsPage(
             IIpcProvider ipcProvider,
             IHyperVProvider hyperVProvider,
+            IShortcutProvider shortcutProvider,
             ISettingsProvider settingsProvider)
         {
             InitializeComponent();
@@ -83,6 +85,7 @@ namespace HyperVLauncher.Pages
             _ipcProvider = ipcProvider;
             _hyperVProvider = hyperVProvider;
             _settingsProvider = settingsProvider;
+            _shortcutProvider = shortcutProvider;
 
             lstShortcuts.ItemsSource = _shortcuts;
         }
@@ -137,6 +140,15 @@ namespace HyperVLauncher.Pages
                 return;
             }
 
+            Tracer.Debug($"Deleting shortcut {shortcut.Id} - {shortcut.Name}...");
+
+            Tracer.Debug("Deleting desktop and start menu shortcuts...");
+
+            _shortcutProvider.DeleteDesktopShortcut(shortcut);
+            _shortcutProvider.DeleteStartMenuShortcut(shortcut);
+
+            Tracer.Debug("Deleting shortcut from settings...");
+
             var appSettings = await _settingsProvider.Get();
             
             appSettings.DeleteShortcut(shortcut.Id);
@@ -146,6 +158,8 @@ namespace HyperVLauncher.Pages
             await RefreshShortcuts();
 
             await _ipcProvider.SendReloadSettings();
+
+            Tracer.Debug("Shortcut deleted.");
         }
 
         private void BtnLaunch_Click(object sender, RoutedEventArgs e)

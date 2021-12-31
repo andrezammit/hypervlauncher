@@ -130,9 +130,17 @@ namespace HyperVLauncher.Pages
             if (shortcutWindow.chkDesktopShortcut.IsChecked.HasValue && 
                 shortcutWindow.chkDesktopShortcut.IsChecked.Value)
             {
-                Tracer.Info("Creating desktop shortcut for \"{shortcut.Name}\"...");
+                Tracer.Info($"Creating desktop shortcut for \"{shortcut.Name}\"...");
 
                 _shortcutProvider.CreateDesktopShortcut(shortcut);
+            }
+
+            if (shortcutWindow.chkStartMenuShortcut.IsChecked.HasValue &&
+                shortcutWindow.chkStartMenuShortcut.IsChecked.Value)
+            {
+                Tracer.Info($"Creating start menu shortcut for \"{shortcut.Name}\"...");
+
+                _shortcutProvider.CreateStartMenuShortcut(shortcut);
             }
 
             await _ipcProvider.SendReloadSettings();
