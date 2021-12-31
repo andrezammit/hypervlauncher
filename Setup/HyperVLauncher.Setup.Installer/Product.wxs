@@ -20,13 +20,14 @@
 				<Directory Id="INSTALLFOLDER" Name="Hyper-V Launcher" />
 			</Directory>
 			<Directory Id="ProgramMenuFolder">
-				<Directory Id="ApplicationProgramsFolder" Name="Hyper-V Launcher"/>
+				<Directory Id="ApplicationProgramsFolder" Name="Hyper-V Launcher" />
 			</Directory>
 			<Directory Id="StartupFolder" />
 		</Directory>
 
 		<InstallExecuteSequence>
 			<Custom Action="WixCloseApplications" After="InstallInitialize" />
+			<Custom Action="RunTrayApp" Before="InstallFinalize">NOT Installed</Custom>
 		</InstallExecuteSequence>
 
 		<util:CloseApplication Id="CloseTrayApp" CloseMessage="yes" Target="HyperVLauncher.Apps.Tray.exe" TerminateProcess="3" RebootPrompt="no"/>
@@ -40,10 +41,10 @@
 						  Name="Hyper-V Launcher Console"
 						  Description="Hyper-V Launcher Console"
 						  Target="[INSTALLFOLDER]HyperVLauncher.Apps.Console.exe"
-						  WorkingDirectory="APPLICATIONROOTDIRECTORY"/>
+						  WorkingDirectory="APPLICATIONROOTDIRECTORY" />
 				
-				<RemoveFolder Id="CleanUpAppShortcut" Directory="ApplicationProgramsFolder" On="uninstall"/>
-				<RegistryValue Root="HKCU" Key="Software\Hyper-V Launcher" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+				<RemoveFolder Id="CleanUpAppShortcut" Directory="ApplicationProgramsFolder" On="uninstall" />
+				<RegistryValue Root="HKCU" Key="Software\Hyper-V Launcher" Name="installed" Type="integer" Value="1" KeyPath="yes" />
 			</Component>
 		</ComponentGroup>
 		
@@ -53,11 +54,17 @@
 						  Name="Hyper-V Launcher Tray App"
 						  Description="Hyper-V Launcher Tray App"
 						  Target="[INSTALLFOLDER]HyperVLauncher.Apps.Tray.exe"
-						  WorkingDirectory="APPLICATIONROOTDIRECTORY"/>
+						  WorkingDirectory="APPLICATIONROOTDIRECTORY" />
 				
-				<RemoveFolder Id="CleanUpAutoStartShortcut" Directory="StartupFolder" On="uninstall"/>
-				<RegistryValue Root="HKCU" Key="Software\Hyper-V Launcher" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+				<RegistryValue Root="HKCU" Key="Software\Hyper-V Launcher" Name="installed" Type="integer" Value="1" KeyPath="yes" />
 			</Component>
 		</ComponentGroup>
+
+		<CustomAction Id="RunTrayApp"
+					  Execute="deferred"
+					  Impersonate="no"
+					  Return="asyncNoWait"
+					  Directory="INSTALLFOLDER"
+					  ExeCommand="[INSTALLFOLDER]HyperVLauncher.Apps.Tray.exe" />
 	</Fragment>
 </Wix>
