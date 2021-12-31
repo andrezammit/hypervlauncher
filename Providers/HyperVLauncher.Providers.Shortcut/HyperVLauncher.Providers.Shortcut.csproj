@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<Import Project="..\..\Misc\Shared Project Files\Library.csproj" />
+
+	<ItemGroup>
+		<ProjectReference Include="..\HyperVLauncher.Providers.Common\HyperVLauncher.Providers.Common.csproj" />
+	</ItemGroup>
+
+</Project>
