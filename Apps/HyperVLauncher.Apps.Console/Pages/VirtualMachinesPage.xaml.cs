@@ -19,12 +19,14 @@ namespace HyperVLauncher.Pages
         private readonly IIpcProvider _ipcProvider;
         private readonly IHyperVProvider _hyperVProvider;
         private readonly ISettingsProvider _settingsProvider;
+        private readonly IShortcutProvider _shortcutProvider;
 
         private readonly ObservableCollection<VirtualMachine> _virtualMachines = new();
 
         public VirtualMachinesPage(
             IIpcProvider ipcProvider,
             IHyperVProvider hyperVProvider,
+            IShortcutProvider shortcutProvider,
             ISettingsProvider settingsProvider)
         {
             InitializeComponent();
@@ -32,6 +34,7 @@ namespace HyperVLauncher.Pages
             _ipcProvider = ipcProvider;
             _hyperVProvider = hyperVProvider;
             _settingsProvider = settingsProvider;
+            _shortcutProvider = shortcutProvider;
 
             lstVirtualMachines.ItemsSource = _virtualMachines;
 
@@ -124,7 +127,17 @@ namespace HyperVLauncher.Pages
 
             Tracer.Info($"New shortcut \"{shortcut.Name}\" created for {vm.Id} - {vm.Name}.");
 
+            if (shortcutWindow.chkDesktopShortcut.IsChecked.HasValue && 
+                shortcutWindow.chkDesktopShortcut.IsChecked.Value)
+            {
+                Tracer.Info("Creating desktop shortcut for \"{shortcut.Name}\"...");
+
+                _shortcutProvider.CreateDesktopShortcut(shortcut);
+            }
+
             await _ipcProvider.SendReloadSettings();
         }
+
+        
     }
 }
