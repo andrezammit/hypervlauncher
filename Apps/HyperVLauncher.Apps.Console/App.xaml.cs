@@ -15,9 +15,9 @@ using HyperVLauncher.Providers.HyperV;
 using HyperVLauncher.Providers.Common;
 using HyperVLauncher.Providers.Tracing;
 using HyperVLauncher.Providers.Settings;
+using HyperVLauncher.Providers.Shortcut;
 
 using HyperVLauncher.Pages;
-using HyperVLauncher.Providers.Shortcut;
 
 namespace HyperVLauncher
 {
