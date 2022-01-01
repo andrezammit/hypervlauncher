@@ -111,7 +111,11 @@ namespace HyperVLauncher.Pages
 
             var shortcut = AppSettings.CreateShortcut(vm.Name, vm.Id);
 
-            var shortcutWindow = new ShortcutWindow(false, shortcut, _hyperVProvider);
+            var shortcutWindow = new ShortcutWindow(
+                false, 
+                shortcut, 
+                _hyperVProvider, 
+                _settingsProvider);
 
             if (shortcutWindow.ShowDialog() is not null and false)
             {

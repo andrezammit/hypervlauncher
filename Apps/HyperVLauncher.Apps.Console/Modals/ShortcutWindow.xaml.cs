@@ -1,26 +1,36 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 
 using HyperVLauncher.Contracts.Enums;
 using HyperVLauncher.Contracts.Models;
+using HyperVLauncher.Contracts.Constants;
 using HyperVLauncher.Contracts.Interfaces;
 
 namespace HyperVLauncher.Modals
 {
-    /// <summary>
-    /// Interaction logic for ShortcutWindow.xaml
-    /// </summary>
     public partial class ShortcutWindow : Window
     {
+        private readonly ISettingsProvider _settingsProvider;
+
         public ShortcutWindow(
             bool editMode,
             Shortcut shortcut,
-            IHyperVProvider hyperVProvider)
+            IHyperVProvider hyperVProvider,
+            ISettingsProvider settingsProvider)
         {
             InitializeComponent();
 
-            txtName.Text = shortcut.Name;
-            lblVmName.Content = hyperVProvider.GetVmName(shortcut.VmId);
+            _settingsProvider = settingsProvider;
+
+            var vmName = hyperVProvider.GetVmName(shortcut.VmId);
+
+            txtName.Text = GetValidShortcutName(vmName)
+                .GetAwaiter()
+                .GetResult();
+
+            lblVmName.Content = vmName;
 
             var closeActionItems = new List<CloseActionItem>()
             {
@@ -84,9 +94,41 @@ namespace HyperVLauncher.Modals
             Close();
         }
 
-        private void BtnSave_Click(object sender, RoutedEventArgs e)
+        private async void BtnSave_Click(object sender, RoutedEventArgs e)
         {
+            if (!await ValidateShortcutName(txtName.Text))
+            {
+                MessageBox.Show(
+                    $"Another shortcut is already named \"{txtName.Text}\".", 
+                    GeneralConstants.AppName, 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Error);
+
+                txtName.Focus();
+                return;
+            }
+
             DialogResult = true;
+        }
+
+        private async Task<bool> ValidateShortcutName(string shortcutName)
+        {
+            var appSettings = await _settingsProvider.Get();
+            return !appSettings.Shortcuts.Any(x => x.Name == shortcutName);
+        }
+
+        private async Task<string> GetValidShortcutName(string vmName)
+        {
+            var counter = 1;
+            var shortcutName = vmName;
+
+            while (!await ValidateShortcutName(shortcutName) 
+                || counter > 100)
+            {
+                shortcutName = $"{vmName} ({counter++})";
+            }
+
+            return shortcutName;
         }
     }
 }
