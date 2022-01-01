@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 
 using HyperVLauncher.Contracts.Models;
+using HyperVLauncher.Contracts.Constants;
 using HyperVLauncher.Contracts.Interfaces;
 
 using HyperVLauncher.Providers.Tracing;
@@ -62,9 +63,6 @@ namespace HyperVLauncher.Pages
         }
     }
 
-    /// <summary>
-    /// Interaction logic for ShortcutsPage.xaml
-    /// </summary>
     public partial class ShortcutsPage : Page
     {
         private readonly IIpcProvider _ipcProvider;
@@ -132,7 +130,7 @@ namespace HyperVLauncher.Pages
 
             var result = MessageBox.Show(
                 $"Are you sure you want to delete shortcut {shortcut.Name}?",
-                "Hyper-V Launcher - Delete shortcut",
+                GeneralConstants.AppName,
                 MessageBoxButton.YesNo);
 
             if (result != MessageBoxResult.Yes)
@@ -206,7 +204,11 @@ namespace HyperVLauncher.Pages
                 throw new InvalidCastException("Invalid selected item type.");
             }
 
-            var shortcutWindow = new ShortcutWindow(true, shortcut, _hyperVProvider);
+            var shortcutWindow = new ShortcutWindow(
+                true, 
+                shortcut, 
+                _hyperVProvider,
+                _settingsProvider);
 
             if (shortcutWindow.ShowDialog() is not null and false)
             {
