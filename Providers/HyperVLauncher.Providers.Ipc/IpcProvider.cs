@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 
 using HyperVLauncher.Contracts.Enums;
 using HyperVLauncher.Contracts.Models;
+using HyperVLauncher.Providers.Tracing;
 using HyperVLauncher.Contracts.Interfaces;
 
 namespace HyperVLauncher.Providers.Ipc
@@ -41,7 +42,7 @@ namespace HyperVLauncher.Providers.Ipc
             {
                 using var namedPipeStream = CreateClientStream(_pipeName);
 
-                await namedPipeStream.ConnectAsync(TimeSpan.FromSeconds(1).Milliseconds);
+                await namedPipeStream.ConnectAsync((int) TimeSpan.FromSeconds(5).TotalMilliseconds);
 
                 using var streamWriter = new StreamWriter(namedPipeStream)
                 {
@@ -52,9 +53,9 @@ namespace HyperVLauncher.Providers.Ipc
 
                 await streamWriter.WriteAsync(jsonMessage);
             }
-            catch
+            catch (Exception ex)
             {
-                // Failed to send tray message.
+                Tracer.Debug($"Failed to send tray message command: {ipcMessage.IpcCommand}.", ex);
             }
         }
 

@@ -144,8 +144,7 @@ namespace HyperVLauncher.Pages
             }
 
             await _ipcProvider.SendReloadSettings();
+            await _ipcProvider.SendShowTrayMessage("New Shortcut Created", $"Your new virtual machine shortcut \"{shortcut.Name}\" is now accessible by clicking on the system tray icon.");
         }
-
-        
     }
 }
