@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Collections.ObjectModel;
 
+using HyperVLauncher.Contracts.Enums;
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
 
@@ -96,7 +97,17 @@ namespace HyperVLauncher.Pages
 
             var vmId = vm.Id;
 
-            _hyperVProvider.StartVirtualMachine(vmId);
+            var vmState = _hyperVProvider.GetVirtualMachineState(vmId);
+
+            if (vmState == VmState.Saved || vmState == VmState.Stopped)
+            {
+                Tracer.Debug($"Starting {vm.Name}...");
+
+                _hyperVProvider.StartVirtualMachine(vmId);
+            }
+
+            Tracer.Debug($"Connecting to {vm.Name}...");
+
             using var process = _hyperVProvider.ConnectVirtualMachine(vmId);
         }
 

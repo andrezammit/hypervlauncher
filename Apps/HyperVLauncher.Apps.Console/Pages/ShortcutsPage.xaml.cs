@@ -33,7 +33,7 @@ namespace HyperVLauncher.Pages
             _hyperVProvider = hyperVProvider;
         }
 
-        public string VmName => _hyperVProvider.GetVmName(VmId);
+        public string VmName => _hyperVProvider.GetVirtualMachineName(VmId);
     }
 
     public class ShortcutTemplateSelector : DataTemplateSelector
