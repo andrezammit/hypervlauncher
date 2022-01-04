@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+using HyperVLauncher.Contracts.Enums;
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Constants;
 using HyperVLauncher.Contracts.Interfaces;
@@ -44,11 +45,16 @@ try
     }
 
     var hyperVProvider = new HyperVProvider();
-    vmName = hyperVProvider.GetVmName(shortcut.VmId);
+    vmName = hyperVProvider.GetVirtualMachineName(shortcut.VmId);
 
-    Tracer.Info($"Starting {vmName}...");
+    var vmState = hyperVProvider.GetVirtualMachineState(shortcut.VmId);
 
-    hyperVProvider.StartVirtualMachine(shortcut.VmId);
+    if (vmState == VmState.Saved || vmState == VmState.Stopped)
+    {
+        Tracer.Info($"Starting {vmName}...");
+
+        hyperVProvider.StartVirtualMachine(shortcut.VmId);
+    }
 
     Tracer.Info($"Connecting to {vmName}...");
 

@@ -24,7 +24,7 @@ namespace HyperVLauncher.Modals
 
             _settingsProvider = settingsProvider;
 
-            var vmName = hyperVProvider.GetVmName(shortcut.VmId);
+            var vmName = hyperVProvider.GetVirtualMachineName(shortcut.VmId);
 
             txtName.Text = GetValidShortcutName(vmName)
                 .GetAwaiter()

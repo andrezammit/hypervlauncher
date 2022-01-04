@@ -4,9 +4,11 @@ using System.Management;
 using System.Diagnostics;
 using System.Collections.Generic;
 
+using HyperVLauncher.Contracts.Enums;
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
 
+using HyperVLauncher.Providers.HyperV.Mappers;
 using HyperVLauncher.Providers.HyperV.Contracts.Enums;
 
 namespace HyperVLauncher.Providers.HyperV
@@ -34,6 +36,20 @@ namespace HyperVLauncher.Providers.HyperV
             }
         }
 
+        public VmState GetVirtualMachineState(string vmId)
+        {
+            var vmObject = GetVmObject(vmId);
+
+            if (vmObject == null)
+            {
+                return VmState.Unknown;
+            }
+
+            var wmiVmState = (WmiVmState)(ushort)vmObject.GetPropertyValue("EnabledState");
+
+            return wmiVmState.ToVmState();
+        }
+
         public void StartVirtualMachine(string vmId)
         {
             var vmObject = GetVmObject(vmId);
@@ -43,7 +59,7 @@ namespace HyperVLauncher.Providers.HyperV
                 return;
             }
 
-            if ((UInt16)vmObject.GetPropertyValue("EnabledState") == (UInt16)WmiVmState.Started)
+            if ((ushort)vmObject.GetPropertyValue("EnabledState") == (UInt16)WmiVmState.Started)
             {
                 return;
             }
@@ -52,12 +68,10 @@ namespace HyperVLauncher.Providers.HyperV
 
             inParams["RequestedState"] = WmiVmState.Started;
 
-            var outParams = vmObject.InvokeMethod(
+            var _ = vmObject.InvokeMethod(
                 "RequestStateChange",
                 inParams,
                 null);
-
-            WaitForJobToFinish(outParams);
         }
 
         public void PauseVirtualMachine(string vmId)
@@ -117,7 +131,7 @@ namespace HyperVLauncher.Providers.HyperV
             WaitForJobToFinish(outParams);
         }
 
-        public string GetVmName(string vmId)
+        public string GetVirtualMachineName(string vmId)
         {
             var vmObject = GetVmObject(vmId);
 
