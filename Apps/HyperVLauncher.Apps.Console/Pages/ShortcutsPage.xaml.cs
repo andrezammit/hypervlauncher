@@ -69,6 +69,7 @@ namespace HyperVLauncher.Pages
         private readonly IHyperVProvider _hyperVProvider;
         private readonly ISettingsProvider _settingsProvider;
         private readonly IShortcutProvider _shortcutProvider;
+        private readonly ISystemFunctionsProvider _systemFunctionsProvider;
 
         private readonly ObservableCollection<ShortcutItem> _shortcuts = new();
 
@@ -76,7 +77,8 @@ namespace HyperVLauncher.Pages
             IIpcProvider ipcProvider,
             IHyperVProvider hyperVProvider,
             IShortcutProvider shortcutProvider,
-            ISettingsProvider settingsProvider)
+            ISettingsProvider settingsProvider,
+            ISystemFunctionsProvider systemFunctionsProvider)
         {
             InitializeComponent();
 
@@ -84,6 +86,7 @@ namespace HyperVLauncher.Pages
             _hyperVProvider = hyperVProvider;
             _settingsProvider = settingsProvider;
             _shortcutProvider = shortcutProvider;
+            _systemFunctionsProvider = systemFunctionsProvider;
 
             lstShortcuts.ItemsSource = _shortcuts;
         }
@@ -170,10 +173,18 @@ namespace HyperVLauncher.Pages
             LaunchShortcut(shortcut.Id);
         }
 
-        private static void LaunchShortcut(string shortcutId)
+        private void LaunchShortcut(string shortcutId)
         {
             try
             {
+                if (_systemFunctionsProvider.IsShortcutAlreadyRunning(shortcutId) is Process process)
+                {
+                    Tracer.Info($"Shortcut {shortcutId} is already running.");
+
+                    _systemFunctionsProvider.BringToFront(process);
+                    return;
+                }
+
                 Tracer.Info($"Launching shortcut {shortcutId}...");
 
                 var startInfo = new ProcessStartInfo($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.LaunchPad.exe", shortcutId)

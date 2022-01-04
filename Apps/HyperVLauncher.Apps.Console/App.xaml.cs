@@ -16,6 +16,7 @@ using HyperVLauncher.Providers.Common;
 using HyperVLauncher.Providers.Tracing;
 using HyperVLauncher.Providers.Settings;
 using HyperVLauncher.Providers.Shortcut;
+using HyperVLauncher.Providers.SystemFunctions;
 
 using HyperVLauncher.Pages;
 
@@ -91,7 +92,8 @@ namespace HyperVLauncher
             services.AddSingleton<IHyperVProvider, HyperVProvider>();
             services.AddSingleton<ISettingsProvider, SettingsProvider>();
             services.AddSingleton<IShortcutProvider, ShortcutProvider>();
-         
+            services.AddSingleton<ISystemFunctionsProvider, SystemFunctionsProvider>();
+
             services.AddSingleton(provider => _pathProvider);
             services.AddSingleton<IIpcProvider>(provider => new IpcProvider(GeneralConstants.IpcPipeName));
         }

@@ -30,7 +30,8 @@ try
     }
 
     var shortcutId = args[0];
-
+    Console.Title = shortcutId;
+    
     Tracer.Debug($"Shortcut ID: {shortcutId}");
 
     var settingsProvider = new SettingsProvider(pathProvider);

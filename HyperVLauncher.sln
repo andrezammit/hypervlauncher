@@ -47,7 +47,9 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "HyperVLauncher.Setup.Bootst
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperVLauncher.Providers.Tracing", "Providers\HyperVLauncher.Providers.Tracing\HyperVLauncher.Providers.Tracing.csproj", "{E43046BF-35F5-4634-8D89-0807637B18B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperVLauncher.Providers.Shortcut", "Providers\HyperVLauncher.Providers.Shortcut\HyperVLauncher.Providers.Shortcut.csproj", "{11A3011D-6A2D-4C65-8729-7B0CC2DFBC65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperVLauncher.Providers.Shortcut", "Providers\HyperVLauncher.Providers.Shortcut\HyperVLauncher.Providers.Shortcut.csproj", "{11A3011D-6A2D-4C65-8729-7B0CC2DFBC65}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperVLauncher.Provider.SystemFunctions", "Providers\HyperVLauncher.Providers.SystemFunctions\HyperVLauncher.Providers.SystemFunctions.csproj", "{5BB37880-0F45-4A5D-A499-B7E3E220276F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -157,6 +159,14 @@ Global
 		{11A3011D-6A2D-4C65-8729-7B0CC2DFBC65}.Release|Any CPU.Build.0 = Release|Any CPU
 		{11A3011D-6A2D-4C65-8729-7B0CC2DFBC65}.Release|x64.ActiveCfg = Release|Any CPU
 		{11A3011D-6A2D-4C65-8729-7B0CC2DFBC65}.Release|x64.Build.0 = Release|Any CPU
+		{5BB37880-0F45-4A5D-A499-B7E3E220276F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BB37880-0F45-4A5D-A499-B7E3E220276F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BB37880-0F45-4A5D-A499-B7E3E220276F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5BB37880-0F45-4A5D-A499-B7E3E220276F}.Debug|x64.Build.0 = Debug|Any CPU
+		{5BB37880-0F45-4A5D-A499-B7E3E220276F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BB37880-0F45-4A5D-A499-B7E3E220276F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BB37880-0F45-4A5D-A499-B7E3E220276F}.Release|x64.ActiveCfg = Release|Any CPU
+		{5BB37880-0F45-4A5D-A499-B7E3E220276F}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -176,6 +186,7 @@ Global
 		{A03E293F-46BE-41A6-B1BA-7BFAEF00D148} = {F13DB580-134D-4952-9B69-4AC91DFB71AA}
 		{E43046BF-35F5-4634-8D89-0807637B18B6} = {815E69A0-71BA-4F1C-B3FC-840F79D299E9}
 		{11A3011D-6A2D-4C65-8729-7B0CC2DFBC65} = {815E69A0-71BA-4F1C-B3FC-840F79D299E9}
+		{5BB37880-0F45-4A5D-A499-B7E3E220276F} = {815E69A0-71BA-4F1C-B3FC-840F79D299E9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B641A9CA-559C-474E-ACD7-F94421915AB2}
