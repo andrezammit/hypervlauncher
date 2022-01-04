@@ -1,7 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Windows;
 using System.Diagnostics;
+
+using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +28,8 @@ namespace HyperVLauncher
     /// </summary>
     public partial class App : Application
     {
+        private readonly Mutex? _instanceMutex;
+
         private readonly IPathProvider _pathProvider;
         private readonly IServiceProvider _serviceProvider;
 
@@ -48,7 +51,9 @@ namespace HyperVLauncher
 
             _serviceProvider = serviceCollection.BuildServiceProvider();
 
-            if (!GenericHelpers.IsUniqueInstance("HyperVLauncherConsoleMutex"))
+            _instanceMutex = GenericHelpers.TakeInstanceMutex(GeneralConstants.ConsoleMutexName);
+
+            if (_instanceMutex is null)
             {
                 base.Shutdown();
 
@@ -77,6 +82,8 @@ namespace HyperVLauncher
         protected override void OnExit(ExitEventArgs e)
         {
             Tracer.Debug("Closing Console...");
+
+            _instanceMutex?.Dispose();
 
             base.OnExit(e);
         }

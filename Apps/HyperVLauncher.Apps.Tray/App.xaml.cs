@@ -27,6 +27,7 @@ namespace HyperVLauncher.Apps.Tray
     public partial class App : Application
     {
         private Task? _ipcProcessor;
+        private Mutex? _instanceMutex;
 
         private readonly TaskbarIcon _taskbarIcon = new();
         private readonly CancellationTokenSource _cancellationTokenSource = new();
@@ -66,7 +67,9 @@ namespace HyperVLauncher.Apps.Tray
 
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
-            if (!GenericHelpers.IsUniqueInstance(GeneralConstants.TrayMutexName))
+            _instanceMutex = GenericHelpers.TakeInstanceMutex(GeneralConstants.TrayMutexName);
+
+            if (_instanceMutex is null)
             {
                 base.Shutdown();
 

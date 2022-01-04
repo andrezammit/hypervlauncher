@@ -9,5 +9,7 @@ namespace HyperVLauncher.Contracts.Constants
 
         public const string IpcPipeName = "HyperVLauncherIpc";
         public const string TrayMutexName = "HyperVLauncherTrayMutex";
+        public const string ConsoleMutexName = "HyperVLauncherConsoleMutex";
+        public const string LaunchPadMutexName = "HyperVLauncherLaunchPadMutex";
     }
 }

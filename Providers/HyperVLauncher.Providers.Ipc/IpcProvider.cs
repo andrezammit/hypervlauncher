@@ -80,6 +80,16 @@ namespace HyperVLauncher.Providers.Ipc
             return SendMessage(ipcMessage);
         }
 
+        public Task SendBringToFront()
+        {
+            var ipcMessage = new IpcMessage()
+            {
+                IpcCommand = IpcCommand.BringToFront
+            };
+
+            return SendMessage(ipcMessage);
+        }
+
         public async IAsyncEnumerable<IpcMessage> ReadMessages(
             [EnumeratorCancellation] CancellationToken cancellationToken)
         {
