@@ -22,6 +22,9 @@ jobs:
       # Checkout the code as the first step.
       - checkout
       - run:
+          name: Install Visual Studio 2022 Build Tools
+          command: choco install visualstudio2022buildtools
+      - run:
           name: Install Wix
           command: choco install wixtoolset
       - run:
