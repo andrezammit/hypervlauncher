@@ -32,10 +32,8 @@ jobs:
           name: Install Wix
           command: choco install wixtoolset
       - run:
-          # Update this line with the directory that contains your tests project file
-          working_directory: ~/HyperVLauncher
           name: Build
-          command: dotnet build
+          command: dotnet build HyperVLauncher.sln
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
