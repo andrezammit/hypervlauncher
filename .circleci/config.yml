@@ -15,6 +15,7 @@ jobs:
     # Be sure to update the tag on this image to a more stable version, using latest can result in unstable builds.
     executor:
       name: win/default # executor type
+      shell: cmd.exe
       size: "medium"
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
@@ -32,7 +33,7 @@ jobs:
           command: choco install dotnet-sdk
       - run:
           name: Build
-          command: C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\msbuild HyperVLauncher.sln /p:Platform="x64"
+          command: '& "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\msbuild.exe" HyperVLauncher.sln /p:Platform="x64"'
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
