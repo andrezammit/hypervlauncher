@@ -15,7 +15,6 @@ jobs:
     # Be sure to update the tag on this image to a more stable version, using latest can result in unstable builds.
     executor:
       name: win/default # executor type
-      shell: cmd.exe
       size: "medium"
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
