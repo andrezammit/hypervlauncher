@@ -26,7 +26,7 @@ jobs:
           # Update this line with the directory that contains your tests project file
           working_directory: ~/HyperVLauncher
           name: Run tests
-          command: |
+          command: choco install wixtoolset |
             dotnet build
 
 # Invoke jobs via workflows
