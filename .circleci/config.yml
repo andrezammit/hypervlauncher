@@ -27,12 +27,15 @@ jobs:
       - run:
           name: Install Wix
           command: choco install wixtoolset
+      # - run:
+      #     name: Install .Net 6 SDK
+      #     command: choco install dotnet-sdk
       - run:
-          name: Install .Net 6 SDK
-          command: choco install dotnet-sdk
+          name: Restore NuGet Packages
+          command: dotnet restore
       - run:
           name: Build
-          command: '& "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\msbuild.exe" HyperVLauncher.sln /p:Platform="x64"'
+          command: '& "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\msbuild.exe" HyperVLauncher.sln /p:Configuration="Release" /p:Platform="x64"'
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
