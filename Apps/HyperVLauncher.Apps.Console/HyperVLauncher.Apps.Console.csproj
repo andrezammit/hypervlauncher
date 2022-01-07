@@ -67,7 +67,6 @@
     <ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Ipc\HyperVLauncher.Providers.Ipc.csproj" />
     <ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Settings\HyperVLauncher.Providers.Settings.csproj" />
     <ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Shortcut\HyperVLauncher.Providers.Shortcut.csproj" />
-    <ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.SystemFunctions\HyperVLauncher.Providers.SystemFunctions.csproj" />
   </ItemGroup>
 
 </Project>
