@@ -32,8 +32,8 @@ namespace HyperVLauncher.Apps.Tray
         private readonly TaskbarIcon _taskbarIcon = new();
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-        private readonly IIpcProvider _ipcProvider = new IpcProvider(GeneralConstants.IpcPipeName);
         private readonly IPathProvider _pathProvider = new PathProvider(GeneralConstants.ProfileName);
+        private readonly IIpcProvider _ipcProvider = new IpcProvider(GeneralConstants.TrayIpcPipeName);
 
         private readonly MenuItem _titleMenuItem;
         private readonly MenuItem _closeMenuItem;
@@ -151,6 +151,8 @@ namespace HyperVLauncher.Apps.Tray
 
                 // Swallow any exception since we're closing anyway.
             }
+
+            _instanceMutex?.Dispose();
 
             Tracer.Debug("Closing Tray app...");
 

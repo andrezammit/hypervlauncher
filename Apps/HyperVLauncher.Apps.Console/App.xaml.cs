@@ -102,7 +102,7 @@ namespace HyperVLauncher
             services.AddSingleton<ISystemFunctionsProvider, SystemFunctionsProvider>();
 
             services.AddSingleton(provider => _pathProvider);
-            services.AddSingleton<IIpcProvider>(provider => new IpcProvider(GeneralConstants.IpcPipeName));
+            services.AddSingleton<IIpcProvider>(provider => new IpcProvider(GeneralConstants.TrayIpcPipeName));
         }
 
         private void App_OnStartup(object sender, StartupEventArgs e)

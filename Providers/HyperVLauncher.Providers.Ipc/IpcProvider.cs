@@ -53,6 +53,10 @@ namespace HyperVLauncher.Providers.Ipc
 
                 await streamWriter.WriteAsync(jsonMessage);
             }
+            catch (TimeoutException)
+            {
+                // Swallow.
+            }
             catch (Exception ex)
             {
                 Tracer.Debug($"Failed to send tray message command: {ipcMessage.IpcCommand}.", ex);

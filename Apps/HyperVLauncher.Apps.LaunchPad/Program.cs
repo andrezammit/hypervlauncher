@@ -46,8 +46,8 @@ try
     Tracer.Debug($"Shortcut ID: {shortcutId}");
 
     var settingsProvider = new SettingsProvider(pathProvider);
-    var trayIpcProvider = new IpcProvider(GeneralConstants.IpcPipeName);
-    var launchPadIpcProvider = new IpcProvider("HyperVLauncher_LaunchPadIpc");
+    var trayIpcProvider = new IpcProvider(GeneralConstants.TrayIpcPipeName);
+    var launchPadIpcProvider = new IpcProvider(GeneralConstants.LaunchPadIpcPipeName);
 
     ipcProcessor = Task.Run(
         () => ProcessIpcMessages(launchPadIpcProvider, cancellationTokenSource.Token));

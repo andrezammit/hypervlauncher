@@ -7,9 +7,11 @@ namespace HyperVLauncher.Contracts.Constants
         public const string ProfileName = "HyperVLauncher";
         public const string SettingsFileName = "settings.json";
 
-        public const string IpcPipeName = "HyperVLauncherIpc";
-        public const string TrayMutexName = "HyperVLauncherTrayMutex";
-        public const string ConsoleMutexName = "HyperVLauncherConsoleMutex";
-        public const string LaunchPadMutexName = "HyperVLauncherLaunchPadMutex";
+        public const string TrayIpcPipeName = "HyperVLauncher_TrayIpc";
+        public const string LaunchPadIpcPipeName = "HyperVLauncher_LaunchPadIpc";
+
+        public const string TrayMutexName = "HyperVLauncher_TrayMutex";
+        public const string ConsoleMutexName = "HyperVLauncher_ConsoleMutex";
+        public const string LaunchPadMutexName = "HyperVLauncher_LaunchPadMutex";
     }
 }
