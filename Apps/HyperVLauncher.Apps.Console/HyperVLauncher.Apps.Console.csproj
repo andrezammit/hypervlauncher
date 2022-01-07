@@ -69,4 +69,11 @@
     <ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Shortcut\HyperVLauncher.Providers.Shortcut.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Page Update="Pages\SettingsPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
 </Project>

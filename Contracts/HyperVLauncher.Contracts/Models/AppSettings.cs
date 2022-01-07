@@ -6,6 +6,10 @@ namespace HyperVLauncher.Contracts.Models
 {
     public class AppSettings
     {
+        public bool StartOnLogin { get; set; }
+        public bool NotifyOnNewVm { get; set; }
+        public bool AutoCreateShortcuts { get; set; }
+
         public List<Shortcut> Shortcuts { get; } = new();
 
         public static Shortcut CreateShortcut(string name, string vmId)
