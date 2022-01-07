@@ -47,7 +47,7 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "HyperVLauncher.Setup.Bootst
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperVLauncher.Providers.Tracing", "Providers\HyperVLauncher.Providers.Tracing\HyperVLauncher.Providers.Tracing.csproj", "{E43046BF-35F5-4634-8D89-0807637B18B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperVLauncher.Providers.Shortcut", "Providers\HyperVLauncher.Providers.Shortcut\HyperVLauncher.Providers.Shortcut.csproj", "{11A3011D-6A2D-4C65-8729-7B0CC2DFBC65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperVLauncher.Providers.Shortcut", "Providers\HyperVLauncher.Providers.Shortcut\HyperVLauncher.Providers.Shortcut.csproj", "{11A3011D-6A2D-4C65-8729-7B0CC2DFBC65}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

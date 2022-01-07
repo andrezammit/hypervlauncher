@@ -14,6 +14,8 @@ using HyperVLauncher.Contracts.Interfaces;
 using HyperVLauncher.Providers.Tracing;
 
 using HyperVLauncher.Modals;
+using HyperVLauncher.Providers.Common;
+using HyperVLauncher.Providers.Ipc;
 
 namespace HyperVLauncher.Pages
 {
@@ -170,10 +172,22 @@ namespace HyperVLauncher.Pages
             LaunchShortcut(shortcut.Id);
         }
 
-        private static void LaunchShortcut(string shortcutId)
+        private void LaunchShortcut(string shortcutId)
         {
             try
             {
+                var launchPadMutexName = $"{GeneralConstants.LaunchPadMutexName}_{shortcutId}";
+
+                if (!GenericHelpers.IsMutexAvailable(launchPadMutexName))
+                {
+                    Tracer.Info($"Shortcut {shortcutId} is already running.");
+
+                    var launchPadIpcProvider = new IpcProvider("HyperVLauncher_LaunchPadIpc");
+                    launchPadIpcProvider.SendBringToFront();
+
+                    return;
+                }
+
                 Tracer.Info($"Launching shortcut {shortcutId}...");
 
                 var startInfo = new ProcessStartInfo($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.LaunchPad.exe", shortcutId)

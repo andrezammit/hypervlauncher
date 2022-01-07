@@ -1,6 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Diagnostics;
+
+using System.Threading;
 using System.Threading.Tasks;
 
 using HyperVLauncher.Contracts.Enums;
@@ -10,11 +13,17 @@ using HyperVLauncher.Contracts.Interfaces;
 
 using HyperVLauncher.Providers.Ipc;
 using HyperVLauncher.Providers.Path;
+using HyperVLauncher.Providers.Common;
 using HyperVLauncher.Providers.HyperV;
 using HyperVLauncher.Providers.Tracing;
 using HyperVLauncher.Providers.Settings;
 
+int vmConnectProcessId = 0;
+
 string? vmName = null;
+
+Task? ipcProcessor = null;
+CancellationTokenSource cancellationTokenSource = new();
 
 try
 {
@@ -30,11 +39,18 @@ try
     }
 
     var shortcutId = args[0];
+    Console.Title = shortcutId;
+
+    using var instanceMutex = GenericHelpers.TakeInstanceMutex($"{GeneralConstants.LaunchPadMutexName}_{shortcutId}");
 
     Tracer.Debug($"Shortcut ID: {shortcutId}");
 
     var settingsProvider = new SettingsProvider(pathProvider);
-    var ipcProvider = new IpcProvider(GeneralConstants.IpcPipeName);
+    var trayIpcProvider = new IpcProvider(GeneralConstants.TrayIpcPipeName);
+    var launchPadIpcProvider = new IpcProvider(GeneralConstants.LaunchPadIpcPipeName);
+
+    ipcProcessor = Task.Run(
+        () => ProcessIpcMessages(launchPadIpcProvider, cancellationTokenSource.Token));
 
     var appSettings = await settingsProvider.Get();
     var shortcut = appSettings.Shortcuts.FirstOrDefault(x => x.Id == shortcutId);
@@ -62,14 +78,20 @@ try
 
     if (process is not null)
     {
-        Tracer.Info($"Waiting for {process.ProcessName} ({process.Id}) to close...");
+        vmConnectProcessId = process.Id;
+
+        Tracer.Info($"Waiting for {process.ProcessName} ({vmConnectProcessId}) to close...");
 
         await process.WaitForExitAsync();
 
         Tracer.Info($"{process.ProcessName} ({process.Id}) closed. Handling any further actions...");
 
-        await HandleShortcutExitBehaviour(hyperVProvider, ipcProvider, shortcut);
+        await HandleShortcutExitBehaviour(hyperVProvider, trayIpcProvider, shortcut);
     }
+
+    cancellationTokenSource.Cancel();
+
+    await ipcProcessor;
 
     Tracer.Debug("Closing LaunchPad app...");
 }
@@ -107,5 +129,44 @@ async Task HandleShortcutExitBehaviour(
 
         default:
             break;
+    }
+}
+
+async Task ProcessIpcMessages(IIpcProvider ipcProvider, CancellationToken cancellationToken)
+{
+    try
+    {
+        await foreach (var ipcMessage in ipcProvider.ReadMessages(cancellationToken))
+        {
+            switch (ipcMessage.IpcCommand)
+            {
+                case IpcCommand.BringToFront:
+
+                    try
+                    {
+                        var process = Process.GetProcessById(vmConnectProcessId);
+                        process.BringToFront();
+                    }
+                    catch
+                    {
+                        // Swallow.
+                    }
+
+                    break;
+
+                default:
+                    throw new InvalidDataException($"Invalid IPC command: {ipcMessage.IpcCommand}");
+            }
+        }
+    }
+    catch (OperationCanceledException)
+    {
+        // Swallow.
+    }
+    catch (Exception ex)
+    {
+        Tracer.Error("Error while processing IPC messages.", ex);
+
+        throw;
     }
 }

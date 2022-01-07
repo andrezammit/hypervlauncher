@@ -1,7 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Windows;
 using System.Diagnostics;
+
+using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,8 @@ namespace HyperVLauncher
     /// </summary>
     public partial class App : Application
     {
+        private readonly Mutex? _instanceMutex;
+
         private readonly IPathProvider _pathProvider;
         private readonly IServiceProvider _serviceProvider;
 
@@ -47,7 +50,9 @@ namespace HyperVLauncher
 
             _serviceProvider = serviceCollection.BuildServiceProvider();
 
-            if (!GenericHelpers.IsUniqueInstance("HyperVLauncherConsoleMutex"))
+            _instanceMutex = GenericHelpers.TakeInstanceMutex(GeneralConstants.ConsoleMutexName);
+
+            if (_instanceMutex is null)
             {
                 base.Shutdown();
 
@@ -77,6 +82,8 @@ namespace HyperVLauncher
         {
             Tracer.Debug("Closing Console...");
 
+            _instanceMutex?.Dispose();
+
             base.OnExit(e);
         }
 
@@ -91,9 +98,9 @@ namespace HyperVLauncher
             services.AddSingleton<IHyperVProvider, HyperVProvider>();
             services.AddSingleton<ISettingsProvider, SettingsProvider>();
             services.AddSingleton<IShortcutProvider, ShortcutProvider>();
-         
+
             services.AddSingleton(provider => _pathProvider);
-            services.AddSingleton<IIpcProvider>(provider => new IpcProvider(GeneralConstants.IpcPipeName));
+            services.AddSingleton<IIpcProvider>(provider => new IpcProvider(GeneralConstants.TrayIpcPipeName));
         }
 
         private void App_OnStartup(object sender, StartupEventArgs e)

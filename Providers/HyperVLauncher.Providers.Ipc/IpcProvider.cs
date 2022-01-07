@@ -53,6 +53,10 @@ namespace HyperVLauncher.Providers.Ipc
 
                 await streamWriter.WriteAsync(jsonMessage);
             }
+            catch (TimeoutException)
+            {
+                // Swallow.
+            }
             catch (Exception ex)
             {
                 Tracer.Debug($"Failed to send tray message command: {ipcMessage.IpcCommand}.", ex);
@@ -75,6 +79,16 @@ namespace HyperVLauncher.Providers.Ipc
             {
                 IpcCommand = IpcCommand.ShowTrayMessage,
                 Data = new TrayMessageData(title, message)
+            };
+
+            return SendMessage(ipcMessage);
+        }
+
+        public Task SendBringToFront()
+        {
+            var ipcMessage = new IpcMessage()
+            {
+                IpcCommand = IpcCommand.BringToFront
             };
 
             return SendMessage(ipcMessage);

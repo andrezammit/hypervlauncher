@@ -5,6 +5,7 @@ namespace HyperVLauncher.Contracts.Enums
     {
         Unknown = 0,
         ReloadSettings = 1,
-        ShowTrayMessage = 2
+        ShowTrayMessage = 2,
+        BringToFront = 3
     }
 }
