@@ -1,10 +1,8 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 
-using HyperVLauncher.Contracts.Interfaces;
 using HyperVLauncher.Contracts.Models;
-using HyperVLauncher.Providers.Common;
+using HyperVLauncher.Contracts.Interfaces;
 
 namespace HyperVLauncher.Pages
 {
@@ -57,35 +55,9 @@ namespace HyperVLauncher.Pages
             }
         }
 
-        private void ChkStartOnLogin_Checked(object sender, RoutedEventArgs e)
+        private void OnCheckboxStateChanged(object sender, RoutedEventArgs e)
         {
             HandleSettingChange();
-            EnableControls();
-        }
-
-        private void ChkStartOnLogin_Unchecked(object sender, RoutedEventArgs e)
-        {
-            HandleSettingChange();
-            EnableControls();
-        }
-
-        private void ChkAutoCreateShortcuts_Unchecked(object sender, RoutedEventArgs e)
-        {
-            EnableControls();
-        }
-
-        private void ChkAutoCreateShortcuts_Checked(object sender, RoutedEventArgs e)
-        {
-            EnableControls();
-        }
-
-        private void ChkNotifyOnNewVm_Checked(object sender, RoutedEventArgs e)
-        {
-            EnableControls();
-        }
-
-        private void ChkNotifyOnNewVm_Unchecked(object sender, RoutedEventArgs e)
-        {
             EnableControls();
         }
 

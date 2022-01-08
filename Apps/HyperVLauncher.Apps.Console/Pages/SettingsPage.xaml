@@ -13,6 +13,11 @@
             <Setter Property="FontSize" Value="16" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="Margin" Value="0, 0, 0, 10" />
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Foreground" Value="Gray"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </Page.Resources>
     <Grid>
@@ -41,9 +46,9 @@
         <StackPanel
             Grid.Row="1"
             Margin="20,10,0,0">
-            <CheckBox Content="Start on Windows login" x:Name="chkStartOnLogin" Checked="ChkStartOnLogin_Checked" Unchecked="ChkStartOnLogin_Unchecked" />
-            <CheckBox Content="Automatically create Virtual Machine shortcuts" x:Name="chkAutoCreateShortcuts" Checked="ChkAutoCreateShortcuts_Checked" Unchecked="ChkAutoCreateShortcuts_Unchecked" />
-            <CheckBox Content="Show new shortcut prompt when a new Hyper-V virtual machine is created" x:Name="chkNotifyOnNewVm" Checked="ChkNotifyOnNewVm_Checked" Unchecked="ChkNotifyOnNewVm_Unchecked" />
+            <CheckBox Content="Start on Windows login" x:Name="chkStartOnLogin" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" />
+            <CheckBox Content="Automatically create Virtual Machine shortcuts" x:Name="chkAutoCreateShortcuts" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" />
+            <CheckBox Content="Show a new shortcut prompt when a new Virtual Machine is created" x:Name="chkNotifyOnNewVm" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" />
         </StackPanel>
     </Grid>
 </Page>
