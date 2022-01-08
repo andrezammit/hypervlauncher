@@ -54,6 +54,7 @@ namespace HyperVLauncher
         {
             _pages[MainPages.Shortcuts] = _serviceProvider.GetRequiredService<ShortcutsPage>();
             _pages[MainPages.VirtualMachines] = _serviceProvider.GetRequiredService<VirtualMachinesPage>();
+            _pages[MainPages.Settings] = _serviceProvider.GetRequiredService<SettingsPage>();
         }
 
         private void CacheNavButtons()
@@ -120,7 +121,7 @@ namespace HyperVLauncher
 
             SetSelectedNavButton(navButton);
 
-            pageFrame.NavigationService.Navigate(_pages[MainPages.VirtualMachines]);
+            pageFrame.NavigationService.Navigate(_pages[MainPages.Settings]);
         }
 
         private void SetSelectedNavButton(Button selectedButton)

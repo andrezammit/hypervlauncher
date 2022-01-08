@@ -92,6 +92,7 @@ namespace HyperVLauncher
             Tracer.Debug("Setting up DI services...");
 
             services.AddSingleton<MainWindow>();
+            services.AddSingleton<SettingsPage>();
             services.AddSingleton<ShortcutsPage>();
             services.AddSingleton<VirtualMachinesPage>();
             

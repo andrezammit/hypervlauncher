@@ -52,6 +52,29 @@ namespace HyperVLauncher.Providers.Shortcut
             shortcutFile.Save(shortcutPath, false);
         }
 
+        public void CreateStartupShortcut()
+        {
+            var shellLink = (IShellLink)new ShellLink();
+
+            shellLink.SetDescription($"Launch Hyper-V Launcher Tray app.");
+            shellLink.SetIconLocation($"{AppContext.BaseDirectory}\\Icons\\app.ico", 0);
+            shellLink.SetPath($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.Tray.exe");
+
+            var shortcutFile = (IPersistFile)shellLink;
+            var startupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup);
+            var shortcutPath = IoPath.Combine(startupFolderPath, "Hyper-V Launcher Tray App.lnk");
+
+            shortcutFile.Save(shortcutPath, false);
+        }
+
+        public void DeleteStartupShortcut()
+        {
+            var startupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup);
+            var shortcutPath = IoPath.Combine(startupFolderPath, "Hyper-V Launcher Tray App.lnk");
+
+            File.Delete(shortcutPath);
+        }
+
         public void DeleteDesktopShortcut(ShortcutModel shortcut)
         {
             var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
