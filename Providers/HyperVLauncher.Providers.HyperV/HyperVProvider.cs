@@ -1,12 +1,16 @@
 ﻿using System;
-using System.Threading;
 using System.Management;
 using System.Diagnostics;
 using System.Collections.Generic;
 
+using System.Threading;
+using System.Threading.Tasks;
+
 using HyperVLauncher.Contracts.Enums;
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
+
+using HyperVLauncher.Providers.Tracing;
 
 using HyperVLauncher.Providers.HyperV.Mappers;
 using HyperVLauncher.Providers.HyperV.Contracts.Enums;
@@ -15,6 +19,8 @@ namespace HyperVLauncher.Providers.HyperV
 {
     public class HyperVProvider : IHyperVProvider
     {
+        public Func<VirtualMachine, Task>? OnNewVirtualMachine { get; set; }
+
         private const string _virtualizationScope = "\\\\.\\root\\virtualization\\v2";
 
         public IEnumerable<VirtualMachine> GetVirtualMachineList()
@@ -38,7 +44,7 @@ namespace HyperVLauncher.Providers.HyperV
 
         public VmState GetVirtualMachineState(string vmId)
         {
-            var vmObject = GetVmObject(vmId);
+            using var vmObject = GetVmObject(vmId);
 
             if (vmObject == null)
             {
@@ -52,7 +58,7 @@ namespace HyperVLauncher.Providers.HyperV
 
         public void StartVirtualMachine(string vmId)
         {
-            var vmObject = GetVmObject(vmId);
+            using var vmObject = GetVmObject(vmId);
 
             if (vmObject == null)
             {
@@ -64,11 +70,11 @@ namespace HyperVLauncher.Providers.HyperV
                 return;
             }
 
-            var inParams = vmObject.GetMethodParameters("RequestStateChange");
+            using var inParams = vmObject.GetMethodParameters("RequestStateChange");
 
             inParams["RequestedState"] = WmiVmState.Started;
 
-            var _ = vmObject.InvokeMethod(
+            using var _ = vmObject.InvokeMethod(
                 "RequestStateChange",
                 inParams,
                 null);
@@ -76,18 +82,18 @@ namespace HyperVLauncher.Providers.HyperV
 
         public void PauseVirtualMachine(string vmId)
         {
-            var vmObject = GetVmObject(vmId);
+            using var vmObject = GetVmObject(vmId);
 
             if (vmObject == null)
             {
                 return;
             }
 
-            var inParams = vmObject.GetMethodParameters("RequestStateChange");
+            using var inParams = vmObject.GetMethodParameters("RequestStateChange");
 
             inParams["RequestedState"] = WmiVmState.Saved;
 
-            var outParams = vmObject.InvokeMethod(
+            using var outParams = vmObject.InvokeMethod(
                 "RequestStateChange",
                 inParams,
                 null);
@@ -97,7 +103,7 @@ namespace HyperVLauncher.Providers.HyperV
 
         public void ShutdownVirtualMachine(string vmId)
         {
-            var vmObject = GetVmObject(vmId);
+            using var vmObject = GetVmObject(vmId);
 
             if (vmObject is null)
             {
@@ -111,19 +117,19 @@ namespace HyperVLauncher.Providers.HyperV
                 return;
             }
 
-            var shutdownComponent = GetVmShutdownComponent(relPath);
+            using var shutdownComponent = GetVmShutdownComponent(relPath);
 
             if (shutdownComponent is null)
             {
                 return;
             }
 
-            var inParams = shutdownComponent.GetMethodParameters("InitiateShutdown");
+            using var inParams = shutdownComponent.GetMethodParameters("InitiateShutdown");
 
             inParams["Force"] = true;
             inParams["Reason"] = "Hyper-V Launcher shutdown.";
 
-            var outParams = shutdownComponent.InvokeMethod(
+            using var outParams = shutdownComponent.InvokeMethod(
                 "InitiateShutdown",
                 inParams,
                 null);
@@ -133,7 +139,7 @@ namespace HyperVLauncher.Providers.HyperV
 
         public string GetVirtualMachineName(string vmId)
         {
-            var vmObject = GetVmObject(vmId);
+            using var vmObject = GetVmObject(vmId);
 
             if (vmObject == null)
             {
@@ -210,7 +216,8 @@ namespace HyperVLauncher.Providers.HyperV
         private static void WaitForStartedJobToFinish(ManagementBaseObject outParams)
         {
             var jobPath = (string)outParams["Job"];
-            var job = new ManagementObject(_virtualizationScope, jobPath, null);
+
+            using var job = new ManagementObject(_virtualizationScope, jobPath, null);
 
             job.Get();
 
@@ -230,6 +237,65 @@ namespace HyperVLauncher.Providers.HyperV
                 var jobErrorDescription = (string)job["ErrorDescription"];
 
                 throw new InvalidOperationException($"WMI operation failed. Error code: {jobErrorCode}, Error description: {jobErrorDescription}");
+            }
+        }
+
+        public void StartVirtualMachineMonitor(CancellationToken cancellationToken)
+        {
+            Tracer.Info("Starting Virtual Machine event watcher...");
+
+            var watcher = new ManagementEventWatcher(
+                _virtualizationScope,
+                "SELECT * FROM __InstanceCreationEvent WITHIN 2 WHERE TargetInstance ISA 'Msvm_ComputerSystem'");
+
+            watcher.Stopped += Watcher_Stopped;
+            watcher.EventArrived += Watcher_EventArrived;
+
+            cancellationToken.Register(
+                () =>
+                {
+                    Tracer.Debug("Stopping Virtual Machine watcher...");
+
+                    watcher.Stop();
+                });
+
+            watcher.Start();
+
+            Tracer.Info("Virtual Machine event watcher started.");
+        }
+
+        private void Watcher_Stopped(object sender, StoppedEventArgs e)
+        {
+            Tracer.Info("Virtual Machine event watcher stopped.");
+        }
+
+        private void Watcher_EventArrived(object sender, EventArrivedEventArgs e)
+        {
+            var eventObject = e.NewEvent;
+
+            if (eventObject["TargetInstance"] is not ManagementBaseObject vmObject)
+            {
+                Tracer.Warning("Received invalid Virtual Machine event.");
+
+                return;
+            }
+
+            var vmId = vmObject["Name"].ToString();
+            var vmName = vmObject["ElementName"].ToString();
+
+            Tracer.Info($"Virtual Machine created event: {vmId} - {vmName}");
+
+            if (string.IsNullOrEmpty(vmId) ||
+                string.IsNullOrEmpty(vmName))
+            {
+                Tracer.Warning("Received invalid Virtual Machine event data.");
+
+                return;
+            }
+
+            if (OnNewVirtualMachine is not null)
+            {
+                OnNewVirtualMachine(new VirtualMachine(vmId, vmName));
             }
         }
     }

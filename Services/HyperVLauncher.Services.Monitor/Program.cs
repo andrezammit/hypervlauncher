@@ -1,9 +1,28 @@
+using HyperVLauncher.Contracts.Constants;
+using HyperVLauncher.Contracts.Interfaces;
+
+using HyperVLauncher.Providers.Path;
+using HyperVLauncher.Providers.HyperV;
+using HyperVLauncher.Providers.Tracing;
+
 using HyperVLauncher.Services.Monitor;
+using HyperVLauncher.Providers.Settings;
+
+var pathProvider = new PathProvider(GeneralConstants.ProfileName);
+pathProvider.CreateDirectories();
+
+TracingProvider.Init(pathProvider.GetTracingPath(), "Monitor");
+
+Tracer.Info("Starting Virtual Machine monitor service...");
 
 var hostBuilder = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
         services.AddHostedService<Worker>();
+        services.AddSingleton<IHyperVProvider, HyperVProvider>();
+        services.AddSingleton<ISettingsProvider, SettingsProvider>();
+
+        services.AddSingleton<IPathProvider>(provider => pathProvider);
     });
 
 if (Environment.UserInteractive)
@@ -19,4 +38,5 @@ else
         .RunAsync();
 }
 
-Console.WriteLine("Stopped.");
+Tracer.Info("Stopped Virtual Machine monitor service.");
+

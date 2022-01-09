@@ -1,22 +1,40 @@
+
 namespace HyperVLauncher.Services.Monitor
 {
     public class Worker : BackgroundService
     {
-        public Worker()
+        private Task? _monitorTask;
+
+        private readonly IServiceProvider _serviceProvider;
+
+        public Worker(IServiceProvider serviceProvider)
         {
+            _serviceProvider = serviceProvider;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+        protected override Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var monitorService = new MonitorService(cancellationToken);
-            await monitorService.Run();
+            _monitorTask = Task.Run(async () =>
+            {
+                var monitorService = ActivatorUtilities
+                    .CreateInstance<MonitorService>(
+                        _serviceProvider,
+                        cancellationToken);
+
+                await monitorService.Run();
+            }, cancellationToken);
+
+            return Task.CompletedTask;
         }
 
-        public override Task StopAsync(CancellationToken cancellationToken)
+        public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            Console.WriteLine("Monitor stopped.");
+            await base.StopAsync(cancellationToken);
 
-            return base.StopAsync(cancellationToken);
+            if (_monitorTask is not null)
+            {
+                await _monitorTask;
+            }
         }
     }
 }
