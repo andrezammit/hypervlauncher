@@ -8,15 +8,18 @@ namespace HyperVLauncher.Services.Monitor
     public class MonitorService
     {
         private readonly IHyperVProvider _hyperVProvider;
+        private readonly IShortcutProvider _shortcutProvider;
         private readonly ISettingsProvider _settingsProvider;
         private readonly CancellationToken _cancellationToken;
 
         public MonitorService(
             IHyperVProvider hyperVProvider,
             ISettingsProvider settingsProvider,
+            IShortcutProvider shortcutProvider,
             CancellationToken cancellationToken)
         {
             _hyperVProvider = hyperVProvider;
+            _shortcutProvider = shortcutProvider;
             _settingsProvider = settingsProvider;
             _cancellationToken = cancellationToken;
         }
@@ -34,14 +37,36 @@ namespace HyperVLauncher.Services.Monitor
         {
             Tracer.Info($"New Virtual Machine detected: {vm.Id} - {vm.Name}");
 
-            var shortcut = AppSettings.CreateShortcut(vm.Name, vm.Id);
-
             var appSettings = await _settingsProvider.Get(true);
-            appSettings.Shortcuts.Add(shortcut);
 
-            await _settingsProvider.Save();
+            if (appSettings.AutoCreateShortcuts)
+            {
+                var shortcut = AppSettings.CreateShortcut(vm.Name, vm.Id);
 
-            Tracer.Info($"New Shortcut created: {shortcut.Id}");
+                appSettings.Shortcuts.Add(shortcut);
+
+                await _settingsProvider.Save();
+
+                Tracer.Info($"New Shortcut created: {shortcut.Id}");
+
+                if (appSettings.AutoCreateDesktopShortcut)
+                {
+                    Tracer.Info($"Creating desktop shortcut for \"{shortcut.Name}\"...");
+
+                    _shortcutProvider.CreateDesktopShortcut(shortcut);
+                }
+
+                if (appSettings.AutoCreateStartMenuShortcut)
+                {
+                    Tracer.Info($"Creating start menu shortcut for \"{shortcut.Name}\"...");
+
+                    _shortcutProvider.CreateStartMenuShortcut(shortcut);
+                }
+            }
+            else if (appSettings.NotifyOnNewVm)
+            {
+
+            }
         }
     }
 }

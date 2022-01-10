@@ -26,7 +26,7 @@ namespace HyperVLauncher.Providers.Shortcut
             shellLink.SetPath($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.LaunchPad.exe");
 
             var shortcutFile = (IPersistFile)shellLink;
-            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonDesktopDirectory);
             var shortcutPath = IoPath.Combine(desktopPath, $"{shortcut.Name}.lnk");
 
             shortcutFile.Save(shortcutPath, false);
@@ -42,7 +42,7 @@ namespace HyperVLauncher.Providers.Shortcut
             shellLink.SetPath($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.LaunchPad.exe");
 
             var shortcutFile = (IPersistFile)shellLink;
-            var startMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
+            var startMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu);
             var shortcutPath = IoPath.Combine(startMenuPath, "Programs", "Hyper-V Launcher", "Shortcuts");
 
             Directory.CreateDirectory(shortcutPath);

@@ -16,6 +16,7 @@
 		<ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Common\HyperVLauncher.Providers.Common.csproj" />
 		<ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.HyperV\HyperVLauncher.Providers.HyperV.csproj" />
 		<ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Settings\HyperVLauncher.Providers.Settings.csproj" />
+		<ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Shortcut\HyperVLauncher.Providers.Shortcut.csproj" />
 	</ItemGroup>
 	
 </Project>

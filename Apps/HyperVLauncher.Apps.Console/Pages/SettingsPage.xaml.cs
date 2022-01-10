@@ -33,6 +33,9 @@ namespace HyperVLauncher.Pages
             }
 
             chkNotifyOnNewVm.IsEnabled = !_appSettings.AutoCreateShortcuts;
+
+            chkAutoCreateDesktopShortcut.IsEnabled = _appSettings.AutoCreateShortcuts;
+            chkAutoCreateStartMenuShortcut.IsEnabled = _appSettings.AutoCreateShortcuts;
         }
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
@@ -81,6 +84,8 @@ namespace HyperVLauncher.Pages
             _appSettings.StartOnLogin = GetCheckboxValue(chkStartOnLogin);
             _appSettings.NotifyOnNewVm = GetCheckboxValue(chkNotifyOnNewVm);
             _appSettings.AutoCreateShortcuts = GetCheckboxValue(chkAutoCreateShortcuts);
+            _appSettings.AutoCreateDesktopShortcut = GetCheckboxValue(chkAutoCreateDesktopShortcut);
+            _appSettings.AutoCreateStartMenuShortcut = GetCheckboxValue(chkAutoCreateStartMenuShortcut);
 
             if (_appSettings.StartOnLogin)
             {
