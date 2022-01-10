@@ -49,6 +49,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperVLauncher.Providers.Tr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperVLauncher.Providers.Shortcut", "Providers\HyperVLauncher.Providers.Shortcut\HyperVLauncher.Providers.Shortcut.csproj", "{11A3011D-6A2D-4C65-8729-7B0CC2DFBC65}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperVLauncher.Services.Monitor", "Services\HyperVLauncher.Services.Monitor\HyperVLauncher.Services.Monitor.csproj", "{299A2F84-1932-4F40-8846-F00F35A4B737}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{15BA1AD4-A18A-4B58-BE5A-C41620EA3BCC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -157,6 +161,14 @@ Global
 		{11A3011D-6A2D-4C65-8729-7B0CC2DFBC65}.Release|Any CPU.Build.0 = Release|Any CPU
 		{11A3011D-6A2D-4C65-8729-7B0CC2DFBC65}.Release|x64.ActiveCfg = Release|Any CPU
 		{11A3011D-6A2D-4C65-8729-7B0CC2DFBC65}.Release|x64.Build.0 = Release|Any CPU
+		{299A2F84-1932-4F40-8846-F00F35A4B737}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{299A2F84-1932-4F40-8846-F00F35A4B737}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{299A2F84-1932-4F40-8846-F00F35A4B737}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{299A2F84-1932-4F40-8846-F00F35A4B737}.Debug|x64.Build.0 = Debug|Any CPU
+		{299A2F84-1932-4F40-8846-F00F35A4B737}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{299A2F84-1932-4F40-8846-F00F35A4B737}.Release|Any CPU.Build.0 = Release|Any CPU
+		{299A2F84-1932-4F40-8846-F00F35A4B737}.Release|x64.ActiveCfg = Release|Any CPU
+		{299A2F84-1932-4F40-8846-F00F35A4B737}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -176,6 +188,7 @@ Global
 		{A03E293F-46BE-41A6-B1BA-7BFAEF00D148} = {F13DB580-134D-4952-9B69-4AC91DFB71AA}
 		{E43046BF-35F5-4634-8D89-0807637B18B6} = {815E69A0-71BA-4F1C-B3FC-840F79D299E9}
 		{11A3011D-6A2D-4C65-8729-7B0CC2DFBC65} = {815E69A0-71BA-4F1C-B3FC-840F79D299E9}
+		{299A2F84-1932-4F40-8846-F00F35A4B737} = {15BA1AD4-A18A-4B58-BE5A-C41620EA3BCC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B641A9CA-559C-474E-ACD7-F94421915AB2}
