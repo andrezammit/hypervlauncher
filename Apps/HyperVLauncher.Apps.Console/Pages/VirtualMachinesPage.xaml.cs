@@ -17,23 +17,23 @@ namespace HyperVLauncher.Pages
     /// </summary>
     public partial class VirtualMachinesPage : Page
     {
-        private readonly IIpcProvider _ipcProvider;
         private readonly IHyperVProvider _hyperVProvider;
+        private readonly ITrayIpcProvider _trayIpcProvider;
         private readonly ISettingsProvider _settingsProvider;
         private readonly IShortcutProvider _shortcutProvider;
 
         private readonly ObservableCollection<VirtualMachine> _virtualMachines = new();
 
         public VirtualMachinesPage(
-            IIpcProvider ipcProvider,
             IHyperVProvider hyperVProvider,
+            ITrayIpcProvider trayIpcProvider,
             IShortcutProvider shortcutProvider,
             ISettingsProvider settingsProvider)
         {
             InitializeComponent();
 
-            _ipcProvider = ipcProvider;
             _hyperVProvider = hyperVProvider;
+            _trayIpcProvider = trayIpcProvider;
             _settingsProvider = settingsProvider;
             _shortcutProvider = shortcutProvider;
 
@@ -158,8 +158,8 @@ namespace HyperVLauncher.Pages
                 _shortcutProvider.CreateStartMenuShortcut(shortcut);
             }
 
-            await _ipcProvider.SendReloadSettings();
-            await _ipcProvider.SendShowTrayMessage("New Shortcut Created", $"Your new virtual machine shortcut \"{shortcut.Name}\" is now accessible by clicking on the system tray icon.");
+            await _trayIpcProvider.SendReloadSettings();
+            await _trayIpcProvider.SendShowMessageNotif("New Shortcut Created", $"Your new virtual machine shortcut \"{shortcut.Name}\" is now accessible by clicking on the system tray icon.");
         }
     }
 }

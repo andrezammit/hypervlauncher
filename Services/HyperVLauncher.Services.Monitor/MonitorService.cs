@@ -7,14 +7,14 @@ namespace HyperVLauncher.Services.Monitor
 {
     public class MonitorService
     {
-        private readonly IIpcProvider _ipcProvider;
+        private readonly IIpcProviderBase _ipcProvider;
         private readonly IHyperVProvider _hyperVProvider;
         private readonly IShortcutProvider _shortcutProvider;
         private readonly ISettingsProvider _settingsProvider;
         private readonly CancellationToken _cancellationToken;
 
         public MonitorService(
-            IIpcProvider ipcProvider,
+            IIpcProviderBase ipcProvider,
             IHyperVProvider hyperVProvider,
             ISettingsProvider settingsProvider,
             IShortcutProvider shortcutProvider,
@@ -68,13 +68,13 @@ namespace HyperVLauncher.Services.Monitor
 
                 await _ipcProvider.SendReloadSettings();
 
-                await _ipcProvider.SendShowTrayMessage(
-                    $"New Virtual Machine Detected", 
-                    $"A new Virtual Machine shortcut was created for \"{vm.Name}\".");
+                await _ipcProvider.SendShowShortcutCreatedNotif(vm.Id, vm.Name);
             }
             else if (appSettings.NotifyOnNewVm)
             {
-
+                await _ipcProvider.SendShowMessageNotif(
+                    $"New Virtual Machine Detected",
+                    $"Click here to create a new Virtual Machine shortcut for \"{vm.Name}\".");
             }
         }
     }

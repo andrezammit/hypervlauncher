@@ -102,7 +102,7 @@ catch (Exception ex)
 
 async Task HandleShortcutExitBehaviour(
     IHyperVProvider hyperVProvider, 
-    IIpcProvider ipcProvider,
+    IIpcProviderBase ipcProvider,
     Shortcut shortcut)
 {
     switch (shortcut.CloseAction)
@@ -110,7 +110,7 @@ async Task HandleShortcutExitBehaviour(
         case HyperVLauncher.Contracts.Enums.CloseAction.Pause:
             Tracer.Info($"Pausing {vmName}...");
 
-            await ipcProvider.SendShowTrayMessage("Virtual Machine State Change", $"Pausing {shortcut.Name}...");
+            await ipcProvider.SendShowMessageNotif("Virtual Machine State Change", $"Pausing {shortcut.Name}...");
             hyperVProvider.PauseVirtualMachine(shortcut.VmId);
 
             Tracer.Info($"{vmName} paused.");
@@ -120,7 +120,7 @@ async Task HandleShortcutExitBehaviour(
         case HyperVLauncher.Contracts.Enums.CloseAction.Shutdown:
             Tracer.Info($"Shutting down {vmName}...");
 
-            await ipcProvider.SendShowTrayMessage("Virtual Machine State Change", $"Shutting down {shortcut.Name}...");
+            await ipcProvider.SendShowMessageNotif("Virtual Machine State Change", $"Shutting down {shortcut.Name}...");
             hyperVProvider.ShutdownVirtualMachine(shortcut.VmId);
 
             Tracer.Info($"{vmName} shut down.");
@@ -132,7 +132,7 @@ async Task HandleShortcutExitBehaviour(
     }
 }
 
-async Task ProcessIpcMessages(IIpcProvider ipcProvider, CancellationToken cancellationToken)
+async Task ProcessIpcMessages(IIpcProviderBase ipcProvider, CancellationToken cancellationToken)
 {
     try
     {

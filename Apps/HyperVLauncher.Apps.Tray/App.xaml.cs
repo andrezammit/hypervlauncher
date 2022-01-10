@@ -21,6 +21,9 @@ using HyperVLauncher.Providers.Path;
 using HyperVLauncher.Providers.Common;
 using HyperVLauncher.Providers.Settings;
 using HyperVLauncher.Providers.Tracing;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Toolkit.Uwp.Notifications;
 
 namespace HyperVLauncher.Apps.Tray
 {
@@ -33,10 +36,13 @@ namespace HyperVLauncher.Apps.Tray
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
         private readonly IPathProvider _pathProvider = new PathProvider(GeneralConstants.ProfileName);
-        private readonly IIpcProvider _ipcProvider = new IpcProvider(GeneralConstants.TrayIpcPipeName);
+        private readonly ITrayIpcProvider _trayIpcProvider = new IpcProvider(GeneralConstants.TrayIpcPipeName);
+        private readonly ILaunchPadIpcProvider _launchPadIpcProvider = new IpcProvider(GeneralConstants.LaunchPadIpcPipeName);
 
         private readonly MenuItem _titleMenuItem;
         private readonly MenuItem _closeMenuItem;
+
+        private readonly Uri _notifIconUri = new($"file:///{Path.GetFullPath("Icons/shortcut.png")}");
 
         public App()
         {
@@ -51,7 +57,7 @@ namespace HyperVLauncher.Apps.Tray
 
             _titleMenuItem.Click += (object sender, RoutedEventArgs e) =>
             {
-                LaunchConsole();
+                GenericHelpers.LaunchConsole();
             };
 
             _closeMenuItem = new MenuItem()
@@ -86,7 +92,111 @@ namespace HyperVLauncher.Apps.Tray
 
             _taskbarIcon.TrayMouseDoubleClick += TaskbarIcon_TrayMouseDoubleClick;
 
+            _taskbarIcon.TrayBalloonTipShown += TaskbarIcon_TrayBalloonTipShown;
+            _taskbarIcon.TrayBalloonTipClicked += TaskbarIcon_TrayBalloonTipClicked;
+
             CreateContextMenu();
+
+            //Task.Run(async () =>
+            //{
+            //    await Task.Delay(2000);
+
+            //    Current.Dispatcher.Invoke(new Action(() =>
+            //    {
+            //        new ToastContentBuilder()
+            //            .AddAppLogoOverride(_notifIconUri)
+            //            .AddArgument("action", "viewConversation")
+            //            .AddArgument("conversationId", 9813)
+            //            .AddText("New Virtual Machine Detected", AdaptiveTextStyle.Header)
+            //            .AddText("Create a new shortcut for \"Windows 10\"?")
+            //            .AddButton(new ToastButton()
+            //                .SetContent("Yes")
+            //                .AddArgument("action", "create"))
+            //            .AddButton(new ToastButtonDismiss("No"))
+            //            .Show();
+            //    }));
+            //});
+
+            ToastNotificationManagerCompat.OnActivated += ToastNotificationManagerCompat_OnActivated;
+        }
+
+        private void ShowMessageNotif(string title, string message)
+        {
+            Current.Dispatcher.Invoke(delegate
+            {
+                new ToastContentBuilder()
+                    .AddAppLogoOverride(_notifIconUri)
+                    .AddArgument("action", "viewConversation")
+                    .AddArgument("conversationId", 9813)
+                    .AddText(title, AdaptiveTextStyle.Header)
+                    .AddText(message)
+                    .Show();
+            });
+        }
+
+        private void ShowShortcutCreatedNotif(string vmName)
+        {
+            Current.Dispatcher.Invoke(delegate
+            {
+                new ToastContentBuilder()
+                    .AddAppLogoOverride(_notifIconUri)
+                    .AddArgument("action", "openConsole")
+                    .AddText("New Virtual Machine Detected", AdaptiveTextStyle.Header)
+                    .AddText($"A new Virtual Machine shortcut was created for \"{vmName}\".")
+                    .Show();
+            });
+        }
+
+        private void ToastNotificationManagerCompat_OnActivated(ToastNotificationActivatedEventArgsCompat e)
+        {
+            var toastArgs = ToastArguments.Parse(e.Argument);
+
+            if (toastArgs["action"] == "openConsole")
+            {
+                GenericHelpers.LaunchConsole();
+                return;
+            }
+
+            Application.Current.Dispatcher.Invoke(delegate
+            {
+                // TODO: Show the corresponding content
+                MessageBox.Show("Toast activated. Args: " + toastArgs);
+            });
+        }
+
+        internal enum BalloonAction
+        {
+            None,
+            Console,
+            AddShortcut
+        }
+
+        internal class BalloonEvent
+        {
+            public object? Sender { get; set; }
+            public BalloonAction BalloonAction { get; set; }
+        }
+
+        internal List<BalloonEvent> _waitingEvents = new();
+
+        private void TaskbarIcon_TrayBalloonTipClicked(object sender, RoutedEventArgs e)
+        {
+            var balloonEvent = _waitingEvents.FirstOrDefault(x => x.Sender == sender);
+
+            if (balloonEvent is not null)
+            {
+                MessageBox.Show(balloonEvent.BalloonAction.ToString());
+            }
+        }
+
+        private void TaskbarIcon_TrayBalloonTipShown(object sender, RoutedEventArgs e)
+        {
+            var balloonEvent = _waitingEvents.FirstOrDefault(x => x.Sender is null);
+
+            if (balloonEvent is not null)
+            {
+                balloonEvent.Sender = sender;
+            }
         }
 
         private void CreateContextMenu()
@@ -116,7 +226,9 @@ namespace HyperVLauncher.Apps.Tray
 
                     menuItem.Click += (object sender, RoutedEventArgs e) =>
                     {
-                        LaunchShortcut(shortcut.Id);
+                        GenericHelpers.LaunchShortcut(
+                            shortcut.Id,
+                            _launchPadIpcProvider);
                     };
 
                     _taskbarIcon.ContextMenu.Items.Add(menuItem);
@@ -161,59 +273,10 @@ namespace HyperVLauncher.Apps.Tray
 
         private void TaskbarIcon_TrayMouseDoubleClick(object sender, RoutedEventArgs e)
         {
-            LaunchConsole();
+            GenericHelpers.LaunchConsole();
         }
 
-        private static void LaunchShortcut(string shortcutId)
-        {
-            try
-            {
-                Tracer.Info($"Launching shortcut {shortcutId}...");
-
-                var startInfo = new ProcessStartInfo($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.LaunchPad.exe", shortcutId)
-                {
-                    Verb = "runas",
-                    UseShellExecute = true,
-                    WindowStyle = ProcessWindowStyle.Hidden
-                };
-
-#if DEBUG
-                startInfo.WindowStyle = ProcessWindowStyle.Normal;
-#endif
-
-                using (Process.Start(startInfo))
-                {
-                }
-            }
-            catch (Exception ex)
-            {
-                Tracer.Error($"Failed to launch shortcut {shortcutId}.", ex);
-            }
-        }
-
-        private static void LaunchConsole()
-        {
-            try
-            {
-                Tracer.Debug($"Launching Console...");
-
-                var startInfo = new ProcessStartInfo($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.Console.exe")
-                {
-                    Verb = "runas",
-                    UseShellExecute = true
-                };
-
-                using (Process.Start(startInfo))
-                {
-                }
-            }
-            catch (Exception ex)
-            {
-                Tracer.Error($"Failed to launch Console.", ex);
-            }
-        }
-
-        private void ShowMessage(JObject? ipcMessageData)
+        private void ShowMessageNotif(JObject? ipcMessageData)
         {
             try
             {
@@ -226,7 +289,7 @@ namespace HyperVLauncher.Apps.Tray
                     return;
                 }
 
-                var trayMessageData = ipcMessageData.ToObject<TrayMessageData>();
+                var trayMessageData = ipcMessageData.ToObject<ShowMessageNotifData>();
 
                 if (trayMessageData is null)
                 {
@@ -237,10 +300,7 @@ namespace HyperVLauncher.Apps.Tray
 
                 Tracer.Debug($"Showing balloon message: {trayMessageData.Title} - {trayMessageData.Message}");
 
-                _taskbarIcon.ShowBalloonTip(
-                    trayMessageData.Title,
-                    trayMessageData.Message,
-                    BalloonIcon.Info);
+                ShowMessageNotif(trayMessageData.Title, trayMessageData.Message);
             }
             catch (Exception ex)
             {
@@ -248,11 +308,43 @@ namespace HyperVLauncher.Apps.Tray
             }
         }
 
+        private void ShowShortcutCreatedNotif(JObject? ipcMessageData)
+        {
+            try
+            {
+                Tracer.Debug("Balloon message notification received.");
+
+                if (ipcMessageData is null)
+                {
+                    Tracer.Debug("Invalid TrayMessageData JSON object received.");
+
+                    return;
+                }
+
+                var shortcutCreatedNotifData = ipcMessageData.ToObject<ShortcutCreatedNotifData>();
+
+                if (shortcutCreatedNotifData is null)
+                {
+                    Tracer.Debug("Invalid ShortcutCreatedNotifData data received.");
+
+                    return;
+                }
+
+                Tracer.Debug($"Showing shortcut created notification: {shortcutCreatedNotifData.VmId} - {shortcutCreatedNotifData.VmName}");
+
+                ShowShortcutCreatedNotif(shortcutCreatedNotifData.VmName);
+            }
+            catch (Exception ex)
+            {
+                Tracer.Warning($"Failed to show shortcut created notification.", ex);
+            }
+        }
+
         private async Task ProcessIpcMessages(CancellationToken cancellationToken)
         {
             try
             {
-                await foreach (var ipcMessage in _ipcProvider.ReadMessages(cancellationToken))
+                await foreach (var ipcMessage in _trayIpcProvider.ReadMessages(cancellationToken))
                 {
                     switch (ipcMessage.IpcCommand)
                     {
@@ -260,8 +352,12 @@ namespace HyperVLauncher.Apps.Tray
                             Current.Dispatcher.Invoke(new Action(() => CreateContextMenu()));
                             break;
 
-                        case IpcCommand.ShowTrayMessage:
-                            Current.Dispatcher.Invoke(new Action(() => ShowMessage(ipcMessage.Data as JObject)));
+                        case IpcCommand.ShowMessageNotif:
+                            ShowMessageNotif(ipcMessage.Data as JObject);
+                            break;
+
+                        case IpcCommand.ShowShortcutCreatedNotif:
+                            ShowShortcutCreatedNotif(ipcMessage.Data as JObject);
                             break;
 
                         default:
