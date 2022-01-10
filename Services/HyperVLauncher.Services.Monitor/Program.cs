@@ -4,9 +4,10 @@ using HyperVLauncher.Contracts.Interfaces;
 using HyperVLauncher.Providers.Path;
 using HyperVLauncher.Providers.HyperV;
 using HyperVLauncher.Providers.Tracing;
+using HyperVLauncher.Providers.Settings;
+using HyperVLauncher.Providers.Shortcut;
 
 using HyperVLauncher.Services.Monitor;
-using HyperVLauncher.Providers.Settings;
 
 var pathProvider = new PathProvider(GeneralConstants.ProfileName);
 pathProvider.CreateDirectories();
@@ -21,6 +22,7 @@ var hostBuilder = Host.CreateDefaultBuilder(args)
         services.AddHostedService<Worker>();
         services.AddSingleton<IHyperVProvider, HyperVProvider>();
         services.AddSingleton<ISettingsProvider, SettingsProvider>();
+        services.AddSingleton<IShortcutProvider, ShortcutProvider>();
 
         services.AddSingleton<IPathProvider>(provider => pathProvider);
     });

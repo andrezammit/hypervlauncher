@@ -48,6 +48,8 @@
             Margin="20,10,0,0">
             <CheckBox Content="Start on Windows login" x:Name="chkStartOnLogin" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" />
             <CheckBox Content="Automatically create Virtual Machine shortcuts" x:Name="chkAutoCreateShortcuts" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" />
+            <CheckBox Content="Create Desktop shortcut" x:Name="chkAutoCreateDesktopShortcut" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" Margin="20,0,0,10" />
+            <CheckBox Content="Create Start Menu shortcut" x:Name="chkAutoCreateStartMenuShortcut" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" Margin="20,0,0,10"/>
             <CheckBox Content="Show a new shortcut prompt when a new Virtual Machine is created" x:Name="chkNotifyOnNewVm" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" />
         </StackPanel>
     </Grid>
