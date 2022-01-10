@@ -1,6 +1,7 @@
 using HyperVLauncher.Contracts.Constants;
 using HyperVLauncher.Contracts.Interfaces;
 
+using HyperVLauncher.Providers.Ipc;
 using HyperVLauncher.Providers.Path;
 using HyperVLauncher.Providers.HyperV;
 using HyperVLauncher.Providers.Tracing;
@@ -25,6 +26,7 @@ var hostBuilder = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IShortcutProvider, ShortcutProvider>();
 
         services.AddSingleton<IPathProvider>(provider => pathProvider);
+        services.AddSingleton<IIpcProvider>(provider => new IpcProvider(GeneralConstants.TrayIpcPipeName));
     });
 
 if (Environment.UserInteractive)

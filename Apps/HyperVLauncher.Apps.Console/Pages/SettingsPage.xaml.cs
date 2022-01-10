@@ -49,6 +49,8 @@ namespace HyperVLauncher.Pages
                 chkStartOnLogin.IsChecked = _appSettings.StartOnLogin;
                 chkNotifyOnNewVm.IsChecked = _appSettings.NotifyOnNewVm;
                 chkAutoCreateShortcuts.IsChecked = _appSettings.AutoCreateShortcuts;
+                chkAutoCreateDesktopShortcut.IsChecked = _appSettings.AutoCreateDesktopShortcut;
+                chkAutoCreateStartMenuShortcut.IsChecked = _appSettings.AutoCreateStartMenuShortcut;
 
                 EnableControls();
             }
