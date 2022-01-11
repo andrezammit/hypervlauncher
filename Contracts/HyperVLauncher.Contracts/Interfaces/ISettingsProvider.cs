@@ -11,13 +11,15 @@ namespace HyperVLauncher.Contracts.Interfaces
 
         Task<AppSettings> Get(bool forceReload = false);
 
-        Task<bool> ValidateShortcutName(
+        bool ValidateShortcutName(
             string shortcutId,
-            string shortcutName);
+            string shortcutName,
+            AppSettings appSettings);
 
-        Task<string> GetValidShortcutName(
+        string GetValidShortcutName(
             string shortcutId,
-            string vmName);
+            string vmName,
+            AppSettings appSettings);
 
         Task DeleteVirtualMachineShortcuts(
             string vmId,

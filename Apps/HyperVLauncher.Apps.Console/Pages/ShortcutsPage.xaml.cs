@@ -107,11 +107,11 @@ namespace HyperVLauncher.Pages
             lstShortcuts.ItemsSource = _shortcuts;
         }
 
-        private async Task RefreshShortcuts()
+        public async Task RefreshShortcuts()
         {
             _shortcuts.Clear();
 
-            var appSettings = await _settingsProvider.Get();
+            var appSettings = await _settingsProvider.Get(true);
 
             foreach (var shortcut in appSettings.Shortcuts)
             {
@@ -128,11 +128,6 @@ namespace HyperVLauncher.Pages
             btnEdit.IsEnabled = enable;
             btnLaunch.IsEnabled = enable;
             btnDelete.IsEnabled = enable;
-        }
-
-        private async void Page_Loaded(object sender, RoutedEventArgs e)
-        {
-            await RefreshShortcuts();
         }
 
         private void LstShortcuts_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -166,7 +161,7 @@ namespace HyperVLauncher.Pages
 
             Tracer.Debug("Deleting shortcut from settings...");
 
-            var appSettings = await _settingsProvider.Get();
+            var appSettings = await _settingsProvider.Get(true);
             
             appSettings.DeleteShortcut(shortcut.Id);
 
@@ -209,7 +204,7 @@ namespace HyperVLauncher.Pages
                 return;
             }
 
-            var appSettings = await _settingsProvider.Get();
+            var appSettings = await _settingsProvider.Get(true);
 
             var savedShortcut = appSettings.Shortcuts.FirstOrDefault(x => x.Id == shortcut.Id);
 

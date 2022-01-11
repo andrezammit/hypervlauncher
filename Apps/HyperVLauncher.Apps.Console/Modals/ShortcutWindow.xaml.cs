@@ -44,9 +44,11 @@ namespace HyperVLauncher.Modals
             }
             else
             {
-                txtName.Text = _settingsProvider.GetValidShortcutName(_shortcutId, vmName)
+                var appSettings = _settingsProvider.Get(true)
                     .GetAwaiter()
                     .GetResult();
+
+                txtName.Text = _settingsProvider.GetValidShortcutName(_shortcutId, vmName, appSettings);
             }
 
             lblVmName.Content = vmName;
@@ -115,9 +117,12 @@ namespace HyperVLauncher.Modals
 
         private async void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            if (!await _settingsProvider.ValidateShortcutName(
+            var appSettings = await _settingsProvider.Get(true);
+
+            if (!_settingsProvider.ValidateShortcutName(
                 _shortcutId,
-                txtName.Text))
+                txtName.Text,
+                appSettings))
             {
                 MessageBox.Show(
                     $"Another shortcut is already named \"{txtName.Text}\".", 

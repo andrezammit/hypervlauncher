@@ -45,7 +45,7 @@
                    HorizontalContentAlignment="Left"/>
         <StackPanel
             Grid.Row="1"
-            Margin="20,10,0,0">
+            Margin="30,20,0,0">
             <CheckBox Content="Start on Windows login" x:Name="chkStartOnLogin" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" />
             <CheckBox Content="Automatically create Virtual Machine shortcuts" x:Name="chkAutoCreateShortcuts" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" />
             <CheckBox Content="Create Desktop shortcut" x:Name="chkAutoCreateDesktopShortcut" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" Margin="20,0,0,10" />

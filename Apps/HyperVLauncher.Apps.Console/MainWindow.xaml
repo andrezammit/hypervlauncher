@@ -9,7 +9,8 @@
         MinHeight="620" 
         MinWidth="970"
         Height="620"
-        Width="970" Loaded="Window_Loaded">
+        Width="970" 
+        Loaded="Window_Loaded">
     <Window.Resources>
         <Style x:Key="NavButton" TargetType="Button">
             <Setter Property="Height" Value="44" />
@@ -51,25 +52,25 @@
                 x:Name="btnBurger" 
                 Width="50" 
                 HorizontalAlignment="Left" 
-                Click="btnBurger_Click"
+                Click="BtnBurger_Click"
                 Margin="0,20,0,0">
                 <StackPanel>
                     <Image Source="Icons/menu.png" Height="32" Width="32" />
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource NavButton}" x:Name="btnShortcuts" Click="btnShortcuts_Click">
+            <Button Style="{StaticResource NavButton}" x:Name="btnShortcuts" Click="BtnShortcuts_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="Icons/shortcut.png" Height="32" Width="32" Margin="0,0,10,0" />
                     <TextBlock Text="Shortcuts" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource NavButton}" x:Name="btnVirtualMachines" Click="btnVirtualMachines_Click">
+            <Button Style="{StaticResource NavButton}" x:Name="btnVirtualMachines" Click="BtnVirtualMachines_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="Icons/vm.png" Height="32" Width="32" Margin="0,0,10,0" />
                     <TextBlock Text="Virtual Machines" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource NavButton}" x:Name="btnSettings" Height="39" Click="btnSettings_Click">
+            <Button Style="{StaticResource NavButton}" x:Name="btnSettings" Height="39" Click="BtnSettings_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="Icons/settings.png" Height="32" Width="32" Margin="0,0,10,0" />
                     <TextBlock Text="Settings" VerticalAlignment="Center" />
