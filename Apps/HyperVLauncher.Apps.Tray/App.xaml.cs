@@ -174,19 +174,6 @@ namespace HyperVLauncher.Apps.Tray
                 default:
                     throw new NotSupportedException($"Invalid notification arguments: {e.Argument}");
             }
-
-            if (toastArgs["action"] == "openConsole")
-            {
-                GenericHelpers.LaunchConsole();
-                return;
-            }
-        }
-
-        internal enum BalloonAction
-        {
-            None,
-            Console,
-            AddShortcut
         }
 
         private void CreateContextMenu()
@@ -287,13 +274,13 @@ namespace HyperVLauncher.Apps.Tray
                     return;
                 }
 
-                Tracer.Debug($"Showing balloon message: {trayMessageData.Title} - {trayMessageData.Message}");
+                Tracer.Debug($"Showing message notification: {trayMessageData.Title} - {trayMessageData.Message}");
 
                 ShowMessageNotif(trayMessageData.Title, trayMessageData.Message);
             }
             catch (Exception ex)
             {
-                Tracer.Warning($"Failed to show balloon with message.", ex);
+                Tracer.Warning($"Failed to show message notification.", ex);
             }
         }
 
