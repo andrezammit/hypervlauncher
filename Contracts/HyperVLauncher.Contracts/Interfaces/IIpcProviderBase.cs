@@ -14,6 +14,7 @@ namespace HyperVLauncher.Contracts.Interfaces
 
         Task SendMessage(IpcMessage ipcMessage);
         Task SendShowMessageNotif(string title, string message);
+        Task SendShowShortcutPromptNotif(string vmId, string vmName);
         Task SendShowShortcutCreatedNotif(string vmId, string vmName);
 
         IAsyncEnumerable<IpcMessage> ReadMessages(CancellationToken cancellationToken);

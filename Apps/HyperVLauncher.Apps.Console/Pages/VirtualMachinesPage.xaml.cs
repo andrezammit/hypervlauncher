@@ -133,33 +133,14 @@ namespace HyperVLauncher.Pages
                 return;
             }
 
-            shortcut.Name = shortcutWindow.txtName.Text;
-
-            var appSettings = await _settingsProvider.Get();
-            appSettings.Shortcuts.Add(shortcut);
-
-            await _settingsProvider.Save();
-
-            Tracer.Info($"New shortcut \"{shortcut.Name}\" created for {vm.Id} - {vm.Name}.");
-
-            if (shortcutWindow.chkDesktopShortcut.IsChecked.HasValue && 
-                shortcutWindow.chkDesktopShortcut.IsChecked.Value)
-            {
-                Tracer.Info($"Creating desktop shortcut for \"{shortcut.Name}\"...");
-
-                _shortcutProvider.CreateDesktopShortcut(shortcut);
-            }
-
-            if (shortcutWindow.chkStartMenuShortcut.IsChecked.HasValue &&
-                shortcutWindow.chkStartMenuShortcut.IsChecked.Value)
-            {
-                Tracer.Info($"Creating start menu shortcut for \"{shortcut.Name}\"...");
-
-                _shortcutProvider.CreateStartMenuShortcut(shortcut);
-            }
-
-            await _trayIpcProvider.SendReloadSettings();
-            await _trayIpcProvider.SendShowMessageNotif("New Shortcut Created", $"Your new virtual machine shortcut \"{shortcut.Name}\" is now accessible by clicking on the system tray icon.");
+            await _settingsProvider.ProcessCreateShortcut(
+                vm.Id,
+                shortcutWindow.txtName.Text,
+                _trayIpcProvider,
+                _shortcutProvider,
+                shortcutWindow.chkDesktopShortcut.IsChecked.GetValueOrDefault(),
+                shortcutWindow.chkStartMenuShortcut.IsChecked.GetValueOrDefault(),
+                shortcutWindow.GetSelectedCloseAction());
         }
     }
 }

@@ -24,4 +24,16 @@ namespace HyperVLauncher.Contracts.Models
             VmName = vmName;
         }
     }
+
+    public class ShortcutPromptNotifData
+    {
+        public string VmId { get; private set; }
+        public string VmName { get; private set; }
+
+        public ShortcutPromptNotifData(string vmId, string vmName)
+        {
+            VmId = vmId;
+            VmName = vmName;
+        }
+    }
 }

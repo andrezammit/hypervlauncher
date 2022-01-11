@@ -6,7 +6,7 @@ namespace HyperVLauncher.Contracts.Enums
         Unknown,
         ReloadSettings,
         ShowMessageNotif,
-        NewVmPrompt,
+        ShowShortcutPromptNotif,
         ShowShortcutCreatedNotif,
         BringToFront
     }

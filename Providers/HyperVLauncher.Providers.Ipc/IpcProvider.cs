@@ -95,6 +95,17 @@ namespace HyperVLauncher.Providers.Ipc
             return SendMessage(ipcMessage);
         }
 
+        public Task SendShowShortcutPromptNotif(string vmId, string vmName)
+        {
+            var ipcMessage = new IpcMessage()
+            {
+                IpcCommand = IpcCommand.ShowShortcutPromptNotif,
+                Data = new ShortcutPromptNotifData(vmId, vmName)
+            };
+
+            return SendMessage(ipcMessage);
+        }
+
         public Task SendBringToFront()
         {
             var ipcMessage = new IpcMessage()

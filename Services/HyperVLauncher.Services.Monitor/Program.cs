@@ -26,7 +26,7 @@ var hostBuilder = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IShortcutProvider, ShortcutProvider>();
 
         services.AddSingleton<IPathProvider>(provider => pathProvider);
-        services.AddSingleton<IIpcProviderBase>(provider => new IpcProvider(GeneralConstants.TrayIpcPipeName));
+        services.AddSingleton<ITrayIpcProvider>(provider => new IpcProvider(GeneralConstants.TrayIpcPipeName));
     });
 
 if (Environment.UserInteractive)

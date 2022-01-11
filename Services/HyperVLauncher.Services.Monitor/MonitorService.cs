@@ -7,21 +7,21 @@ namespace HyperVLauncher.Services.Monitor
 {
     public class MonitorService
     {
-        private readonly IIpcProviderBase _ipcProvider;
         private readonly IHyperVProvider _hyperVProvider;
+        private readonly ITrayIpcProvider _trayIpcProvider;
         private readonly IShortcutProvider _shortcutProvider;
         private readonly ISettingsProvider _settingsProvider;
         private readonly CancellationToken _cancellationToken;
 
         public MonitorService(
-            IIpcProviderBase ipcProvider,
             IHyperVProvider hyperVProvider,
+            ITrayIpcProvider trayIpcProvider,
             ISettingsProvider settingsProvider,
             IShortcutProvider shortcutProvider,
             CancellationToken cancellationToken)
         {
-            _ipcProvider = ipcProvider;
             _hyperVProvider = hyperVProvider;
+            _trayIpcProvider = trayIpcProvider;
             _shortcutProvider = shortcutProvider;
             _settingsProvider = settingsProvider;
             _cancellationToken = cancellationToken;
@@ -44,37 +44,17 @@ namespace HyperVLauncher.Services.Monitor
 
             if (appSettings.AutoCreateShortcuts)
             {
-                var shortcut = AppSettings.CreateShortcut(vm.Name, vm.Id);
-
-                appSettings.Shortcuts.Add(shortcut);
-
-                await _settingsProvider.Save();
-
-                Tracer.Info($"New Shortcut created: {shortcut.Id}");
-
-                if (appSettings.AutoCreateDesktopShortcut)
-                {
-                    Tracer.Info($"Creating desktop shortcut for \"{shortcut.Name}\"...");
-
-                    _shortcutProvider.CreateDesktopShortcut(shortcut);
-                }
-
-                if (appSettings.AutoCreateStartMenuShortcut)
-                {
-                    Tracer.Info($"Creating start menu shortcut for \"{shortcut.Name}\"...");
-
-                    _shortcutProvider.CreateStartMenuShortcut(shortcut);
-                }
-
-                await _ipcProvider.SendReloadSettings();
-
-                await _ipcProvider.SendShowShortcutCreatedNotif(vm.Id, vm.Name);
+                await _settingsProvider.ProcessCreateShortcut(
+                    vm.Id,
+                    vm.Name,
+                    _trayIpcProvider,
+                    _shortcutProvider);
             }
             else if (appSettings.NotifyOnNewVm)
             {
-                await _ipcProvider.SendShowMessageNotif(
-                    $"New Virtual Machine Detected",
-                    $"Click here to create a new Virtual Machine shortcut for \"{vm.Name}\".");
+                await _trayIpcProvider.SendShowShortcutPromptNotif(
+                    vm.Id,
+                    vm.Name);
             }
         }
     }
