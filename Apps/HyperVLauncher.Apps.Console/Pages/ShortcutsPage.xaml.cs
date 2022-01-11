@@ -67,25 +67,28 @@ namespace HyperVLauncher.Pages
 
     public partial class ShortcutsPage : Page
     {
-        private readonly IIpcProvider _ipcProvider;
         private readonly IHyperVProvider _hyperVProvider;
+        private readonly ITrayIpcProvider _trayIpcProvider;
         private readonly ISettingsProvider _settingsProvider;
         private readonly IShortcutProvider _shortcutProvider;
+        private readonly ILaunchPadIpcProvider _launchPadIpcProvider;
 
         private readonly ObservableCollection<ShortcutItem> _shortcuts = new();
 
         public ShortcutsPage(
-            IIpcProvider ipcProvider,
             IHyperVProvider hyperVProvider,
+            ITrayIpcProvider trayIpcProvider,
             IShortcutProvider shortcutProvider,
-            ISettingsProvider settingsProvider)
+            ISettingsProvider settingsProvider,
+            ILaunchPadIpcProvider launchPadIpcProvider)
         {
             InitializeComponent();
 
-            _ipcProvider = ipcProvider;
             _hyperVProvider = hyperVProvider;
+            _trayIpcProvider = trayIpcProvider;
             _settingsProvider = settingsProvider;
             _shortcutProvider = shortcutProvider;
+            _launchPadIpcProvider = launchPadIpcProvider;
 
             lstShortcuts.ItemsSource = _shortcuts;
         }
@@ -157,7 +160,7 @@ namespace HyperVLauncher.Pages
 
             await RefreshShortcuts();
 
-            await _ipcProvider.SendReloadSettings();
+            await _trayIpcProvider.SendReloadSettings();
 
             Tracer.Debug("Shortcut deleted.");
         }
@@ -169,46 +172,9 @@ namespace HyperVLauncher.Pages
                 throw new InvalidCastException("Invalid selected item type.");
             }
 
-            LaunchShortcut(shortcut.Id);
-        }
-
-        private void LaunchShortcut(string shortcutId)
-        {
-            try
-            {
-                var launchPadMutexName = $"{GeneralConstants.LaunchPadMutexName}_{shortcutId}";
-
-                if (!GenericHelpers.IsMutexAvailable(launchPadMutexName))
-                {
-                    Tracer.Info($"Shortcut {shortcutId} is already running.");
-
-                    var launchPadIpcProvider = new IpcProvider("HyperVLauncher_LaunchPadIpc");
-                    launchPadIpcProvider.SendBringToFront();
-
-                    return;
-                }
-
-                Tracer.Info($"Launching shortcut {shortcutId}...");
-
-                var startInfo = new ProcessStartInfo($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.LaunchPad.exe", shortcutId)
-                {
-                    Verb = "runas",
-                    UseShellExecute = true,
-                    WindowStyle = ProcessWindowStyle.Hidden
-                };
-
-#if DEBUG
-                startInfo.WindowStyle = ProcessWindowStyle.Normal;
-#endif
-
-                using (Process.Start(startInfo))
-                {
-                }
-            }
-            catch (Exception ex)
-            {
-                Tracer.Error($"Failed to launch shortcut {shortcutId}.", ex);
-            }
+            GenericHelpers.LaunchShortcut(
+                shortcut.Id,
+                _launchPadIpcProvider);
         }
 
         private async void BtnEdit_Click(object sender, RoutedEventArgs e)
@@ -245,7 +211,7 @@ namespace HyperVLauncher.Pages
 
             await RefreshShortcuts();
             
-            await _ipcProvider.SendReloadSettings();
+            await _trayIpcProvider.SendReloadSettings();
         }
     }
 }

@@ -17,23 +17,23 @@ namespace HyperVLauncher.Pages
     /// </summary>
     public partial class VirtualMachinesPage : Page
     {
-        private readonly IIpcProvider _ipcProvider;
         private readonly IHyperVProvider _hyperVProvider;
+        private readonly ITrayIpcProvider _trayIpcProvider;
         private readonly ISettingsProvider _settingsProvider;
         private readonly IShortcutProvider _shortcutProvider;
 
         private readonly ObservableCollection<VirtualMachine> _virtualMachines = new();
 
         public VirtualMachinesPage(
-            IIpcProvider ipcProvider,
             IHyperVProvider hyperVProvider,
+            ITrayIpcProvider trayIpcProvider,
             IShortcutProvider shortcutProvider,
             ISettingsProvider settingsProvider)
         {
             InitializeComponent();
 
-            _ipcProvider = ipcProvider;
             _hyperVProvider = hyperVProvider;
+            _trayIpcProvider = trayIpcProvider;
             _settingsProvider = settingsProvider;
             _shortcutProvider = shortcutProvider;
 
@@ -133,33 +133,14 @@ namespace HyperVLauncher.Pages
                 return;
             }
 
-            shortcut.Name = shortcutWindow.txtName.Text;
-
-            var appSettings = await _settingsProvider.Get();
-            appSettings.Shortcuts.Add(shortcut);
-
-            await _settingsProvider.Save();
-
-            Tracer.Info($"New shortcut \"{shortcut.Name}\" created for {vm.Id} - {vm.Name}.");
-
-            if (shortcutWindow.chkDesktopShortcut.IsChecked.HasValue && 
-                shortcutWindow.chkDesktopShortcut.IsChecked.Value)
-            {
-                Tracer.Info($"Creating desktop shortcut for \"{shortcut.Name}\"...");
-
-                _shortcutProvider.CreateDesktopShortcut(shortcut);
-            }
-
-            if (shortcutWindow.chkStartMenuShortcut.IsChecked.HasValue &&
-                shortcutWindow.chkStartMenuShortcut.IsChecked.Value)
-            {
-                Tracer.Info($"Creating start menu shortcut for \"{shortcut.Name}\"...");
-
-                _shortcutProvider.CreateStartMenuShortcut(shortcut);
-            }
-
-            await _ipcProvider.SendReloadSettings();
-            await _ipcProvider.SendShowTrayMessage("New Shortcut Created", $"Your new virtual machine shortcut \"{shortcut.Name}\" is now accessible by clicking on the system tray icon.");
+            await _settingsProvider.ProcessCreateShortcut(
+                vm.Id,
+                shortcutWindow.txtName.Text,
+                _trayIpcProvider,
+                _shortcutProvider,
+                shortcutWindow.chkDesktopShortcut.IsChecked.GetValueOrDefault(),
+                shortcutWindow.chkStartMenuShortcut.IsChecked.GetValueOrDefault(),
+                shortcutWindow.GetSelectedCloseAction());
         }
     }
 }

@@ -4,27 +4,43 @@
 		<OutputType>WinExe</OutputType>
 		<UseWPF>true</UseWPF>
 		<AssemblyTitle>Hyper-V Launcher</AssemblyTitle>
+		<SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+		<ApplicationIcon>Icons\app.ico</ApplicationIcon>
 	</PropertyGroup>
 
 	<Import Project="..\..\Misc\Shared Project Files\App.csproj" />
 
 	<ItemGroup>
 		<None Remove="Icons\app.ico" />
+		<None Remove="Icons\Logo.png" />
+		<None Remove="Icons\shortcut.png" />
+		<None Remove="Icons\vm.png" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
+		<PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.2" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Common\HyperVLauncher.Providers.Common.csproj" />
 		<ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Ipc\HyperVLauncher.Providers.Ipc.csproj" />
 		<ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Settings\HyperVLauncher.Providers.Settings.csproj" />
+		<ProjectReference Include="..\..\Providers\HyperVLauncher.Providers.Shortcut\HyperVLauncher.Providers.Shortcut.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Content Include="Icons\app.ico">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Icons\Logo.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Icons\shortcut.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Icons\vm.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
 

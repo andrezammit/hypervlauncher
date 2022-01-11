@@ -49,6 +49,8 @@ namespace HyperVLauncher.Pages
                 chkStartOnLogin.IsChecked = _appSettings.StartOnLogin;
                 chkNotifyOnNewVm.IsChecked = _appSettings.NotifyOnNewVm;
                 chkAutoCreateShortcuts.IsChecked = _appSettings.AutoCreateShortcuts;
+                chkAutoCreateDesktopShortcut.IsChecked = _appSettings.AutoCreateDesktopShortcut;
+                chkAutoCreateStartMenuShortcut.IsChecked = _appSettings.AutoCreateStartMenuShortcut;
 
                 EnableControls();
             }
@@ -64,16 +66,6 @@ namespace HyperVLauncher.Pages
             EnableControls();
         }
 
-        private bool GetCheckboxValue(CheckBox checkBox)
-        {
-            if (!checkBox.IsChecked.HasValue)
-            {
-                return false;
-            }
-
-            return checkBox.IsChecked.Value;
-        }
-
         private void HandleSettingChange()
         {
             if (_appSettings is null || _isLoading)
@@ -81,11 +73,11 @@ namespace HyperVLauncher.Pages
                 return;
             }
 
-            _appSettings.StartOnLogin = GetCheckboxValue(chkStartOnLogin);
-            _appSettings.NotifyOnNewVm = GetCheckboxValue(chkNotifyOnNewVm);
-            _appSettings.AutoCreateShortcuts = GetCheckboxValue(chkAutoCreateShortcuts);
-            _appSettings.AutoCreateDesktopShortcut = GetCheckboxValue(chkAutoCreateDesktopShortcut);
-            _appSettings.AutoCreateStartMenuShortcut = GetCheckboxValue(chkAutoCreateStartMenuShortcut);
+            _appSettings.StartOnLogin = chkStartOnLogin.IsChecked.GetValueOrDefault();
+            _appSettings.NotifyOnNewVm = chkNotifyOnNewVm.IsChecked.GetValueOrDefault();
+            _appSettings.AutoCreateShortcuts = chkAutoCreateShortcuts.IsChecked.GetValueOrDefault();
+            _appSettings.AutoCreateDesktopShortcut = chkAutoCreateDesktopShortcut.IsChecked.GetValueOrDefault();
+            _appSettings.AutoCreateStartMenuShortcut = chkAutoCreateStartMenuShortcut.IsChecked.GetValueOrDefault();
 
             if (_appSettings.StartOnLogin)
             {

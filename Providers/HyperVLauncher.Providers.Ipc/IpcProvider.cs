@@ -17,7 +17,7 @@ using HyperVLauncher.Contracts.Interfaces;
 
 namespace HyperVLauncher.Providers.Ipc
 {
-    public class IpcProvider : IIpcProvider
+    public class IpcProvider : IIpcProviderAll
     {
         private readonly string _pipeName;
 
@@ -73,12 +73,34 @@ namespace HyperVLauncher.Providers.Ipc
             return SendMessage(ipcMessage);
         }
 
-        public Task SendShowTrayMessage(string title, string message)
+        public Task SendShowMessageNotif(string title, string message)
         {
             var ipcMessage = new IpcMessage()
             {
-                IpcCommand = IpcCommand.ShowTrayMessage,
-                Data = new TrayMessageData(title, message)
+                IpcCommand = IpcCommand.ShowMessageNotif,
+                Data = new ShowMessageNotifData(title, message)
+            };
+
+            return SendMessage(ipcMessage);
+        }
+
+        public Task SendShowShortcutCreatedNotif(string vmId, string vmName)
+        {
+            var ipcMessage = new IpcMessage()
+            {
+                IpcCommand = IpcCommand.ShowShortcutCreatedNotif,
+                Data = new ShortcutCreatedNotifData(vmId, vmName)
+            };
+
+            return SendMessage(ipcMessage);
+        }
+
+        public Task SendShowShortcutPromptNotif(string vmId, string vmName)
+        {
+            var ipcMessage = new IpcMessage()
+            {
+                IpcCommand = IpcCommand.ShowShortcutPromptNotif,
+                Data = new ShortcutPromptNotifData(vmId, vmName)
             };
 
             return SendMessage(ipcMessage);

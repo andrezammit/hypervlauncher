@@ -3,6 +3,11 @@ using System.Threading;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
+using HyperVLauncher.Providers.Tracing;
+using HyperVLauncher.Contracts.Constants;
+using HyperVLauncher.Contracts.Interfaces;
+using System.Linq;
+
 namespace HyperVLauncher.Providers.Common
 {
     public static class GenericHelpers
@@ -33,6 +38,78 @@ namespace HyperVLauncher.Providers.Common
             }
 
             return true;
+        }
+
+        public static void LaunchShortcut(
+            string shortcutId,
+            ILaunchPadIpcProvider launchPadIpcProvider)
+        {
+            try
+            {
+                var launchPadMutexName = $"{GeneralConstants.LaunchPadMutexName}_{shortcutId}";
+
+                if (!IsMutexAvailable(launchPadMutexName))
+                {
+                    Tracer.Info($"Shortcut {shortcutId} is already running.");
+
+                    launchPadIpcProvider.SendBringToFront();
+
+                    return;
+                }
+
+                Tracer.Info($"Launching shortcut {shortcutId}...");
+
+                var startInfo = new ProcessStartInfo($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.LaunchPad.exe", shortcutId)
+                {
+                    Verb = "runas",
+                    UseShellExecute = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
+
+#if DEBUG
+                startInfo.WindowStyle = ProcessWindowStyle.Normal;
+#endif
+
+                using (Process.Start(startInfo))
+                {
+                }
+            }
+            catch (Exception ex)
+            {
+                Tracer.Error($"Failed to launch shortcut {shortcutId}.", ex);
+            }
+        }
+
+        public static void LaunchConsole()
+        {
+            try
+            {
+                var runningInstances = Process.GetProcessesByName("HyperVLauncher.Apps.Console");
+
+                if (runningInstances.FirstOrDefault() is Process runningInstance)
+                {
+                    Tracer.Debug($"Console already running.");
+
+                    BringToFront(runningInstance);
+                    return;
+                }
+
+                Tracer.Debug($"Launching Console...");
+
+                var startInfo = new ProcessStartInfo($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.Console.exe")
+                {
+                    Verb = "runas",
+                    UseShellExecute = true
+                };
+
+                using (Process.Start(startInfo))
+                {
+                }
+            }
+            catch (Exception ex)
+            {
+                Tracer.Error($"Failed to launch Console.", ex);
+            }
         }
 
         public static void BringToFront(this Process process)
