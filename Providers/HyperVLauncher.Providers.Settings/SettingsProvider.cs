@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Newtonsoft.Json;
@@ -9,7 +10,6 @@ using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
 
 using HyperVLauncher.Providers.Tracing;
-using System.Linq;
 
 namespace HyperVLauncher.Providers.Settings
 {
@@ -91,7 +91,7 @@ namespace HyperVLauncher.Providers.Settings
             var shortcut = AppSettings.CreateShortcut(name, vmId);
 
             shortcut.CloseAction = closeAction;
-            shortcut.Name = await GetValidShortcutName(shortcut.Id, name);
+            shortcut.Name = GetValidShortcutName(shortcut.Id, name, appSettings);
 
             appSettings.Shortcuts.Add(shortcut);
 
@@ -137,22 +137,23 @@ namespace HyperVLauncher.Providers.Settings
             await trayIpcProvider.SendReloadSettings();
         }
 
-        public async Task<bool> ValidateShortcutName(
+        public bool ValidateShortcutName(
             string shortcutId,
-            string shortcutName)
+            string shortcutName,
+            AppSettings appSettings)
         {
-            var appSettings = await Get();
             return !appSettings.Shortcuts.Any(x => x.Name == shortcutName && x.Id != shortcutId);
         }
 
-        public async Task<string> GetValidShortcutName(
+        public string GetValidShortcutName(
             string shortcutId,
-            string vmName)
+            string vmName,
+            AppSettings appSettings)
         {
             var counter = 1;
             var shortcutName = vmName;
 
-            while (!await ValidateShortcutName(shortcutId, shortcutName)
+            while (!ValidateShortcutName(shortcutId, shortcutName, appSettings)
                 || counter > 100)
             {
                 shortcutName = $"{vmName} ({counter++})";

@@ -38,11 +38,9 @@ namespace HyperVLauncher.Pages
             _shortcutProvider = shortcutProvider;
 
             lstVirtualMachines.ItemsSource = _virtualMachines;
-
-            RefreshVirtualMachines();
         }
 
-        private void RefreshVirtualMachines()
+        public void RefreshVirtualMachines()
         {
             Tracer.Debug("Refresing virtual machine list...");
 

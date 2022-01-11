@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Navigation;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -40,6 +41,8 @@ namespace HyperVLauncher
             _settingsProvider = settingsProvider;
 
             _navPanelOriginalWidth = navPanel.Width;
+
+            pageFrame.Navigated += PageFrame_Navigated;
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -72,23 +75,35 @@ namespace HyperVLauncher
             if (anyShortcuts)
             {
                 SetSelectedNavButton(btnShortcuts);
-                pageFrame.NavigationService.Navigate(_pages[MainPages.Shortcuts]);
+                pageFrame.Navigate(_pages[MainPages.Shortcuts]);
             }
             else
             {
                 SetSelectedNavButton(btnVirtualMachines);
-                pageFrame.NavigationService.Navigate(_pages[MainPages.VirtualMachines]);
+                pageFrame.Navigate(_pages[MainPages.VirtualMachines]);
             }
         }
 
-        private void btnBurger_Click(object sender, RoutedEventArgs e)
+        private async void PageFrame_Navigated(object sender, NavigationEventArgs e)
+        {
+            if (e.Content is VirtualMachinesPage virtualMachinesPage)
+            {
+                virtualMachinesPage.RefreshVirtualMachines();
+            }
+            else if (e.Content is ShortcutsPage shortcutsPage)
+            {
+                await shortcutsPage.RefreshShortcuts();
+            }
+        }
+
+        private void BtnBurger_Click(object sender, RoutedEventArgs e)
         {
             navPanel.Width = _navPanelShowing ? 50 : _navPanelOriginalWidth;
 
             _navPanelShowing = !_navPanelShowing;
         }
 
-        private void btnShortcuts_Click(object sender, RoutedEventArgs e)
+        private void BtnShortcuts_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button navButton)
             {
@@ -97,10 +112,10 @@ namespace HyperVLauncher
 
             SetSelectedNavButton(navButton);
 
-            pageFrame.NavigationService.Navigate(_pages[MainPages.Shortcuts]);
+            pageFrame.Navigate(_pages[MainPages.Shortcuts]);
         }
 
-        private void btnVirtualMachines_Click(object sender, RoutedEventArgs e)
+        private void BtnVirtualMachines_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button navButton)
             {
@@ -109,10 +124,10 @@ namespace HyperVLauncher
 
             SetSelectedNavButton(navButton);
 
-            pageFrame.NavigationService.Navigate(_pages[MainPages.VirtualMachines]);
+            pageFrame.Navigate(_pages[MainPages.VirtualMachines]);
         }
 
-        private void btnSettings_Click(object sender, RoutedEventArgs e)
+        private void BtnSettings_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button navButton)
             {
@@ -121,7 +136,7 @@ namespace HyperVLauncher
 
             SetSelectedNavButton(navButton);
 
-            pageFrame.NavigationService.Navigate(_pages[MainPages.Settings]);
+            pageFrame.Navigate(_pages[MainPages.Settings]);
         }
 
         private void SetSelectedNavButton(Button selectedButton)

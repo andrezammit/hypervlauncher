@@ -1,7 +1,8 @@
-﻿using System.Windows;
+﻿using System.Threading.Tasks;
+
+using System.Windows;
 using System.Windows.Controls;
 
-using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
 
 namespace HyperVLauncher.Pages
@@ -9,8 +10,6 @@ namespace HyperVLauncher.Pages
     public partial class SettingsPage : Page
     {
         private bool _isLoading;
-
-        private AppSettings? _appSettings;
 
         private readonly IShortcutProvider _shortcutProvider;
         private readonly ISettingsProvider _settingsProvider;
@@ -27,15 +26,10 @@ namespace HyperVLauncher.Pages
 
         private void EnableControls()
         {
-            if (_appSettings is null)
-            {
-                return;
-            }
+            chkNotifyOnNewVm.IsEnabled = !chkAutoCreateShortcuts.IsChecked.GetValueOrDefault();
 
-            chkNotifyOnNewVm.IsEnabled = !_appSettings.AutoCreateShortcuts;
-
-            chkAutoCreateDesktopShortcut.IsEnabled = _appSettings.AutoCreateShortcuts;
-            chkAutoCreateStartMenuShortcut.IsEnabled = _appSettings.AutoCreateShortcuts;
+            chkAutoCreateDesktopShortcut.IsEnabled = !chkAutoCreateShortcuts.IsChecked.GetValueOrDefault();
+            chkAutoCreateStartMenuShortcut.IsEnabled = !chkAutoCreateShortcuts.IsChecked.GetValueOrDefault();
         }
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
@@ -44,14 +38,14 @@ namespace HyperVLauncher.Pages
             {
                 _isLoading = true;
 
-                _appSettings = await _settingsProvider.Get();
+                var appSettings = await _settingsProvider.Get();
 
-                chkStartOnLogin.IsChecked = _appSettings.StartOnLogin;
-                chkNotifyOnNewVm.IsChecked = _appSettings.NotifyOnNewVm;
-                chkAutoDeleteShortcuts.IsChecked = _appSettings.AutoDeleteShortcuts;
-                chkAutoCreateShortcuts.IsChecked = _appSettings.AutoCreateShortcuts;
-                chkAutoCreateDesktopShortcut.IsChecked = _appSettings.AutoCreateDesktopShortcut;
-                chkAutoCreateStartMenuShortcut.IsChecked = _appSettings.AutoCreateStartMenuShortcut;
+                chkStartOnLogin.IsChecked = appSettings.StartOnLogin;
+                chkNotifyOnNewVm.IsChecked = appSettings.NotifyOnNewVm;
+                chkAutoDeleteShortcuts.IsChecked = appSettings.AutoDeleteShortcuts;
+                chkAutoCreateShortcuts.IsChecked = appSettings.AutoCreateShortcuts;
+                chkAutoCreateDesktopShortcut.IsChecked = appSettings.AutoCreateDesktopShortcut;
+                chkAutoCreateStartMenuShortcut.IsChecked = appSettings.AutoCreateStartMenuShortcut;
 
                 EnableControls();
             }
@@ -61,27 +55,29 @@ namespace HyperVLauncher.Pages
             }
         }
 
-        private void OnCheckboxStateChanged(object sender, RoutedEventArgs e)
+        private async void OnCheckboxStateChanged(object sender, RoutedEventArgs e)
         {
-            HandleSettingChange();
+            await HandleSettingChange();
             EnableControls();
         }
 
-        private void HandleSettingChange()
+        private async Task HandleSettingChange()
         {
-            if (_appSettings is null || _isLoading)
+            if (_isLoading)
             {
                 return;
             }
 
-            _appSettings.StartOnLogin = chkStartOnLogin.IsChecked.GetValueOrDefault();
-            _appSettings.NotifyOnNewVm = chkNotifyOnNewVm.IsChecked.GetValueOrDefault();
-            _appSettings.AutoCreateShortcuts = chkAutoCreateShortcuts.IsChecked.GetValueOrDefault();
-            _appSettings.AutoDeleteShortcuts = chkAutoDeleteShortcuts.IsChecked.GetValueOrDefault();
-            _appSettings.AutoCreateDesktopShortcut = chkAutoCreateDesktopShortcut.IsChecked.GetValueOrDefault();
-            _appSettings.AutoCreateStartMenuShortcut = chkAutoCreateStartMenuShortcut.IsChecked.GetValueOrDefault();
+            var appSettings = await _settingsProvider.Get(true);
 
-            if (_appSettings.StartOnLogin)
+            appSettings.StartOnLogin = chkStartOnLogin.IsChecked.GetValueOrDefault();
+            appSettings.NotifyOnNewVm = chkNotifyOnNewVm.IsChecked.GetValueOrDefault();
+            appSettings.AutoCreateShortcuts = chkAutoCreateShortcuts.IsChecked.GetValueOrDefault();
+            appSettings.AutoDeleteShortcuts = chkAutoDeleteShortcuts.IsChecked.GetValueOrDefault();
+            appSettings.AutoCreateDesktopShortcut = chkAutoCreateDesktopShortcut.IsChecked.GetValueOrDefault();
+            appSettings.AutoCreateStartMenuShortcut = chkAutoCreateStartMenuShortcut.IsChecked.GetValueOrDefault();
+
+            if (appSettings.StartOnLogin)
             {
                 _shortcutProvider.CreateStartupShortcut();
             }
@@ -90,7 +86,7 @@ namespace HyperVLauncher.Pages
                 _shortcutProvider.DeleteStartupShortcut();
             }
 
-            _settingsProvider.Save();
+            await _settingsProvider.Save();
         }
     }
 }
