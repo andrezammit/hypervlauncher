@@ -16,12 +16,12 @@ namespace HyperVLauncher.Contracts.Models
     public class ShortcutCreatedNotifData
     {
         public string VmId { get; private set; }
-        public string VmName { get; private set; }
+        public string ShortcutName { get; private set; }
 
-        public ShortcutCreatedNotifData(string vmId, string vmName)
+        public ShortcutCreatedNotifData(string vmId, string shortcutName)
         {
             VmId = vmId;
-            VmName = vmName;
+            ShortcutName = shortcutName;
         }
     }
 

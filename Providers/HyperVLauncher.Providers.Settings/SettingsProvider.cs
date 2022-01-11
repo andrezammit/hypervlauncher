@@ -9,6 +9,7 @@ using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
 
 using HyperVLauncher.Providers.Tracing;
+using System.Linq;
 
 namespace HyperVLauncher.Providers.Settings
 {
@@ -89,8 +90,8 @@ namespace HyperVLauncher.Providers.Settings
 
             var shortcut = AppSettings.CreateShortcut(name, vmId);
 
-            shortcut.Name = name;
             shortcut.CloseAction = closeAction;
+            shortcut.Name = await GetValidShortcutName(shortcut.Id, name);
 
             appSettings.Shortcuts.Add(shortcut);
 
@@ -113,7 +114,51 @@ namespace HyperVLauncher.Providers.Settings
             }
 
             await trayIpcProvider.SendReloadSettings();
-            await trayIpcProvider.SendShowShortcutCreatedNotif(vmId, name);
+            await trayIpcProvider.SendShowShortcutCreatedNotif(vmId, shortcut.Name);
+        }
+
+        public async Task DeleteVirtualMachineShortcuts(
+            string vmId,
+            ITrayIpcProvider trayIpcProvider)
+        {
+            var appSettings = await Get(true);
+
+            var matchingShortcuts = appSettings.Shortcuts.Where(x => x.VmId == vmId);
+
+            foreach (var shortcut in matchingShortcuts)
+            {
+                await trayIpcProvider.SendShowMessageNotif("Shortcut Deleted", $"Shortcut \"{shortcut.Name}\" was automatically deleted.");
+            }
+
+            appSettings.Shortcuts.RemoveAll(x => x.VmId == vmId);
+
+            await Save();
+
+            await trayIpcProvider.SendReloadSettings();
+        }
+
+        public async Task<bool> ValidateShortcutName(
+            string shortcutId,
+            string shortcutName)
+        {
+            var appSettings = await Get();
+            return !appSettings.Shortcuts.Any(x => x.Name == shortcutName && x.Id != shortcutId);
+        }
+
+        public async Task<string> GetValidShortcutName(
+            string shortcutId,
+            string vmName)
+        {
+            var counter = 1;
+            var shortcutName = vmName;
+
+            while (!await ValidateShortcutName(shortcutId, shortcutName)
+                || counter > 100)
+            {
+                shortcutName = $"{vmName} ({counter++})";
+            }
+
+            return shortcutName;
         }
     }
 }

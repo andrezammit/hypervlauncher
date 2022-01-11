@@ -19,7 +19,8 @@ namespace HyperVLauncher.Providers.HyperV
 {
     public class HyperVProvider : IHyperVProvider
     {
-        public Func<VirtualMachine, Task>? OnNewVirtualMachine { get; set; }
+        public Func<VirtualMachine, Task>? OnVirtualMachineCreated { get; set; }
+        public Func<VirtualMachine, Task>? OnVirtualMachineDeleted { get; set; }
 
         private const string _virtualizationScope = "\\\\.\\root\\virtualization\\v2";
 
@@ -240,36 +241,65 @@ namespace HyperVLauncher.Providers.HyperV
             }
         }
 
-        public void StartVirtualMachineMonitor(CancellationToken cancellationToken)
+        public void StartVirtualMachineCreatedMonitor(CancellationToken cancellationToken)
         {
-            Tracer.Info("Starting Virtual Machine event watcher...");
+            Tracer.Info("Starting Virtual Machine created event watcher...");
 
             var watcher = new ManagementEventWatcher(
                 _virtualizationScope,
                 "SELECT * FROM __InstanceCreationEvent WITHIN 2 WHERE TargetInstance ISA 'Msvm_ComputerSystem'");
 
-            watcher.Stopped += Watcher_Stopped;
-            watcher.EventArrived += Watcher_EventArrived;
+            watcher.Stopped += Watcher_CreateStopped;
+            watcher.EventArrived += Watcher_OnCreatedEvent;
 
             cancellationToken.Register(
                 () =>
                 {
-                    Tracer.Debug("Stopping Virtual Machine watcher...");
+                    Tracer.Debug("Stopping Virtual Machine created event watcher...");
 
                     watcher.Stop();
                 });
 
             watcher.Start();
 
-            Tracer.Info("Virtual Machine event watcher started.");
+            Tracer.Info("Virtual Machine created event watcher started.");
         }
 
-        private void Watcher_Stopped(object sender, StoppedEventArgs e)
+        public void StartVirtualMachineDeletedMonitor(CancellationToken cancellationToken)
         {
-            Tracer.Info("Virtual Machine event watcher stopped.");
+            Tracer.Info("Starting Virtual Machine deleted event watcher...");
+
+            var watcher = new ManagementEventWatcher(
+                _virtualizationScope,
+                "SELECT * FROM __InstanceDeletionEvent WITHIN 2 WHERE TargetInstance ISA 'Msvm_ComputerSystem'");
+
+            watcher.Stopped += Watcher_DeleteStopped;
+            watcher.EventArrived += Watcher_OnDeletedEvent;
+
+            cancellationToken.Register(
+                () =>
+                {
+                    Tracer.Debug("Stopping Virtual Machine deleted event watcher...");
+
+                    watcher.Stop();
+                });
+
+            watcher.Start();
+
+            Tracer.Info("Virtual Machine deleted event watcher started.");
         }
 
-        private void Watcher_EventArrived(object sender, EventArrivedEventArgs e)
+        private void Watcher_CreateStopped(object sender, StoppedEventArgs e)
+        {
+            Tracer.Info("Virtual Machine created event watcher stopped.");
+        }
+
+        private void Watcher_DeleteStopped(object sender, StoppedEventArgs e)
+        {
+            Tracer.Info("Virtual Machine deleted event watcher stopped.");
+        }
+
+        private void Watcher_OnCreatedEvent(object sender, EventArrivedEventArgs e)
         {
             var eventObject = e.NewEvent;
 
@@ -293,9 +323,39 @@ namespace HyperVLauncher.Providers.HyperV
                 return;
             }
 
-            if (OnNewVirtualMachine is not null)
+            if (OnVirtualMachineCreated is not null)
             {
-                OnNewVirtualMachine(new VirtualMachine(vmId, vmName));
+                OnVirtualMachineCreated(new VirtualMachine(vmId, vmName));
+            }
+        }
+
+        private void Watcher_OnDeletedEvent(object sender, EventArrivedEventArgs e)
+        {
+            var eventObject = e.NewEvent;
+
+            if (eventObject["TargetInstance"] is not ManagementBaseObject vmObject)
+            {
+                Tracer.Warning("Received invalid Virtual Machine event.");
+
+                return;
+            }
+
+            var vmId = vmObject["Name"].ToString();
+            var vmName = vmObject["ElementName"].ToString();
+
+            Tracer.Info($"Virtual Machine created event: {vmId} - {vmName}");
+
+            if (string.IsNullOrEmpty(vmId) ||
+                string.IsNullOrEmpty(vmName))
+            {
+                Tracer.Warning("Received invalid Virtual Machine event data.");
+
+                return;
+            }
+
+            if (OnVirtualMachineDeleted is not null)
+            {
+                OnVirtualMachineDeleted(new VirtualMachine(vmId, vmName));
             }
         }
     }

@@ -29,14 +29,16 @@ namespace HyperVLauncher.Services.Monitor
 
         public Task Run()
         {
-            _hyperVProvider.StartVirtualMachineMonitor(_cancellationToken);
+            _hyperVProvider.StartVirtualMachineCreatedMonitor(_cancellationToken);
+            _hyperVProvider.StartVirtualMachineDeletedMonitor(_cancellationToken);
 
-            _hyperVProvider.OnNewVirtualMachine = OnNewVirtualMachine;
+            _hyperVProvider.OnVirtualMachineCreated = OnVirtualMachineCreated;
+            _hyperVProvider.OnVirtualMachineDeleted = OnVirtualMachineDeleted;
 
             return Task.CompletedTask;
         }
 
-        public async Task OnNewVirtualMachine(VirtualMachine vm)
+        public async Task OnVirtualMachineCreated(VirtualMachine vm)
         {
             Tracer.Info($"New Virtual Machine detected: {vm.Id} - {vm.Name}");
 
@@ -55,6 +57,20 @@ namespace HyperVLauncher.Services.Monitor
                 await _trayIpcProvider.SendShowShortcutPromptNotif(
                     vm.Id,
                     vm.Name);
+            }
+        }
+
+        public async Task OnVirtualMachineDeleted(VirtualMachine vm)
+        {
+            Tracer.Info($"Deleted Virtual Machine detected: {vm.Id} - {vm.Name}");
+
+            var appSettings = await _settingsProvider.Get(true);
+
+            if (appSettings.AutoDeleteShortcuts)
+            {
+                await _settingsProvider.DeleteVirtualMachineShortcuts(
+                    vm.Id,
+                    _trayIpcProvider);
             }
         }
     }

@@ -8,7 +8,20 @@ namespace HyperVLauncher.Contracts.Interfaces
     public interface ISettingsProvider
     {
         Task Save();
+
         Task<AppSettings> Get(bool forceReload = false);
+
+        Task<bool> ValidateShortcutName(
+            string shortcutId,
+            string shortcutName);
+
+        Task<string> GetValidShortcutName(
+            string shortcutId,
+            string vmName);
+
+        Task DeleteVirtualMachineShortcuts(
+            string vmId,
+            ITrayIpcProvider trayIpcProvider);
 
         Task ProcessCreateShortcut(
             string vmId,

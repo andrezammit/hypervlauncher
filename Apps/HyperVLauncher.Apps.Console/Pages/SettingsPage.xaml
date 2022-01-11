@@ -51,6 +51,7 @@
             <CheckBox Content="Create Desktop shortcut" x:Name="chkAutoCreateDesktopShortcut" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" Margin="20,0,0,10" />
             <CheckBox Content="Create Start Menu shortcut" x:Name="chkAutoCreateStartMenuShortcut" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" Margin="20,0,0,10"/>
             <CheckBox Content="Show a new shortcut prompt when a new Virtual Machine is created" x:Name="chkNotifyOnNewVm" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" />
+            <CheckBox Content="Automatically delete shortcuts when a Virtual Machine is deleted" x:Name="chkAutoDeleteShortcuts" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" />
         </StackPanel>
     </Grid>
 </Page>

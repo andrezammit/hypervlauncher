@@ -306,9 +306,9 @@ namespace HyperVLauncher.Apps.Tray
                     return;
                 }
 
-                Tracer.Debug($"Showing shortcut created notification: {shortcutCreatedNotifData.VmId} - {shortcutCreatedNotifData.VmName}");
+                Tracer.Debug($"Showing shortcut created notification: {shortcutCreatedNotifData.VmId} - {shortcutCreatedNotifData.ShortcutName}");
 
-                ShowShortcutCreatedNotif(shortcutCreatedNotifData.VmName);
+                ShowShortcutCreatedNotif(shortcutCreatedNotifData.ShortcutName);
             }
             catch (Exception ex)
             {

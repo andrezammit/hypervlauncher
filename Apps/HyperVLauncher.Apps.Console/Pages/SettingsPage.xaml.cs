@@ -48,6 +48,7 @@ namespace HyperVLauncher.Pages
 
                 chkStartOnLogin.IsChecked = _appSettings.StartOnLogin;
                 chkNotifyOnNewVm.IsChecked = _appSettings.NotifyOnNewVm;
+                chkAutoDeleteShortcuts.IsChecked = _appSettings.AutoDeleteShortcuts;
                 chkAutoCreateShortcuts.IsChecked = _appSettings.AutoCreateShortcuts;
                 chkAutoCreateDesktopShortcut.IsChecked = _appSettings.AutoCreateDesktopShortcut;
                 chkAutoCreateStartMenuShortcut.IsChecked = _appSettings.AutoCreateStartMenuShortcut;
@@ -76,6 +77,7 @@ namespace HyperVLauncher.Pages
             _appSettings.StartOnLogin = chkStartOnLogin.IsChecked.GetValueOrDefault();
             _appSettings.NotifyOnNewVm = chkNotifyOnNewVm.IsChecked.GetValueOrDefault();
             _appSettings.AutoCreateShortcuts = chkAutoCreateShortcuts.IsChecked.GetValueOrDefault();
+            _appSettings.AutoDeleteShortcuts = chkAutoDeleteShortcuts.IsChecked.GetValueOrDefault();
             _appSettings.AutoCreateDesktopShortcut = chkAutoCreateDesktopShortcut.IsChecked.GetValueOrDefault();
             _appSettings.AutoCreateStartMenuShortcut = chkAutoCreateStartMenuShortcut.IsChecked.GetValueOrDefault();
 
