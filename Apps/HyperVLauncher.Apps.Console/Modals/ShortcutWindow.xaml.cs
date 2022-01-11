@@ -12,6 +12,8 @@ namespace HyperVLauncher.Modals
 {
     public partial class ShortcutWindow : Window
     {
+        private readonly string _shortcutId;
+
         private readonly ISettingsProvider _settingsProvider;
 
         public ShortcutWindow(
@@ -22,13 +24,30 @@ namespace HyperVLauncher.Modals
         {
             InitializeComponent();
 
+            _shortcutId = shortcut.Id;
             _settingsProvider = settingsProvider;
 
-            var vmName = hyperVProvider.GetVirtualMachineName(shortcut.VmId);
+            string vmName;
 
-            txtName.Text = GetValidShortcutName(vmName)
-                .GetAwaiter()
-                .GetResult();
+            try
+            {
+                vmName = hyperVProvider.GetVirtualMachineName(shortcut.VmId);
+            }
+            catch
+            {
+                vmName = "Virtual Machine not found";
+            }
+
+            if (editMode)
+            {
+                txtName.Text = shortcut.Name;
+            }
+            else
+            {
+                txtName.Text = _settingsProvider.GetValidShortcutName(_shortcutId, vmName)
+                    .GetAwaiter()
+                    .GetResult();
+            }
 
             lblVmName.Content = vmName;
 
@@ -96,7 +115,9 @@ namespace HyperVLauncher.Modals
 
         private async void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            if (!await ValidateShortcutName(txtName.Text))
+            if (!await _settingsProvider.ValidateShortcutName(
+                _shortcutId,
+                txtName.Text))
             {
                 MessageBox.Show(
                     $"Another shortcut is already named \"{txtName.Text}\".", 
@@ -109,26 +130,6 @@ namespace HyperVLauncher.Modals
             }
 
             DialogResult = true;
-        }
-
-        private async Task<bool> ValidateShortcutName(string shortcutName)
-        {
-            var appSettings = await _settingsProvider.Get();
-            return !appSettings.Shortcuts.Any(x => x.Name == shortcutName);
-        }
-
-        private async Task<string> GetValidShortcutName(string vmName)
-        {
-            var counter = 1;
-            var shortcutName = vmName;
-
-            while (!await ValidateShortcutName(shortcutName) 
-                || counter > 100)
-            {
-                shortcutName = $"{vmName} ({counter++})";
-            }
-
-            return shortcutName;
         }
     }
 }

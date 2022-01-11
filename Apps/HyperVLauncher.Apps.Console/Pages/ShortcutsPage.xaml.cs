@@ -27,15 +27,29 @@ namespace HyperVLauncher.Pages
             Shortcut shortcut,
             IHyperVProvider hyperVProvider)
             : base(
-                shortcut.Id, 
-                shortcut.VmId, 
-                shortcut.Name, 
+                shortcut.Id,
+                shortcut.VmId,
+                shortcut.Name,
                 shortcut.CloseAction)
         {
             _hyperVProvider = hyperVProvider;
         }
 
-        public string VmName => _hyperVProvider.GetVirtualMachineName(VmId);
+        public string VmName
+        {
+            get
+            {
+                try
+                {
+                    return _hyperVProvider.GetVirtualMachineName(VmId);
+                }
+                catch
+                {
+                }
+
+                return "Virtual Machine not found";
+            }
+        }
     }
 
     public class ShortcutTemplateSelector : DataTemplateSelector

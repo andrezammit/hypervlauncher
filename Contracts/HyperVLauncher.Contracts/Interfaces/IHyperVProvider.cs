@@ -12,13 +12,15 @@ namespace HyperVLauncher.Contracts.Interfaces
 {
     public interface IHyperVProvider
     {
-        Func<VirtualMachine, Task>? OnNewVirtualMachine { get; set; }
+        Func<VirtualMachine, Task>? OnVirtualMachineCreated { get; set; }
+        Func<VirtualMachine, Task>? OnVirtualMachineDeleted { get; set; }
 
         void StartVirtualMachine(string vmId);
         void PauseVirtualMachine(string vmId);
         void ShutdownVirtualMachine(string vmId);
 
-        void StartVirtualMachineMonitor(CancellationToken cancellationToken);
+        void StartVirtualMachineCreatedMonitor(CancellationToken cancellationToken);
+        void StartVirtualMachineDeletedMonitor(CancellationToken cancellationToken);
 
         string GetVirtualMachineName(string vmId);
 

@@ -6,11 +6,12 @@ namespace HyperVLauncher.Contracts.Models
 {
     public class AppSettings
     {
-        public bool StartOnLogin { get; set; }
-        public bool NotifyOnNewVm { get; set; }
+        public bool StartOnLogin { get; set; } = true;
+        public bool NotifyOnNewVm { get; set; } = true;
         public bool AutoCreateShortcuts { get; set; }
-        public bool AutoCreateDesktopShortcut { get; set; }
-        public bool AutoCreateStartMenuShortcut { get; set; }
+        public bool AutoDeleteShortcuts { get; set; } = true;
+        public bool AutoCreateDesktopShortcut { get; set; } = true;
+        public bool AutoCreateStartMenuShortcut { get; set; } = true;
 
         public List<Shortcut> Shortcuts { get; } = new();
 

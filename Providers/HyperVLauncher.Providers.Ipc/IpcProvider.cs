@@ -84,12 +84,12 @@ namespace HyperVLauncher.Providers.Ipc
             return SendMessage(ipcMessage);
         }
 
-        public Task SendShowShortcutCreatedNotif(string vmId, string vmName)
+        public Task SendShowShortcutCreatedNotif(string vmId, string shortcutName)
         {
             var ipcMessage = new IpcMessage()
             {
                 IpcCommand = IpcCommand.ShowShortcutCreatedNotif,
-                Data = new ShortcutCreatedNotifData(vmId, vmName)
+                Data = new ShortcutCreatedNotifData(vmId, shortcutName)
             };
 
             return SendMessage(ipcMessage);
