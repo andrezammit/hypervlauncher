@@ -102,6 +102,27 @@ namespace HyperVLauncher.Providers.HyperV
             WaitForJobToFinish(outParams);
         }
 
+        public void TurnOffVirtualMachine(string vmId)
+        {
+            using var vmObject = GetVmObject(vmId);
+
+            if (vmObject == null)
+            {
+                return;
+            }
+
+            using var inParams = vmObject.GetMethodParameters("RequestStateChange");
+
+            inParams["RequestedState"] = WmiVmState.Stopped;
+
+            using var outParams = vmObject.InvokeMethod(
+                "RequestStateChange",
+                inParams,
+                null);
+
+            WaitForJobToFinish(outParams);
+        }
+
         public void ShutdownVirtualMachine(string vmId)
         {
             using var vmObject = GetVmObject(vmId);
@@ -135,7 +156,16 @@ namespace HyperVLauncher.Providers.HyperV
                 inParams,
                 null);
 
-            WaitForJobToFinish(outParams);
+            try
+            {
+                WaitForJobToFinish(outParams);
+            }
+            catch (Exception ex) when (ex.Message.Contains("32768"))
+            {
+                Tracer.Warning("Virtual Machine shutdown failed. Trying to turn it off...");
+
+                TurnOffVirtualMachine(vmId);
+            }
         }
 
         public string GetVirtualMachineName(string vmId)

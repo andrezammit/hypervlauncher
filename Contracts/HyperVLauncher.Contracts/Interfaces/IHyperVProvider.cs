@@ -17,6 +17,7 @@ namespace HyperVLauncher.Contracts.Interfaces
 
         void StartVirtualMachine(string vmId);
         void PauseVirtualMachine(string vmId);
+        void TurnOffVirtualMachine(string vmId);
         void ShutdownVirtualMachine(string vmId);
 
         void StartVirtualMachineCreatedMonitor(CancellationToken cancellationToken);
