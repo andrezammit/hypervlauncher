@@ -28,8 +28,13 @@ namespace HyperVLauncher.Pages
         {
             chkNotifyOnNewVm.IsEnabled = !chkAutoCreateShortcuts.IsChecked.GetValueOrDefault();
 
-            chkAutoCreateDesktopShortcut.IsEnabled = !chkAutoCreateShortcuts.IsChecked.GetValueOrDefault();
-            chkAutoCreateStartMenuShortcut.IsEnabled = !chkAutoCreateShortcuts.IsChecked.GetValueOrDefault();
+            var autoCreateVms =
+                chkAutoCreateShortcuts.IsChecked.GetValueOrDefault() ||
+                chkNotifyOnNewVm.IsChecked.GetValueOrDefault();
+
+            lblAutoCreatedShortcuts.IsEnabled = autoCreateVms;
+            chkAutoCreateDesktopShortcut.IsEnabled = autoCreateVms;
+            chkAutoCreateStartMenuShortcut.IsEnabled = autoCreateVms;
         }
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
