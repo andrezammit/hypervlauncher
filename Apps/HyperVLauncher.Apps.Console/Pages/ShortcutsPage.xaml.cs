@@ -152,26 +152,12 @@ namespace HyperVLauncher.Pages
                 return;
             }
 
-            Tracer.Debug($"Deleting shortcut {shortcut.Id} - {shortcut.Name}...");
-
-            Tracer.Debug("Deleting desktop and start menu shortcuts...");
-
-            _shortcutProvider.DeleteDesktopShortcut(shortcut);
-            _shortcutProvider.DeleteStartMenuShortcut(shortcut);
-
-            Tracer.Debug("Deleting shortcut from settings...");
-
-            var appSettings = await _settingsProvider.Get(true);
-            
-            appSettings.DeleteShortcut(shortcut.Id);
-
-            await _settingsProvider.Save();
+            await _settingsProvider.ProcessDeleteShortcut(
+                shortcut,
+                _trayIpcProvider,
+                _shortcutProvider);
 
             await RefreshShortcuts();
-
-            await _trayIpcProvider.SendReloadSettings();
-
-            Tracer.Debug("Shortcut deleted.");
         }
 
         private void BtnLaunch_Click(object sender, RoutedEventArgs e)

@@ -27,15 +27,47 @@ namespace HyperVLauncher.Services.Monitor
             _cancellationToken = cancellationToken;
         }
 
-        public Task Run()
+        public async Task Run()
         {
+            await CheckForInvalidShortcuts();
+
             _hyperVProvider.StartVirtualMachineCreatedMonitor(_cancellationToken);
             _hyperVProvider.StartVirtualMachineDeletedMonitor(_cancellationToken);
 
             _hyperVProvider.OnVirtualMachineCreated = OnVirtualMachineCreated;
             _hyperVProvider.OnVirtualMachineDeleted = OnVirtualMachineDeleted;
+        }
 
-            return Task.CompletedTask;
+        private async Task CheckForInvalidShortcuts()
+        {
+            var appSettings = await _settingsProvider.Get(true);
+
+            if (!appSettings.AutoDeleteShortcuts)
+            {
+                return;
+            }
+
+            Tracer.Info("Checking for invalid shortcuts...");
+
+            var vmList = _hyperVProvider.GetVirtualMachineList().ToList();
+
+            var vmIdsToDelete = new HashSet<string>();
+
+            foreach (var shortcut in appSettings.Shortcuts)
+            {
+                if (vmList.FirstOrDefault(x => x.Id == shortcut.VmId) is null)
+                {
+                    vmIdsToDelete.Add(shortcut.VmId);
+                }
+            }
+
+            foreach (var vmIdToDelete in vmIdsToDelete)
+            {
+                await _settingsProvider.DeleteVirtualMachineShortcuts(
+                    vmIdToDelete, 
+                    _trayIpcProvider, 
+                    _shortcutProvider);
+            }
         }
 
         public async Task OnVirtualMachineCreated(VirtualMachine vm)
@@ -70,7 +102,8 @@ namespace HyperVLauncher.Services.Monitor
             {
                 await _settingsProvider.DeleteVirtualMachineShortcuts(
                     vm.Id,
-                    _trayIpcProvider);
+                    _trayIpcProvider,
+                    _shortcutProvider);
             }
         }
     }

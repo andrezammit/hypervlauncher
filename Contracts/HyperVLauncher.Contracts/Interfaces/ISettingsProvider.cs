@@ -23,7 +23,8 @@ namespace HyperVLauncher.Contracts.Interfaces
 
         Task DeleteVirtualMachineShortcuts(
             string vmId,
-            ITrayIpcProvider trayIpcProvider);
+            ITrayIpcProvider trayIpcProvider,
+            IShortcutProvider shortcutProvider);
 
         Task ProcessCreateShortcut(
             string vmId,
@@ -33,5 +34,10 @@ namespace HyperVLauncher.Contracts.Interfaces
             bool? createDesktopShortcut = null,
             bool? createStartMenuShortcut = null,
             CloseAction closeAction = CloseAction.None);
+
+        Task ProcessDeleteShortcut(
+           Shortcut shortcut,
+           ITrayIpcProvider trayIpcProvider,
+           IShortcutProvider shortcutProvider);
     }
 }

@@ -117,9 +117,35 @@ namespace HyperVLauncher.Providers.Settings
             await trayIpcProvider.SendShowShortcutCreatedNotif(vmId, shortcut.Name);
         }
 
+        public async Task ProcessDeleteShortcut(
+            Shortcut shortcut,
+            ITrayIpcProvider trayIpcProvider,
+            IShortcutProvider shortcutProvider)
+        {
+            Tracer.Debug($"Deleting shortcut {shortcut.Id} - {shortcut.Name}...");
+
+            Tracer.Debug("Deleting desktop and start menu shortcuts...");
+
+            shortcutProvider.DeleteDesktopShortcut(shortcut);
+            shortcutProvider.DeleteStartMenuShortcut(shortcut);
+
+            Tracer.Debug("Deleting shortcut from settings...");
+
+            var appSettings = await Get(true);
+
+            appSettings.DeleteShortcut(shortcut.Id);
+
+            await Save();
+
+            Tracer.Debug("Shortcut deleted.");
+
+            await trayIpcProvider.SendReloadSettings();
+        }
+
         public async Task DeleteVirtualMachineShortcuts(
             string vmId,
-            ITrayIpcProvider trayIpcProvider)
+            ITrayIpcProvider trayIpcProvider,
+            IShortcutProvider shortcutProvider)
         {
             var appSettings = await Get(true);
 
@@ -127,13 +153,21 @@ namespace HyperVLauncher.Providers.Settings
 
             foreach (var shortcut in matchingShortcuts)
             {
+                Tracer.Debug($"Deleting shortcut {shortcut.Id} - {shortcut.Name}...");
+
+                Tracer.Debug("Deleting desktop and start menu shortcuts...");
+
+                shortcutProvider.DeleteDesktopShortcut(shortcut);
+                shortcutProvider.DeleteStartMenuShortcut(shortcut);
+
                 await trayIpcProvider.SendShowMessageNotif("Shortcut Deleted", $"Shortcut \"{shortcut.Name}\" was automatically deleted.");
             }
+
+            Tracer.Debug($"Deleting shortcuts for Virtual Machine {vmId} from settings...");
 
             appSettings.Shortcuts.RemoveAll(x => x.VmId == vmId);
 
             await Save();
-
             await trayIpcProvider.SendReloadSettings();
         }
 
