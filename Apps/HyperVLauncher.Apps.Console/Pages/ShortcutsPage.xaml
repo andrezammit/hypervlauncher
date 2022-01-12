@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:HyperVLauncher.Pages"
       mc:Ignorable="d" 
       d:DesignHeight="620" d:DesignWidth="970"
-      Title="Shortcuts">
+      Title="Shortcuts" KeyDown="Page_KeyDown">
     <Page.Resources>
         <DataTemplate x:Key="DefaultTemplate">
             <DockPanel Margin="2" Height="50">
