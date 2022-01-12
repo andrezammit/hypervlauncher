@@ -112,19 +112,6 @@ namespace HyperVLauncher
 
             var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
-
-#if !DEBUG
-            LaunchTrayApp();
-#endif
-        }
-
-        private static void LaunchTrayApp()
-        {
-            var startInfo = new ProcessStartInfo($"{AppContext.BaseDirectory}\\HyperVLauncher.Apps.Tray.exe");
-
-            using (Process.Start(startInfo))
-            {
-            }
         }
 
         private static void LogUnhandledException(Exception exception)

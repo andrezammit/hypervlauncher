@@ -28,6 +28,9 @@
       <Name>WixUtilExtension</Name>
     </WixExtension>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="HeatTransforms.xslt" />
+  </ItemGroup>
   <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />
   <Target Name="EnsureWixToolsetInstalled" Condition=" '$(WixTargetsImported)' != 'true' ">
@@ -37,11 +40,12 @@
     <Exec Command="dotnet publish ..\..\Apps\HyperVLauncher.Apps.Console\HyperVLauncher.Apps.Console.csproj -o ..\..\Publish\$(Configuration) -c $(Configuration) -r win10-x64 --self-contained" />
     <Exec Command="dotnet publish ..\..\Apps\HyperVLauncher.Apps.Tray\HyperVLauncher.Apps.Tray.csproj -o ..\..\Publish\$(Configuration) -c $(Configuration) -r win10-x64 --self-contained" />
     <Exec Command="dotnet publish ..\..\Apps\HyperVLauncher.Apps.LaunchPad\HyperVLauncher.Apps.LaunchPad.csproj -o ..\..\Publish\$(Configuration) -c $(Configuration) -r win10-x64 --self-contained" />
+    <Exec Command="dotnet publish ..\..\Services\HyperVLauncher.Services.Monitor&gt;\HyperVLauncher.Services.Monitor.csproj -o ..\..\Publish\$(Configuration) -c $(Configuration) -r win10-x64 --self-contained" />
     <PropertyGroup>
       <LinkerBaseInputPaths>..\..\Publish\$(Configuration)</LinkerBaseInputPaths>
       <DefineConstants>BasePath=..\..\Publish\$(Configuration)</DefineConstants>
     </PropertyGroup>
-    <HeatDirectory OutputFile="HyperVLauncher.wxs" DirectoryRefId="INSTALLFOLDER" ComponentGroupName="HyperVLauncher_Project" SuppressCom="true" Directory="..\..\Publish\$(Configuration)" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="false" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" RunAsSeparateProcess="true" />
+    <HeatDirectory OutputFile="HyperVLauncher.wxs" DirectoryRefId="INSTALLFOLDER" ComponentGroupName="HyperVLauncher_Project" SuppressCom="true" Directory="..\..\Publish\$(Configuration)" Transforms="HeatTransforms.xslt" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="false" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" RunAsSeparateProcess="true" />
   </Target>
   <!--
 	To modify your build process, add your task inside one of the targets below and uncomment it.
