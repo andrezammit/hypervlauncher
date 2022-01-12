@@ -45,6 +45,7 @@
 					Source="..\..\Publish\$(var.Configuration)\HyperVLauncher.Services.Monitor.exe"
 					KeyPath="yes"
 					/>
+
 				<ServiceInstall
 					Id="InstallMonitorService"
 					Type="ownProcess"
@@ -53,7 +54,14 @@
 					Description="A service to monitor Hyper-V Virtual Machines."
 					Start="auto"
 					ErrorControl="normal"
-					/>
+					>
+						<util:ServiceConfig
+							FirstFailureActionType="restart"
+							SecondFailureActionType="restart"
+							ThirdFailureActionType="restart"
+						/>
+				</ServiceInstall>
+				
 				<ServiceControl
 					Id="StartMonitorService"
 					Start="install"
