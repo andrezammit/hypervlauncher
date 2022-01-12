@@ -77,7 +77,7 @@ namespace HyperVLauncher.Providers.Shortcut
 
         public void DeleteDesktopShortcut(ShortcutModel shortcut)
         {
-            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonDesktopDirectory);
             var shortcutPath = IoPath.Combine(desktopPath, $"{shortcut.Name}.lnk");
 
             try
@@ -94,7 +94,7 @@ namespace HyperVLauncher.Providers.Shortcut
 
         public void DeleteStartMenuShortcut(ShortcutModel shortcut)
         {
-            var startMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
+            var startMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu);
             var shortcutPath = IoPath.Combine(startMenuPath, "Programs", "Hyper-V Launcher", "Shortcuts", $"{shortcut.Name}.lnk");
 
             try

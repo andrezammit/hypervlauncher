@@ -187,7 +187,6 @@ namespace HyperVLauncher.Apps.Tray
                 _taskbarIcon.ContextMenu.Items.Add(_titleMenuItem);
                 _taskbarIcon.ContextMenu.Items.Add(new Separator());
 
-
                 var appSettings = _settingsProvider
                     .Get(true)
                     .GetAwaiter()
