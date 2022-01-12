@@ -112,6 +112,28 @@ namespace HyperVLauncher.Providers.Common
             }
         }
 
+        public static void LaunchHyperVManager()
+        {
+            try
+            {
+                Tracer.Debug($"Launching Hyper-V Manager...");
+
+                var startInfo = new ProcessStartInfo("Virtmgmt.msc")
+                {
+                    Verb = "runas",
+                    UseShellExecute = true
+                };
+
+                using (Process.Start(startInfo))
+                {
+                }
+            }
+            catch (Exception ex)
+            {
+                Tracer.Error($"Failed to launch Hyper-V Manager.", ex);
+            }
+        }
+
         public static void BringToFront(this Process process)
         {
             var hwnd = process.MainWindowHandle;

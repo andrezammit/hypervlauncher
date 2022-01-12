@@ -43,6 +43,7 @@ namespace HyperVLauncher.Apps.Tray
 
         private readonly MenuItem _titleMenuItem;
         private readonly MenuItem _closeMenuItem;
+        private readonly MenuItem _hyperVManagerMenuItem;
 
         private readonly Uri _notifVmIconUri = new($"file:///{Path.GetFullPath("Icons/vm.png")}");
         private readonly Uri _notifShortcutIconUri = new($"file:///{Path.GetFullPath("Icons/shortcut.png")}");
@@ -73,6 +74,16 @@ namespace HyperVLauncher.Apps.Tray
             _closeMenuItem.Click += (object sender, RoutedEventArgs e) =>
             {
                 base.Shutdown();
+            };
+
+            _hyperVManagerMenuItem = new MenuItem()
+            {
+                Header = "Hyper-V Manager"
+            };
+
+            _hyperVManagerMenuItem.Click += (object sender, RoutedEventArgs e) =>
+            {
+                GenericHelpers.LaunchHyperVManager();
             };
         }
 
@@ -214,6 +225,9 @@ namespace HyperVLauncher.Apps.Tray
                     _taskbarIcon.ContextMenu.Items.Add(new Separator());
                 }
 
+                _taskbarIcon.ContextMenu.Items.Add(_hyperVManagerMenuItem);
+                
+                _taskbarIcon.ContextMenu.Items.Add(new Separator());
                 _taskbarIcon.ContextMenu.Items.Add(_closeMenuItem);
             }
             catch (Exception ex)
