@@ -19,6 +19,17 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0, 0, 0, 10" />
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Foreground" Value="Gray"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Page.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -48,10 +59,11 @@
             Margin="30,20,0,0">
             <CheckBox Content="Start on Windows login" x:Name="chkStartOnLogin" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" />
             <CheckBox Content="Automatically create Virtual Machine shortcuts" x:Name="chkAutoCreateShortcuts" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" />
-            <CheckBox Content="Create Desktop shortcut" x:Name="chkAutoCreateDesktopShortcut" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" Margin="20,0,0,10" />
-            <CheckBox Content="Create Start Menu shortcut" x:Name="chkAutoCreateStartMenuShortcut" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" Margin="20,0,0,10"/>
             <CheckBox Content="Show a new shortcut prompt when a new Virtual Machine is created" x:Name="chkNotifyOnNewVm" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" />
             <CheckBox Content="Automatically delete shortcuts when a Virtual Machine is deleted" x:Name="chkAutoDeleteShortcuts" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" />
+            <Label Content="When shortcuts are automatically created" x:Name="lblAutoCreatedShortcuts" Margin="0,10,0,5" />
+            <CheckBox Content="Create Desktop shortcut" x:Name="chkAutoCreateDesktopShortcut" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" Margin="20,0,0,10" />
+            <CheckBox Content="Create Start Menu shortcut" x:Name="chkAutoCreateStartMenuShortcut" Checked="OnCheckboxStateChanged" Unchecked="OnCheckboxStateChanged" Margin="20,0,0,10"/>
         </StackPanel>
     </Grid>
 </Page>
