@@ -15,7 +15,7 @@
 			<bal:WixStandardBootstrapperApplication
             ShowVersion="yes"
 			LogoFile="Logo.png"
-			LicenseUrl=""
+			LicenseUrl="https://www.eulatemplate.com/live.php?token=E33NRAFhYNEFOWgLMl0blldHqwipzpgd"
             />
 		</BootstrapperApplicationRef>
 
