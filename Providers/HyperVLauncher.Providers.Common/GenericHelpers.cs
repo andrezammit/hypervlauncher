@@ -63,12 +63,7 @@ namespace HyperVLauncher.Providers.Common
                 {
                     Verb = "runas",
                     UseShellExecute = true,
-                    WindowStyle = ProcessWindowStyle.Hidden
                 };
-
-#if DEBUG
-                startInfo.WindowStyle = ProcessWindowStyle.Normal;
-#endif
 
                 using (Process.Start(startInfo))
                 {
@@ -141,6 +136,14 @@ namespace HyperVLauncher.Providers.Common
             ShowWindow(hwnd, SW_RESTORE);
             SetForegroundWindow(hwnd);
         }
+
+        public static void ShowConsoleWindow()
+        {
+            AllocConsole();
+        }
+
+        [DllImport("kernel32.dll")]
+        private static extern bool AllocConsole();
 
         [DllImport("user32.dll")]
         private static extern bool ShowWindow(IntPtr handle, int nCmdShow);

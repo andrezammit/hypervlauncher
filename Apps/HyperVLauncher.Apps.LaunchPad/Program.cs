@@ -27,6 +27,10 @@ CancellationTokenSource cancellationTokenSource = new();
 
 try
 {
+#if DEBUG
+    GenericHelpers.ShowConsoleWindow();
+#endif
+
     var pathProvider = new PathProvider(GeneralConstants.ProfileName);
     pathProvider.CreateDirectories();
 
@@ -39,7 +43,6 @@ try
     }
 
     var shortcutId = args[0];
-    Console.Title = shortcutId;
 
     using var instanceMutex = GenericHelpers.TakeInstanceMutex($"{GeneralConstants.LaunchPadMutexName}_{shortcutId}");
 

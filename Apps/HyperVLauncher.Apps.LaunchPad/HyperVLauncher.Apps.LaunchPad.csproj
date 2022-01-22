@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <ApplicationManifest>HyperVLauncher.Apps.LaunchPad.manifest</ApplicationManifest>
   </PropertyGroup>
   
