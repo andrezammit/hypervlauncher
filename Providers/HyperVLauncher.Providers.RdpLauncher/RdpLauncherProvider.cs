@@ -17,6 +17,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
     {
         private readonly IHyperVProvider _hyperVProvider;
 
+        private readonly List<RdpProxy> _rdpProxies = new();
         private readonly List<Task> _tcpListenerTasks = new();
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -47,7 +48,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
         public async Task StartTcpListener(int port)
         {
-            using var udpClient = new UdpClient(port);
+            using var udpListener = new UdpClient(port);
             var tcpListener = new TcpListener(IPAddress.Any, port);
 
             tcpListener.Start();
@@ -56,67 +57,50 @@ namespace HyperVLauncher.Providers.RdpLauncher
             {
                 var tcpClient = await tcpListener.AcceptTcpClientAsync(_cancellationTokenSource.Token);
 
+                Tracer.Info($"New socket detected on port {port}. Peer address: {tcpClient.Client.RemoteEndPoint}");
+
                 _hyperVProvider.StartVirtualMachine("31DD1747-ACFB-47FD-9434-7AAC6DA3442B");
 
-                var serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                await serverSocket.ConnectAsync(IPAddress.Parse("192.168.86.42"), 3389, _cancellationTokenSource.Token);
+                var rdpProxy = new RdpProxy(
+                    "192.168.86.42",
+                    udpListener,
+                    tcpClient.Client,
+                    _cancellationTokenSource.Token);
 
-                var socketCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
+                rdpProxy.OnDisconnect += RdpProxy_OnDisconnect;
 
-                var serverUdpSocket = new UdpClient();
-                serverUdpSocket.Connect("192.168.86.42", 3389);
-
-                _ = ProxyTcpSocket(tcpClient.Client, serverSocket, socketCancellationTokenSource);
-                _ = ProxyTcpSocket(serverSocket, tcpClient.Client, socketCancellationTokenSource);
-
-                _ = ProxyUdpSockets(udpClient, serverUdpSocket, socketCancellationTokenSource);
+                _rdpProxies.Add(rdpProxy);
+                
+                _ = rdpProxy.Run();
             }
+
+            var taskList = new List<Task>();
+            
+            lock (_rdpProxies)
+            {
+                foreach (var rdpProxy in _rdpProxies)
+                {
+                    taskList.Add(rdpProxy.Close());
+                }
+            }
+
+            await Task.WhenAll(taskList);
 
             tcpListener.Stop();
         }
 
-        private async Task ProxyTcpSocket(Socket receiveSocket, Socket sendSocket, CancellationTokenSource cancellationTokenSource)
+        private void RdpProxy_OnDisconnect(object? sender, EventArgs e)
         {
-            try
+            if (sender is not RdpProxy rdpProxy)
             {
-                while (!cancellationTokenSource.IsCancellationRequested)
-                {
-                    var bytesToRead = Math.Min(1024, receiveSocket.Available);
-                    var clientBuffer = new byte[bytesToRead];
-
-                    await receiveSocket.ReceiveAsync(clientBuffer, SocketFlags.None, _cancellationTokenSource.Token);
-                    await sendSocket.SendAsync(clientBuffer, SocketFlags.None, _cancellationTokenSource.Token);
-                }
+                throw new InvalidOperationException($"Invalid sender type {sender?.GetType().Name}.");
             }
-            catch (Exception ex)
+
+            Tracer.Debug($"Processing RDP proxy ({rdpProxy.RemoteAddress}) disconnect event...");
+
+            lock (_rdpProxies)
             {
-                cancellationTokenSource.Cancel();
-            }
-        }
-
-        private async Task ProxyUdpSockets(UdpClient clientUdpClient, UdpClient serverUdpClient, CancellationTokenSource cancellationTokenSource)
-        {
-            var result = await clientUdpClient.ReceiveAsync(_cancellationTokenSource.Token);
-            await serverUdpClient.SendAsync(result.Buffer, _cancellationTokenSource.Token);
-
-            _ = ProxyUdpSocket(clientUdpClient, serverUdpClient, null, cancellationTokenSource);
-            _ = ProxyUdpSocket(serverUdpClient, clientUdpClient, result.RemoteEndPoint, cancellationTokenSource);
-        }
-
-        private async Task ProxyUdpSocket(UdpClient clientUdpClient, UdpClient serverUdpClient, IPEndPoint? remoteEndpoint, CancellationTokenSource cancellationTokenSource)
-        {
-            while (!cancellationTokenSource.IsCancellationRequested)
-            {
-                var result = await clientUdpClient.ReceiveAsync(_cancellationTokenSource.Token);
-
-                if (remoteEndpoint is null)
-                {
-                    await serverUdpClient.SendAsync(result.Buffer, _cancellationTokenSource.Token);
-                }
-                else
-                {
-                    await serverUdpClient.SendAsync(result.Buffer, remoteEndpoint, _cancellationTokenSource.Token);
-                }
+                _rdpProxies.Remove(rdpProxy);
             }
         }
     }
