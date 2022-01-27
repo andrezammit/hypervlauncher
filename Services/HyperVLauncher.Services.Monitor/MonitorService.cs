@@ -11,6 +11,8 @@ namespace HyperVLauncher.Services.Monitor
         private readonly ITrayIpcProvider _trayIpcProvider;
         private readonly IShortcutProvider _shortcutProvider;
         private readonly ISettingsProvider _settingsProvider;
+        private readonly IRdpLauncherProvider _rdpLauncherProvider;
+
         private readonly CancellationToken _cancellationToken;
 
         public MonitorService(
@@ -18,18 +20,23 @@ namespace HyperVLauncher.Services.Monitor
             ITrayIpcProvider trayIpcProvider,
             ISettingsProvider settingsProvider,
             IShortcutProvider shortcutProvider,
+            IRdpLauncherProvider rdpLauncherProvider,
             CancellationToken cancellationToken)
         {
             _hyperVProvider = hyperVProvider;
             _trayIpcProvider = trayIpcProvider;
             _shortcutProvider = shortcutProvider;
             _settingsProvider = settingsProvider;
+            _rdpLauncherProvider = rdpLauncherProvider;
+
             _cancellationToken = cancellationToken;
         }
 
         public async Task Run()
         {
             await CheckForInvalidShortcuts();
+
+            await _rdpLauncherProvider.StartListeners();
 
             _hyperVProvider.StartVirtualMachineCreatedMonitor(_cancellationToken);
             _hyperVProvider.StartVirtualMachineDeletedMonitor(_cancellationToken);

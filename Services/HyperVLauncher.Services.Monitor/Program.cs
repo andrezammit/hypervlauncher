@@ -7,6 +7,7 @@ using HyperVLauncher.Providers.HyperV;
 using HyperVLauncher.Providers.Tracing;
 using HyperVLauncher.Providers.Settings;
 using HyperVLauncher.Providers.Shortcut;
+using HyperVLauncher.Providers.RdpLauncher;
 
 using HyperVLauncher.Services.Monitor;
 
@@ -24,6 +25,7 @@ var hostBuilder = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IHyperVProvider, HyperVProvider>();
         services.AddSingleton<ISettingsProvider, SettingsProvider>();
         services.AddSingleton<IShortcutProvider, ShortcutProvider>();
+        services.AddSingleton<IRdpLauncherProvider, RdpLauncherProvider>();
 
         services.AddSingleton<IPathProvider>(provider => pathProvider);
         services.AddSingleton<ITrayIpcProvider>(provider => new IpcProvider(GeneralConstants.TrayIpcPipeName));
