@@ -51,28 +51,45 @@ namespace HyperVLauncher.Providers.RdpLauncher
             using var udpListener = new UdpClient(port);
             var tcpListener = new TcpListener(IPAddress.Any, port);
 
+            Tracer.Debug($"Starting TCP listener on port {port}...");
+
             tcpListener.Start();
 
-            while (!_cancellationTokenSource.IsCancellationRequested)
+            try
             {
-                var tcpClient = await tcpListener.AcceptTcpClientAsync(_cancellationTokenSource.Token);
+                while (!_cancellationTokenSource.IsCancellationRequested)
+                {
+                    var tcpClient = await tcpListener.AcceptTcpClientAsync(_cancellationTokenSource.Token);
 
-                Tracer.Info($"New socket detected on port {port}. Peer address: {tcpClient.Client.RemoteEndPoint}");
+                    Tracer.Info($"New socket detected on port {port}. Peer address: {tcpClient.Client.RemoteEndPoint}");
 
-                _hyperVProvider.StartVirtualMachine("31DD1747-ACFB-47FD-9434-7AAC6DA3442B");
+                    _hyperVProvider.StartVirtualMachine("31DD1747-ACFB-47FD-9434-7AAC6DA3442B");
 
-                var rdpProxy = new RdpProxy(
-                    "192.168.86.42",
-                    udpListener,
-                    tcpClient.Client,
-                    _cancellationTokenSource.Token);
+                    var rdpProxy = new RdpProxy(
+                        "192.168.86.42",
+                        udpListener,
+                        tcpClient.Client,
+                        _cancellationTokenSource.Token);
 
-                rdpProxy.OnDisconnect += RdpProxy_OnDisconnect;
+                    rdpProxy.OnDisconnect += RdpProxy_OnDisconnect;
 
-                _rdpProxies.Add(rdpProxy);
-                
-                _ = rdpProxy.Run();
+                    _rdpProxies.Add(rdpProxy);
+
+                    _ = rdpProxy.Run();
+                }
             }
+            catch (OperationCanceledException)
+            {
+                // Swallow.
+            }
+            catch (Exception ex)
+            {
+                Tracer.Warning($"Exception while listening on RDP proxy port {port}.", ex);
+            }
+
+            Tracer.Debug($"Stopping TCP listener on port {port}...");
+
+            tcpListener.Stop();
 
             var taskList = new List<Task>();
             
@@ -84,9 +101,9 @@ namespace HyperVLauncher.Providers.RdpLauncher
                 }
             }
 
-            await Task.WhenAll(taskList);
+            Tracer.Debug("Waiting for all RDP proxies to stop...");
 
-            tcpListener.Stop();
+            await Task.WhenAll(taskList);
         }
 
         private void RdpProxy_OnDisconnect(object? sender, EventArgs e)

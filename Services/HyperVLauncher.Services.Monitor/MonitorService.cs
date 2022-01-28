@@ -43,6 +43,8 @@ namespace HyperVLauncher.Services.Monitor
 
             _hyperVProvider.OnVirtualMachineCreated = OnVirtualMachineCreated;
             _hyperVProvider.OnVirtualMachineDeleted = OnVirtualMachineDeleted;
+
+            _cancellationToken.Register(() => _rdpLauncherProvider.StopListeners());
         }
 
         private async Task CheckForInvalidShortcuts()

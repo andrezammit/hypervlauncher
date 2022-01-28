@@ -79,9 +79,9 @@ namespace HyperVLauncher.Providers.RdpLauncher
                     await sendSocket.SendAsync(clientBuffer, SocketFlags.None, _socketCancellationToken);
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                await Close();
+                _ = Close();
             }
         }
 
@@ -100,18 +100,25 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
         private async Task ProxyUdpSocket(UdpClient clientUdpClient, UdpClient serverUdpClient, IPEndPoint? remoteEndpoint)
         {
-            while (!_socketCancellationToken.IsCancellationRequested)
+            try
             {
-                var result = await clientUdpClient.ReceiveAsync(_socketCancellationToken);
+                while (!_socketCancellationToken.IsCancellationRequested)
+                {
+                    var result = await clientUdpClient.ReceiveAsync(_socketCancellationToken);
 
-                if (remoteEndpoint is null)
-                {
-                    await serverUdpClient.SendAsync(result.Buffer, _socketCancellationToken);
+                    if (remoteEndpoint is null)
+                    {
+                        await serverUdpClient.SendAsync(result.Buffer, _socketCancellationToken);
+                    }
+                    else
+                    {
+                        await serverUdpClient.SendAsync(result.Buffer, remoteEndpoint, _socketCancellationToken);
+                    }
                 }
-                else
-                {
-                    await serverUdpClient.SendAsync(result.Buffer, remoteEndpoint, _socketCancellationToken);
-                }
+            }
+            catch
+            {
+                _ = Close();
             }
         }
 
@@ -131,7 +138,18 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
             _socketCancellationTokenSource.Cancel();
 
-            await Task.WhenAll(_taskList);
+            try
+            {
+                await Task.WhenAll(_taskList);
+            }
+            catch (Exception ex) when (ex is OperationCanceledException)
+            {
+                // Swallow.
+            }
+            catch (Exception ex)
+            {
+                Tracer.Warning("Exception while closing RDP proxy.", ex);
+            }
 
             _serverSocket?.Dispose();
             _serverUdpSocket?.Dispose();
