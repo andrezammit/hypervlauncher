@@ -55,18 +55,41 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
             tcpListener.Start();
 
-            try
+            while (!_cancellationTokenSource.IsCancellationRequested)
             {
-                while (!_cancellationTokenSource.IsCancellationRequested)
+                try
                 {
                     var tcpClient = await tcpListener.AcceptTcpClientAsync(_cancellationTokenSource.Token);
 
                     Tracer.Info($"New socket detected on port {port}. Peer address: {tcpClient.Client.RemoteEndPoint}");
 
-                    _hyperVProvider.StartVirtualMachine("31DD1747-ACFB-47FD-9434-7AAC6DA3442B");
+                    var vmId = "31DD1747-ACFB-47FD-9434-7AAC6DA3442B";
+
+                    _hyperVProvider.StartVirtualMachine(vmId);
+
+                    string[]? ipAddresses = null;
+
+                    for (var cnt = 0; cnt < 5; cnt++)
+                    {
+                        ipAddresses = _hyperVProvider.GetVirtualMachineIpAddresses(vmId);
+
+                        if (ipAddresses is not null 
+                            && ipAddresses.Length > 0)
+                        {
+                            break;
+                        }
+
+                        await Task.Delay(1000);
+                    }
+
+                    if (ipAddresses is null)
+                    {
+                        throw new InvalidOperationException("Failed to get virtual machine IP addresses.");
+                    }
 
                     var rdpProxy = new RdpProxy(
-                        "192.168.86.42",
+                        vmId,
+                        ipAddresses,
                         udpListener,
                         tcpClient.Client,
                         _cancellationTokenSource.Token);
@@ -77,14 +100,14 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
                     _ = rdpProxy.Run();
                 }
-            }
-            catch (OperationCanceledException)
-            {
-                // Swallow.
-            }
-            catch (Exception ex)
-            {
-                Tracer.Warning($"Exception while listening on RDP proxy port {port}.", ex);
+                catch (OperationCanceledException)
+                {
+                    // Swallow.
+                }
+                catch (Exception ex)
+                {
+                    Tracer.Warning($"Exception while listening on RDP proxy port {port}.", ex);
+                }
             }
 
             Tracer.Debug($"Stopping TCP listener on port {port}...");
@@ -113,7 +136,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
                 throw new InvalidOperationException($"Invalid sender type {sender?.GetType().Name}.");
             }
 
-            Tracer.Debug($"Processing RDP proxy ({rdpProxy.RemoteAddress}) disconnect event...");
+            Tracer.Debug($"Processing RDP proxy ({rdpProxy.ConnectedIpAddress}) disconnect event...");
 
             lock (_rdpProxies)
             {

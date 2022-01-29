@@ -13,6 +13,7 @@ using HyperVLauncher.Contracts.Interfaces;
 using HyperVLauncher.Providers.Tracing;
 
 using HyperVLauncher.Providers.HyperV.Mappers;
+using HyperVLauncher.Providers.HyperV.Extensions;
 using HyperVLauncher.Providers.HyperV.Contracts.Enums;
 
 namespace HyperVLauncher.Providers.HyperV
@@ -201,6 +202,59 @@ namespace HyperVLauncher.Providers.HyperV
             }
 
             return null;
+        }
+
+        public string[]? GetVirtualMachineIpAddresses(string vmId)
+        {
+            using var vmObject = GetVmObject(vmId);
+
+            if (vmObject is null)
+            {
+                return null;
+            }
+
+            using var systemSettingsData = vmObject.GetRelated(
+                    "Msvm_VirtualSystemSettingData", 
+                    "Msvm_SettingsDefineState", 
+                    null, 
+                    null, 
+                    "SettingData", 
+                    "ManagedElement", 
+                    false, 
+                    null)
+                .FirstOrDefault();
+
+            if (systemSettingsData is null)
+            {
+                return null;
+            }
+
+            using var ethernetPortSettingsData = systemSettingsData
+                .GetRelated("Msvm_SyntheticEthernetPortSettingData")
+                .FirstOrDefault();
+
+            if (ethernetPortSettingsData is null)
+            {
+                return null;
+            }
+
+            using var guestNetworkAdapterConfig = ethernetPortSettingsData
+                .GetRelated("Msvm_GuestNetworkAdapterConfiguration")
+                .FirstOrDefault();
+
+            if (guestNetworkAdapterConfig is null)
+            {
+                return null;
+            }
+
+            var ipAddressesObject = guestNetworkAdapterConfig["IPAddresses"];
+
+            if (ipAddressesObject is not string[] ipAddresses)
+            {
+                return null;
+            }
+
+            return ipAddresses;
         }
 
         private static ManagementObject? GetVmShutdownComponent(string relPath)

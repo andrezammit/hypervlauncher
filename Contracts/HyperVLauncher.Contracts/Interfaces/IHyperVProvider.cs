@@ -27,6 +27,7 @@ namespace HyperVLauncher.Contracts.Interfaces
 
         Process? ConnectVirtualMachine(string vmId);
         VmState GetVirtualMachineState(string vmId);
+        string[]? GetVirtualMachineIpAddresses(string vmId);
 
         IEnumerable<VirtualMachine> GetVirtualMachineList();
     }
