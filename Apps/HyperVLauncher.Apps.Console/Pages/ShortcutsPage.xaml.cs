@@ -29,6 +29,8 @@ namespace HyperVLauncher.Pages
                 shortcut.Id,
                 shortcut.VmId,
                 shortcut.Name,
+                shortcut.RdpTriggerEnabled,
+                shortcut.RdpPort,
                 shortcut.CloseAction)
         {
             _hyperVProvider = hyperVProvider;
@@ -241,6 +243,9 @@ namespace HyperVLauncher.Pages
 
             savedShortcut.Name = shortcutWindow.txtName.Text;
             savedShortcut.CloseAction = shortcutWindow.GetSelectedCloseAction();
+
+            savedShortcut.RdpPort = int.Parse(shortcutWindow.txtRdpPort.Text);
+            savedShortcut.RdpTriggerEnabled = shortcutWindow.chkRdpTrigger.IsChecked.GetValueOrDefault();
 
             await _settingsProvider.Save();
 

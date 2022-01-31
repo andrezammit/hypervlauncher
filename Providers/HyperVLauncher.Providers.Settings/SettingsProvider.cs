@@ -84,6 +84,8 @@ namespace HyperVLauncher.Providers.Settings
             IShortcutProvider shortcutProvider,
             bool? createDesktopShortcut = null,
             bool? createStartMenuShortcut = null,
+            bool rdpTriggerEnabled = false,
+            int rdpPort = 0,
             CloseAction closeAction = CloseAction.None)
         {
             var appSettings = await Get(true);
@@ -92,6 +94,9 @@ namespace HyperVLauncher.Providers.Settings
 
             shortcut.CloseAction = closeAction;
             shortcut.Name = GetValidShortcutName(shortcut.Id, name, appSettings);
+
+            shortcut.RdpPort = rdpPort;
+            shortcut.RdpTriggerEnabled = rdpTriggerEnabled;
 
             appSettings.Shortcuts.Add(shortcut);
 

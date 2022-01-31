@@ -1,12 +1,12 @@
-﻿using System.Linq;
-using System.Windows;
-using System.Threading.Tasks;
+﻿using System.Windows;
 using System.Collections.Generic;
 
 using HyperVLauncher.Contracts.Enums;
 using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Constants;
 using HyperVLauncher.Contracts.Interfaces;
+
+using HyperVLauncher.Providers.Common;
 
 namespace HyperVLauncher.Modals
 {
@@ -65,16 +65,27 @@ namespace HyperVLauncher.Modals
             if (editMode)
             {
                 lblTitle.Content = "Edit Shortcut";
-
+                
                 stackPanel.Children.Remove(chkDesktopShortcut);
                 stackPanel.Children.Remove(chkStartMenuShortcut);
 
                 SetDefaultCloseActionSelection(shortcut.CloseAction);
+
+                txtRdpPort.Text = shortcut.RdpPort.ToString();
             }
             else
             {
                 SetDefaultCloseActionSelection(CloseAction.None);
+
+                txtRdpPort.Text = GenericHelpers.GetAvailablePort(3390).ToString();
             }
+
+            EnableControls();
+        }
+
+        private void EnableControls()
+        {
+            txtRdpPort.IsEnabled = chkRdpTrigger.IsChecked.GetValueOrDefault();
         }
 
         public CloseAction GetSelectedCloseAction()
@@ -135,6 +146,11 @@ namespace HyperVLauncher.Modals
             }
 
             DialogResult = true;
+        }
+
+        private void ChkRdpTrigger_OnCheckChange(object sender, RoutedEventArgs e)
+        {
+            EnableControls();
         }
     }
 }

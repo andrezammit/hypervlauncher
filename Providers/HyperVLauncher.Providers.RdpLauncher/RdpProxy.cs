@@ -79,6 +79,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
                 }
                 catch (Exception ex)
                 {
+                    Tracer.Debug($"Failed to connect to {remoteAddress}.", ex);
                 }
             }
 
