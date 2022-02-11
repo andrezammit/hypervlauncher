@@ -53,6 +53,8 @@ namespace HyperVLauncher.Services.Monitor
 
             _ipcProxy = Task.Run(() => _monitorIpcProvider.RunIpcProxy(_cancellationToken));
             _ipcProcessor = Task.Run(() => ProcessIpcMessages(_cancellationToken));
+
+            Tracer.Info("Monitor service initialization done.");
         }
 
         public async Task Stop()

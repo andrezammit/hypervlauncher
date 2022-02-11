@@ -20,9 +20,12 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
         public event EventHandler? OnDisconnect;
 
+        private readonly int _port;
         private readonly Socket _clientSocket;
         private readonly UdpClient _udpListener;
         private readonly string[] _remoteAddresses;
+
+        private readonly List<Task> _proxyTasks = new();
 
         private readonly CancellationToken _cancellationToken;
         private readonly CancellationToken _socketCancellationToken;
@@ -34,8 +37,6 @@ namespace HyperVLauncher.Providers.RdpLauncher
         private UdpClient? _serverUdpSocket;
 
         private static readonly ConcurrentDictionary<int, UdpClient> _udpListeners = new();
-
-        private readonly List<Task> _taskList = new();
 
         public RdpProxy(
             string vmId,
@@ -54,10 +55,10 @@ namespace HyperVLauncher.Providers.RdpLauncher
             _udpListener = new UdpClient(port);
             _udpListeners[port] = _udpListener;
 
+            _port = port;
             _clientSocket = clientSocket;
             _remoteAddresses = remoteAddresses;
             _cancellationToken = cancellationToken;
-
 
             _socketCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_cancellationToken);
             _socketCancellationToken = _socketCancellationTokenSource.Token;
@@ -108,10 +109,10 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
             Tracer.Debug($"Starting TCP proxy...");
 
-            _taskList.Add(ProxyTcpSocket(_clientSocket, _serverSocket));
-            _taskList.Add(ProxyTcpSocket(_serverSocket, _clientSocket));
+            _proxyTasks.Add(ProxyTcpSocket(_clientSocket, _serverSocket));
+            _proxyTasks.Add(ProxyTcpSocket(_serverSocket, _clientSocket));
 
-            _taskList.Add(ProxyUdpSockets(_udpListener, _serverUdpSocket));
+            _proxyTasks.Add(ProxyUdpSockets(_udpListener, _serverUdpSocket));
         }
 
         private async Task ProxyTcpSocket(Socket receiveSocket, Socket sendSocket)
@@ -142,8 +143,20 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
             Tracer.Debug($"Starting UDP proxy...");
 
-            _taskList.Add(ProxyUdpSocket(clientUdpClient, serverUdpClient, null));
-            _taskList.Add(ProxyUdpSocket(serverUdpClient, clientUdpClient, result.RemoteEndPoint));
+            var clientSocketProxy = ProxyUdpSocket(clientUdpClient, serverUdpClient, null);
+            var serverSocketProxy = ProxyUdpSocket(serverUdpClient, clientUdpClient, result.RemoteEndPoint);
+
+            _proxyTasks.Add(clientSocketProxy);
+            _proxyTasks.Add(serverSocketProxy);
+
+            var udpProxyTasks = new List<Task>()
+            {
+                clientSocketProxy,
+                serverSocketProxy
+            };
+
+            _ = Task.WhenAny(udpProxyTasks)
+                .ContinueWith((result) => Tracer.Debug($"UDP proxy stopped on port {_port}"));
         }
 
         private async Task ProxyUdpSocket(UdpClient clientUdpClient, UdpClient serverUdpClient, IPEndPoint? remoteEndpoint)
@@ -166,7 +179,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
             }
             catch
             {
-                _ = Close();
+                // Swallow.
             }
         }
 
@@ -188,7 +201,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
             try
             {
-                await Task.WhenAll(_taskList);
+                await Task.WhenAll(_proxyTasks);
             }
             catch (Exception ex) when (ex is OperationCanceledException)
             {

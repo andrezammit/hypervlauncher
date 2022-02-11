@@ -53,6 +53,8 @@ namespace HyperVLauncher.Providers.Ipc
 
         public Task RunIpcProxy(CancellationToken cancellationToken)
         {
+            cancellationToken.Register(() => NetMQConfig.Cleanup(false));
+
             var taskList = new List<Task>
             {
                 Task.Run(() => ProxyMessages(8871, cancellationToken), cancellationToken),
@@ -139,9 +141,9 @@ namespace HyperVLauncher.Providers.Ipc
             int port,
             CancellationToken cancellationToken)
         {
-            using var subscriberSocket = CreateSubscriberSocket(port);
+            Tracer.Debug($"Starting IPC proxy on port {port}...");
 
-            cancellationToken.Register(() => NetMQConfig.Cleanup(false));
+            using var subscriberSocket = CreateSubscriberSocket(port);
 
             do
             {
