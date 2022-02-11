@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 using System.Collections.Generic;
 using System.Collections.Concurrent;
@@ -9,22 +10,25 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
+using HyperVLauncher.Contracts.Models;
+
 using HyperVLauncher.Providers.Tracing;
 
 namespace HyperVLauncher.Providers.RdpLauncher
 {
     internal class RdpProxy
     {
-        public string VmId { get; private set; }
+        public Shortcut Shortcut { get; private set; }
         public string? ConnectedIpAddress { get; private set; }
+        public TimeSpan ConnectionDuration => _stopwatch.Elapsed;
 
         public event EventHandler? OnDisconnect;
 
-        private readonly int _port;
         private readonly Socket _clientSocket;
         private readonly UdpClient _udpListener;
         private readonly string[] _remoteAddresses;
 
+        private readonly Stopwatch _stopwatch = new();
         private readonly List<Task> _proxyTasks = new();
 
         private readonly CancellationToken _cancellationToken;
@@ -39,23 +43,21 @@ namespace HyperVLauncher.Providers.RdpLauncher
         private static readonly ConcurrentDictionary<int, UdpClient> _udpListeners = new();
 
         public RdpProxy(
-            string vmId,
+            Shortcut shortcut,
             string[] remoteAddresses,
-            int port,
             Socket clientSocket,
             CancellationToken cancellationToken)
         {
-            VmId = vmId;
+            Shortcut = shortcut;
 
-            if (_udpListeners.TryGetValue(port, out var currentUdpClient))
+            if (_udpListeners.TryGetValue(shortcut.RdpPort, out var currentUdpClient))
             {
                 currentUdpClient.Dispose();
             }
 
-            _udpListener = new UdpClient(port);
-            _udpListeners[port] = _udpListener;
+            _udpListener = new UdpClient(shortcut.RdpPort);
+            _udpListeners[shortcut.RdpPort] = _udpListener;
 
-            _port = port;
             _clientSocket = clientSocket;
             _remoteAddresses = remoteAddresses;
             _cancellationToken = cancellationToken;
@@ -66,7 +68,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
         public async Task Run()
         {
-            Tracer.Info($"Starting RDP proxy with virtual machine {VmId}...");
+            Tracer.Info($"Starting RDP proxy for shortcut {Shortcut.Name} with virtual machine {Shortcut.VmId}...");
 
             _serverSocket = new Socket(SocketType.Stream, ProtocolType.Tcp);
             
@@ -84,6 +86,8 @@ namespace HyperVLauncher.Providers.RdpLauncher
                         IPAddress.Parse(remoteAddress), 
                         3389,
                         connectCancellationTokenSource.Token);
+
+                    _stopwatch.Start();
 
                     ConnectedIpAddress = remoteAddress;
 
@@ -167,14 +171,14 @@ namespace HyperVLauncher.Providers.RdpLauncher
                 };
 
                 _ = Task.WhenAny(udpProxyTasks)
-                    .ContinueWith((result) => Tracer.Debug($"UDP proxy stopped on port {_port}"));
+                    .ContinueWith((result) => Tracer.Debug($"UDP proxy stopped on port {Shortcut.RdpPort}"));
             }
             catch (OperationCanceledException)
             {
                 if (!_socketCancellationToken.IsCancellationRequested && 
                     udpSocketCancellationTokenSource.IsCancellationRequested)
                 {
-                    Tracer.Debug($"Giving up on UDP proxy on port {_port}.");
+                    Tracer.Debug($"Giving up on UDP proxy on port {Shortcut.RdpPort}.");
                 }
             }
         }
@@ -215,7 +219,9 @@ namespace HyperVLauncher.Providers.RdpLauncher
                 _closing = true;
             }
 
-            Tracer.Info($"Closing RDP proxy with virtual machine {VmId}...");
+            _stopwatch.Stop();
+
+            Tracer.Info($"Closing RDP proxy with virtual machine {Shortcut.VmId}...");
 
             _socketCancellationTokenSource.Cancel();
 
@@ -237,7 +243,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
             _udpListener.Dispose();
 
-            Tracer.Info($"RDP proxy with virtual machine {VmId} closed.");
+            Tracer.Info($"RDP proxy with virtual machine {Shortcut.VmId} closed.");
 
             OnDisconnect?.Invoke(this, EventArgs.Empty);
         }

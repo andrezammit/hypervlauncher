@@ -11,8 +11,10 @@ using Newtonsoft.Json;
 
 using HyperVLauncher.Contracts.Enums;
 using HyperVLauncher.Contracts.Models;
-using HyperVLauncher.Providers.Tracing;
+using HyperVLauncher.Contracts.Constants;
 using HyperVLauncher.Contracts.Interfaces;
+
+using HyperVLauncher.Providers.Tracing;
 
 namespace HyperVLauncher.Providers.Ipc
 {
@@ -29,14 +31,24 @@ namespace HyperVLauncher.Providers.Ipc
             _publisherSocket = CreatePublisherSocket(_port);
         }
 
-        private static SubscriberSocket CreateSubscriberSocket(int port)
+        private static SubscriberSocket CreateSubscriberSocket(int port, IList<IpcTopic> topics)
         {
             var subscriberSocket = new SubscriberSocket();
             
             subscriberSocket.Connect($"tcp://127.0.0.1:{port}");
             subscriberSocket.Options.ReceiveHighWatermark = 1000;
 
-            subscriberSocket.SubscribeToAnyTopic();
+            if (topics.Contains(IpcTopic.All))
+            {
+                subscriberSocket.SubscribeToAnyTopic();
+            }
+            else
+            {
+                foreach (var topic in topics)
+                {
+                    subscriberSocket.Subscribe(topic.ToString());
+                }
+            }
 
             return subscriberSocket;
         }
@@ -57,20 +69,22 @@ namespace HyperVLauncher.Providers.Ipc
 
             var taskList = new List<Task>
             {
-                Task.Run(() => ProxyMessages(8871, cancellationToken), cancellationToken),
-                Task.Run(() => ProxyMessages(8872, cancellationToken), cancellationToken)
+                Task.Run(() => ProxyMessages(GeneralConstants.TrayIpcPort, cancellationToken), cancellationToken),
+                Task.Run(() => ProxyMessages(GeneralConstants.ConsoleIpcPort, cancellationToken), cancellationToken)
             };
 
             return Task.WhenAll(taskList);
         }
 
-        public Task SendMessage(IpcMessage ipcMessage)
+        public Task SendMessage(IpcTopic topic, IpcMessage ipcMessage)
         {
             try
             {
                 var jsonMessage = JsonConvert.SerializeObject(ipcMessage);
 
-                _publisherSocket.SendFrame(jsonMessage);
+                _publisherSocket
+                    .SendMoreFrame(topic.ToString())
+                    .SendFrame(jsonMessage);
             }
             catch (TimeoutException)
             {
@@ -91,7 +105,7 @@ namespace HyperVLauncher.Providers.Ipc
                 IpcCommand = IpcCommand.ReloadSettings
             };
 
-            return SendMessage(ipcMessage);
+            return SendMessage(IpcTopic.Settings, ipcMessage);
         }
 
         public Task SendShowMessageNotif(string title, string message)
@@ -102,7 +116,7 @@ namespace HyperVLauncher.Providers.Ipc
                 Data = new ShowMessageNotifData(title, message)
             };
 
-            return SendMessage(ipcMessage);
+            return SendMessage(IpcTopic.Tray, ipcMessage);
         }
 
         public Task SendShowShortcutCreatedNotif(string vmId, string shortcutName)
@@ -113,7 +127,7 @@ namespace HyperVLauncher.Providers.Ipc
                 Data = new ShortcutCreatedNotifData(vmId, shortcutName)
             };
 
-            return SendMessage(ipcMessage);
+            return SendMessage(IpcTopic.Tray, ipcMessage);
         }
 
         public Task SendShowShortcutPromptNotif(string vmId, string vmName)
@@ -124,7 +138,7 @@ namespace HyperVLauncher.Providers.Ipc
                 Data = new ShortcutPromptNotifData(vmId, vmName)
             };
 
-            return SendMessage(ipcMessage);
+            return SendMessage(IpcTopic.Tray, ipcMessage);
         }
 
         public Task SendBringToFront()
@@ -134,7 +148,7 @@ namespace HyperVLauncher.Providers.Ipc
                 IpcCommand = IpcCommand.BringToFront
             };
 
-            return SendMessage(ipcMessage);
+            return SendMessage(IpcTopic.LaunchPad, ipcMessage);
         }
 
         private void ProxyMessages(
@@ -143,12 +157,13 @@ namespace HyperVLauncher.Providers.Ipc
         {
             Tracer.Debug($"Starting IPC proxy on port {port}...");
 
-            using var subscriberSocket = CreateSubscriberSocket(port);
+            using var subscriberSocket = CreateSubscriberSocket(port, new List<IpcTopic> { IpcTopic.All });
 
             do
             {
                 try
                 {
+                    var topic = subscriberSocket.ReceiveFrameString();
                     var jsonMessage = subscriberSocket.ReceiveFrameString();
 
                     if (jsonMessage is null)
@@ -156,7 +171,9 @@ namespace HyperVLauncher.Providers.Ipc
                         continue;
                     }
 
-                    _publisherSocket.SendFrame(jsonMessage);
+                    _publisherSocket
+                        .SendMoreFrame(topic)
+                        .SendFrame(jsonMessage);
                 }
                 catch (Exception ex)
                 {
@@ -170,9 +187,10 @@ namespace HyperVLauncher.Providers.Ipc
         }
 
         public IEnumerable<IpcMessage> ReadMessages(
+            IList<IpcTopic> topics,
             CancellationToken cancellationToken)
         {
-            using var subscriberSocket = CreateSubscriberSocket(8870);
+            using var subscriberSocket = CreateSubscriberSocket(GeneralConstants.MonitorIpcPort, topics);
 
             cancellationToken.Register(() => NetMQConfig.Cleanup(false));
 
@@ -182,6 +200,7 @@ namespace HyperVLauncher.Providers.Ipc
 
                 try
                 {
+                    var topic = subscriberSocket.ReceiveFrameString();
                     var jsonMessage = subscriberSocket.ReceiveFrameString();
 
                     if (jsonMessage is null)

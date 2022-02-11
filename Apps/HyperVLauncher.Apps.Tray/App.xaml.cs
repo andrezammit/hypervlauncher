@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
+
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -52,7 +54,7 @@ namespace HyperVLauncher.Apps.Tray
         {
             _settingsProvider = new SettingsProvider(_pathProvider);
 
-            var ipcProvider = new IpcProvider(8871);
+            var ipcProvider = new IpcProvider(GeneralConstants.TrayIpcPort);
 
             _trayIpcProvider = ipcProvider;
             _launchPadIpcProvider = ipcProvider;
@@ -370,7 +372,9 @@ namespace HyperVLauncher.Apps.Tray
         {
             try
             {
-                foreach (var ipcMessage in _trayIpcProvider.ReadMessages(cancellationToken))
+                foreach (var ipcMessage in _trayIpcProvider.ReadMessages(
+                    new List<IpcTopic> { IpcTopic.Settings, IpcTopic.Tray },
+                    cancellationToken))
                 {
                     switch (ipcMessage.IpcCommand)
                     {

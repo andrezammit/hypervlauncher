@@ -3,6 +3,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
+using HyperVLauncher.Contracts.Enums;
 using HyperVLauncher.Contracts.Models;
 
 namespace HyperVLauncher.Contracts.Interfaces
@@ -11,12 +12,13 @@ namespace HyperVLauncher.Contracts.Interfaces
     {
         Task SendReloadSettings();
 
-        IEnumerable<IpcMessage> ReadMessages(CancellationToken cancellationToken);
+        IEnumerable<IpcMessage> ReadMessages(
+            IList<IpcTopic> topics, 
+            CancellationToken cancellationToken);
     }
 
     public interface ITrayIpcProvider : IIpcProviderBase
     {
-        Task SendMessage(IpcMessage ipcMessage);
         Task SendShowMessageNotif(string title, string message);
         Task SendShowShortcutPromptNotif(string vmId, string vmName);
         Task SendShowShortcutCreatedNotif(string vmId, string shortcutName);

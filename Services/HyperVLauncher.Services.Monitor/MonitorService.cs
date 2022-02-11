@@ -154,7 +154,9 @@ namespace HyperVLauncher.Services.Monitor
 
             try
             {
-                foreach (var ipcMessage in _monitorIpcProvider.ReadMessages(cancellationToken))
+                foreach (var ipcMessage in _monitorIpcProvider.ReadMessages(
+                    new List<IpcTopic> { IpcTopic.Settings }, 
+                    cancellationToken))
                 {
                     switch (ipcMessage.IpcCommand)
                     {

@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 
-using HyperVLauncher.Providers.Tracing;
+using System.Threading;
+using System.Threading.Tasks;
+
+using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Constants;
 using HyperVLauncher.Contracts.Interfaces;
+
+using HyperVLauncher.Providers.Tracing;
 
 namespace HyperVLauncher.Providers.Common
 {
@@ -128,6 +132,38 @@ namespace HyperVLauncher.Providers.Common
             catch (Exception ex)
             {
                 Tracer.Error($"Failed to launch Hyper-V Manager.", ex);
+            }
+        }
+
+        public static async Task HandleShortcutExitBehaviour(
+            IHyperVProvider hyperVProvider,
+            ITrayIpcProvider trayIpcProvider,
+            Shortcut shortcut)
+        {
+            switch (shortcut.CloseAction)
+            {
+                case HyperVLauncher.Contracts.Enums.CloseAction.Pause:
+                    Tracer.Info($"Pausing {shortcut.Name}...");
+
+                    await trayIpcProvider.SendShowMessageNotif("Virtual Machine State Change", $"Pausing {shortcut.Name}...");
+                    hyperVProvider.PauseVirtualMachine(shortcut.VmId);
+
+                    Tracer.Info($"{shortcut.Name} paused.");
+
+                    break;
+
+                case HyperVLauncher.Contracts.Enums.CloseAction.Shutdown:
+                    Tracer.Info($"Shutting down {shortcut.Name}...");
+
+                    await trayIpcProvider.SendShowMessageNotif("Virtual Machine State Change", $"Shutting down {shortcut.Name}...");
+                    hyperVProvider.ShutdownVirtualMachine(shortcut.VmId);
+
+                    Tracer.Info($"{shortcut.Name} shut down.");
+
+                    break;
+
+                default:
+                    break;
             }
         }
 

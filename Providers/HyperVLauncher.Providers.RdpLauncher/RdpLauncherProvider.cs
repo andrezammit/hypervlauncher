@@ -7,8 +7,10 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
+using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Interfaces;
 
+using HyperVLauncher.Providers.Common;
 using HyperVLauncher.Providers.Tracing;
 
 namespace HyperVLauncher.Providers.RdpLauncher
@@ -16,6 +18,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
     public class RdpLauncherProvider : IRdpLauncherProvider
     {
         private readonly IHyperVProvider _hyperVProvider;
+        private readonly ITrayIpcProvider _trayIpcProvider;
         private readonly ISettingsProvider _settingsProvider;
 
         private CancellationTokenSource _tcpListenerCancellationTokenSource;
@@ -26,9 +29,11 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
         public RdpLauncherProvider(
             IHyperVProvider hyperVProvider,
+            ITrayIpcProvider trayIpcProvider,
             ISettingsProvider settingsProvider)
         {
             _hyperVProvider = hyperVProvider;
+            _trayIpcProvider = trayIpcProvider;
             _settingsProvider = settingsProvider;
 
             _tcpListenerCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
@@ -86,8 +91,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
                 if (shortcut.RdpTriggerEnabled)
                 {
                     var tcpListenerTask = StartTcpListener(
-                        shortcut.VmId,
-                        shortcut.RdpPort,
+                        shortcut,
                         _tcpListenerCancellationTokenSource.Token);
 
                     _tcpListenerTasks.Add(tcpListenerTask);
@@ -103,37 +107,34 @@ namespace HyperVLauncher.Providers.RdpLauncher
         }
 
         public async Task StartTcpListener(
-            string vmId, 
-            int port,
+            Shortcut shortcut,
             CancellationToken cancellationToken)
         {
-            Tracer.Debug($"Starting TCP listener for virtual machine {vmId} on port {port}...");
+            Tracer.Debug($"Starting TCP listener for shortcut {shortcut.Name} on port {shortcut.RdpPort}...");
 
             try
             {
-                var tcpListener = new TcpListener(IPAddress.Any, port);
+                var tcpListener = new TcpListener(IPAddress.Any, shortcut.RdpPort);
 
                 tcpListener.Start();
 
                 await ProcessTcpSockets(
-                    vmId,
-                    port,
+                    shortcut,
                     tcpListener,
                     cancellationToken);
 
-                Tracer.Debug($"Stopping TCP listener for virtual machine {vmId} on port {port}...");
+                Tracer.Debug($"Stopping TCP listener for shortcut {shortcut.Name} on port {shortcut.RdpPort}...");
 
                 tcpListener.Stop();
             }
             catch (Exception ex)
             {
-                Tracer.Error($"Failed to start listening for RDP virtual machine {vmId} connections on port {port}.", ex);
+                Tracer.Error($"Failed to start listening for shortcut {shortcut.Name} on port {shortcut.RdpPort}.", ex);
             }
         }
 
         private async Task ProcessTcpSockets(
-            string vmId,
-            int port,
+            Shortcut shortcut,
             TcpListener tcpListener,
             CancellationToken cancellationToken)
         {
@@ -143,15 +144,15 @@ namespace HyperVLauncher.Providers.RdpLauncher
                 {
                     var tcpClient = await tcpListener.AcceptTcpClientAsync(cancellationToken);
                     
-                    Tracer.Info($"New socket detected on port {port}. Peer address: {tcpClient.Client.RemoteEndPoint}");
+                    Tracer.Info($"New socket detected on port {shortcut.RdpPort}. Peer address: {tcpClient.Client.RemoteEndPoint}");
 
-                    _hyperVProvider.StartVirtualMachine(vmId);
+                    _hyperVProvider.StartVirtualMachine(shortcut.VmId);
 
                     string[]? ipAddresses = null;
 
                     for (var cnt = 0; cnt < 10; cnt++)
                     {
-                        ipAddresses = _hyperVProvider.GetVirtualMachineIpAddresses(vmId);
+                        ipAddresses = _hyperVProvider.GetVirtualMachineIpAddresses(shortcut.VmId);
 
                         if (ipAddresses is not null
                             && ipAddresses.Length > 0)
@@ -168,9 +169,8 @@ namespace HyperVLauncher.Providers.RdpLauncher
                     }
 
                     var rdpProxy = new RdpProxy(
-                        vmId,
+                        shortcut,
                         ipAddresses,
-                        port,
                         tcpClient.Client,
                         _cancellationTokenSource.Token);
 
@@ -186,23 +186,42 @@ namespace HyperVLauncher.Providers.RdpLauncher
                 }
                 catch (Exception ex)
                 {
-                    Tracer.Warning($"Exception while listening on RDP proxy port {port}.", ex);
+                    Tracer.Warning($"Exception while listening on RDP proxy port {shortcut.RdpPort}.", ex);
                 }
             }
         }
 
         private void RdpProxy_OnDisconnect(object? sender, EventArgs e)
         {
-            if (sender is not RdpProxy rdpProxy)
+            try
             {
-                throw new InvalidOperationException($"Invalid sender type {sender?.GetType().Name}.");
+                if (sender is not RdpProxy rdpProxy)
+                {
+                    throw new InvalidOperationException($"Invalid sender type {sender?.GetType().Name}.");
+                }
+
+                Tracer.Debug($"Processing RDP proxy ({rdpProxy.ConnectedIpAddress}) disconnect event...");
+
+                lock (_rdpProxies)
+                {
+                    _rdpProxies.Remove(rdpProxy);
+                }
+
+                Tracer.Debug($"RDP proxy connection duration: {rdpProxy.ConnectionDuration}");
+
+                if (rdpProxy.ConnectionDuration > TimeSpan.FromSeconds(2))
+                {
+                    GenericHelpers.HandleShortcutExitBehaviour(
+                            _hyperVProvider,
+                            _trayIpcProvider,
+                            rdpProxy.Shortcut)
+                        .GetAwaiter()
+                        .GetResult();
+                }
             }
-
-            Tracer.Debug($"Processing RDP proxy ({rdpProxy.ConnectedIpAddress}) disconnect event...");
-
-            lock (_rdpProxies)
+            catch (Exception ex)
             {
-                _rdpProxies.Remove(rdpProxy);
+                Tracer.Warning("Exception while processing RDP proxy disconnect.", ex);
             }
         }
     }
