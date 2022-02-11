@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 using System.Threading;
 using System.Threading.Tasks;
 
-using System.IO;
-using System.IO.Pipes;
+using NetMQ;
+using NetMQ.Sockets;
 
 using Newtonsoft.Json;
 
@@ -19,39 +18,57 @@ namespace HyperVLauncher.Providers.Ipc
 {
     public class IpcProvider : IIpcProviderAll
     {
-        private readonly string _pipeName;
+        private readonly int _port;
 
-        public IpcProvider(string pipeName)
+        private readonly PublisherSocket _publisherSocket;
+
+        public IpcProvider(int port)
         {
-            _pipeName = pipeName;
+            _port = port;
+
+            _publisherSocket = CreatePublisherSocket(_port);
         }
 
-        private static NamedPipeServerStream CreateServerStream(string pipeName)
+        private static SubscriberSocket CreateSubscriberSocket(int port)
         {
-            return new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+            var subscriberSocket = new SubscriberSocket();
+            
+            subscriberSocket.Connect($"tcp://127.0.0.1:{port}");
+            subscriberSocket.Options.ReceiveHighWatermark = 1000;
+
+            subscriberSocket.SubscribeToAnyTopic();
+
+            return subscriberSocket;
         }
 
-        private static NamedPipeClientStream CreateClientStream(string pipeName)
+        private static PublisherSocket CreatePublisherSocket(int port)
         {
-            return new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+            var publisherSocket = new PublisherSocket();
+
+            publisherSocket.Bind($"tcp://127.0.0.1:{port}");
+            publisherSocket.Options.SendHighWatermark = 1000;
+
+            return publisherSocket;
         }
 
-        public async Task SendMessage(IpcMessage ipcMessage)
+        public Task RunIpcProxy(CancellationToken cancellationToken)
+        {
+            var taskList = new List<Task>
+            {
+                Task.Run(() => ProxyMessages(8871, cancellationToken), cancellationToken),
+                Task.Run(() => ProxyMessages(8872, cancellationToken), cancellationToken)
+            };
+
+            return Task.WhenAll(taskList);
+        }
+
+        public Task SendMessage(IpcMessage ipcMessage)
         {
             try
             {
-                using var namedPipeStream = CreateClientStream(_pipeName);
-
-                await namedPipeStream.ConnectAsync((int) TimeSpan.FromSeconds(5).TotalMilliseconds);
-
-                using var streamWriter = new StreamWriter(namedPipeStream)
-                {
-                    AutoFlush = true
-                };
-
                 var jsonMessage = JsonConvert.SerializeObject(ipcMessage);
 
-                await streamWriter.WriteAsync(jsonMessage);
+                _publisherSocket.SendFrame(jsonMessage);
             }
             catch (TimeoutException)
             {
@@ -61,6 +78,8 @@ namespace HyperVLauncher.Providers.Ipc
             {
                 Tracer.Debug($"Failed to send tray message command: {ipcMessage.IpcCommand}.", ex);
             }
+
+            return Task.CompletedTask;
         }
 
         public Task SendReloadSettings()
@@ -116,34 +135,81 @@ namespace HyperVLauncher.Providers.Ipc
             return SendMessage(ipcMessage);
         }
 
-        public async IAsyncEnumerable<IpcMessage> ReadMessages(
-            [EnumeratorCancellation] CancellationToken cancellationToken)
+        private void ProxyMessages(
+            int port,
+            CancellationToken cancellationToken)
         {
+            using var subscriberSocket = CreateSubscriberSocket(port);
+
+            cancellationToken.Register(() => subscriberSocket.Close());
+
             do
             {
-                using var namedPipeServerStream = CreateServerStream(_pipeName);
-
-                await namedPipeServerStream.WaitForConnectionAsync(cancellationToken);
-
-                using var streamReader = new StreamReader(namedPipeServerStream);
-
-                var jsonMessage = await streamReader
-                    .ReadLineAsync()
-                    .WaitAsync(cancellationToken);
-
-                if (jsonMessage is null)
+                try
                 {
-                    break;
+                    subscriberSocket.Poll();
+
+                    var jsonMessage = subscriberSocket.ReceiveFrameString();
+
+                    if (jsonMessage is null)
+                    {
+                        continue;
+                    }
+
+                    _publisherSocket.SendFrame(jsonMessage);
+                }
+                catch (Exception ex)
+                {
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        Tracer.Warning($"Failed to proxy message on port {port}.", ex);
+                    }
+                }
+            }
+            while (!cancellationToken.IsCancellationRequested);
+        }
+
+        public IEnumerable<IpcMessage> ReadMessages(
+            CancellationToken cancellationToken)
+        {
+            using var subscriberSocket = CreateSubscriberSocket(8870);
+
+            cancellationToken.Register(() => subscriberSocket.Close());
+
+            do
+            {
+                IpcMessage? ipcMessage = null;
+
+                try
+                {
+                    subscriberSocket.Poll();
+
+                    var jsonMessage = subscriberSocket.ReceiveFrameString();
+
+                    if (jsonMessage is null)
+                    {
+                        break;
+                    }
+
+                    ipcMessage = JsonConvert.DeserializeObject<IpcMessage>(jsonMessage);
+
+                    if (ipcMessage is null)
+                    {
+                        throw new InvalidOperationException("Invalid IPC message received.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        Tracer.Warning($"Failed to proxy message on port {_port}.", ex);
+                    }
                 }
 
-                var ipcMessage = JsonConvert.DeserializeObject<IpcMessage>(jsonMessage);
-
-                if (ipcMessage is null)
+                if (ipcMessage is not null)
                 {
-                    throw new InvalidOperationException("Invalid IPC message received.");
+                    yield return ipcMessage;
                 }
-
-                yield return ipcMessage;
             }
             while (!cancellationToken.IsCancellationRequested);
         }

@@ -49,8 +49,11 @@ try
     Tracer.Debug($"Shortcut ID: {shortcutId}");
 
     var settingsProvider = new SettingsProvider(pathProvider);
-    var trayIpcProvider = new IpcProvider(GeneralConstants.TrayIpcPipeName);
-    var launchPadIpcProvider = new IpcProvider(GeneralConstants.LaunchPadIpcPipeName);
+
+    var ipcProvider = new IpcProvider(8873);
+
+    var trayIpcProvider = ipcProvider;
+    var launchPadIpcProvider = ipcProvider;
 
     ipcProcessor = Task.Run(
         () => ProcessIpcMessages(launchPadIpcProvider, cancellationTokenSource.Token));
@@ -105,7 +108,7 @@ catch (Exception ex)
 
 async Task HandleShortcutExitBehaviour(
     IHyperVProvider hyperVProvider, 
-    IIpcProviderBase ipcProvider,
+    ITrayIpcProvider trayIpcProvider,
     Shortcut shortcut)
 {
     switch (shortcut.CloseAction)
@@ -113,7 +116,7 @@ async Task HandleShortcutExitBehaviour(
         case HyperVLauncher.Contracts.Enums.CloseAction.Pause:
             Tracer.Info($"Pausing {vmName}...");
 
-            await ipcProvider.SendShowMessageNotif("Virtual Machine State Change", $"Pausing {shortcut.Name}...");
+            await trayIpcProvider.SendShowMessageNotif("Virtual Machine State Change", $"Pausing {shortcut.Name}...");
             hyperVProvider.PauseVirtualMachine(shortcut.VmId);
 
             Tracer.Info($"{vmName} paused.");
@@ -123,7 +126,7 @@ async Task HandleShortcutExitBehaviour(
         case HyperVLauncher.Contracts.Enums.CloseAction.Shutdown:
             Tracer.Info($"Shutting down {vmName}...");
 
-            await ipcProvider.SendShowMessageNotif("Virtual Machine State Change", $"Shutting down {shortcut.Name}...");
+            await trayIpcProvider.SendShowMessageNotif("Virtual Machine State Change", $"Shutting down {shortcut.Name}...");
             hyperVProvider.ShutdownVirtualMachine(shortcut.VmId);
 
             Tracer.Info($"{vmName} shut down.");
@@ -135,11 +138,11 @@ async Task HandleShortcutExitBehaviour(
     }
 }
 
-async Task ProcessIpcMessages(IIpcProviderBase ipcProvider, CancellationToken cancellationToken)
+void ProcessIpcMessages(IIpcProviderBase ipcProvider, CancellationToken cancellationToken)
 {
     try
     {
-        await foreach (var ipcMessage in ipcProvider.ReadMessages(cancellationToken))
+        foreach (var ipcMessage in ipcProvider.ReadMessages(cancellationToken))
         {
             switch (ipcMessage.IpcCommand)
             {

@@ -28,7 +28,11 @@ var hostBuilder = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IRdpLauncherProvider, RdpLauncherProvider>();
 
         services.AddSingleton<IPathProvider>(provider => pathProvider);
-        services.AddSingleton<ITrayIpcProvider>(provider => new IpcProvider(GeneralConstants.TrayIpcPipeName));
+
+        var ipcProvider = new IpcProvider(8870);
+
+        services.AddSingleton<ITrayIpcProvider>(ipcProvider);
+        services.AddSingleton<IMonitorIpcProvider>(ipcProvider);
     });
 
 if (Environment.UserInteractive)

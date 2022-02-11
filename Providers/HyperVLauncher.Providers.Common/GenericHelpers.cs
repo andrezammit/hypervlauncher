@@ -146,12 +146,14 @@ namespace HyperVLauncher.Providers.Common
 
             // Ignore active tcp listners
             var endPoints = properties.GetActiveTcpListeners();
+
             portArray.AddRange(from n in endPoints
                                where n.Port >= startingPort
                                select n.Port);
 
             // Ignore active UDP listeners
             endPoints = properties.GetActiveUdpListeners();
+
             portArray.AddRange(from n in endPoints
                                where n.Port >= startingPort
                                select n.Port);

@@ -34,12 +34,12 @@ namespace HyperVLauncher.Apps.Tray
         private readonly TaskbarIcon _taskbarIcon = new();
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
+        private readonly ITrayIpcProvider _trayIpcProvider;
         private readonly ISettingsProvider _settingsProvider;
+        private readonly ILaunchPadIpcProvider _launchPadIpcProvider;
 
         private readonly IShortcutProvider _shortcutProvider = new ShortcutProvider();
         private readonly IPathProvider _pathProvider = new PathProvider(GeneralConstants.ProfileName);
-        private readonly ITrayIpcProvider _trayIpcProvider = new IpcProvider(GeneralConstants.TrayIpcPipeName);
-        private readonly ILaunchPadIpcProvider _launchPadIpcProvider = new IpcProvider(GeneralConstants.LaunchPadIpcPipeName);
 
         private readonly MenuItem _titleMenuItem;
         private readonly MenuItem _closeMenuItem;
@@ -51,6 +51,11 @@ namespace HyperVLauncher.Apps.Tray
         public App()
         {
             _settingsProvider = new SettingsProvider(_pathProvider);
+
+            var ipcProvider = new IpcProvider(8871);
+
+            _trayIpcProvider = ipcProvider;
+            _launchPadIpcProvider = ipcProvider;
 
             _pathProvider.CreateDirectories();
 
@@ -361,11 +366,11 @@ namespace HyperVLauncher.Apps.Tray
             }
         }
 
-        private async Task ProcessIpcMessages(CancellationToken cancellationToken)
+        private Task ProcessIpcMessages(CancellationToken cancellationToken)
         {
             try
             {
-                await foreach (var ipcMessage in _trayIpcProvider.ReadMessages(cancellationToken))
+                foreach (var ipcMessage in _trayIpcProvider.ReadMessages(cancellationToken))
                 {
                     switch (ipcMessage.IpcCommand)
                     {
@@ -400,6 +405,8 @@ namespace HyperVLauncher.Apps.Tray
 
                 throw;
             }
+
+            return Task.CompletedTask;
         }
     }
 }

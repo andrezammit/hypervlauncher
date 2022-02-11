@@ -9,27 +9,36 @@ namespace HyperVLauncher.Contracts.Interfaces
 {
     public interface IIpcProviderBase
     {
-        Task SendBringToFront();
         Task SendReloadSettings();
 
+        IEnumerable<IpcMessage> ReadMessages(CancellationToken cancellationToken);
+    }
+
+    public interface ITrayIpcProvider : IIpcProviderBase
+    {
         Task SendMessage(IpcMessage ipcMessage);
         Task SendShowMessageNotif(string title, string message);
         Task SendShowShortcutPromptNotif(string vmId, string vmName);
         Task SendShowShortcutCreatedNotif(string vmId, string shortcutName);
-
-        IAsyncEnumerable<IpcMessage> ReadMessages(CancellationToken cancellationToken);
     }
 
-    public interface ITrayIpcProvider : IIpcProviderBase
+    public interface IConsoleIpcProvider : IIpcProviderBase
     {
     }
 
     public interface ILaunchPadIpcProvider : IIpcProviderBase
     {
+        Task SendBringToFront();
+    }
+
+    public interface IMonitorIpcProvider : IIpcProviderBase
+    {
+        Task RunIpcProxy(CancellationToken cancellationToken);
     }
 
     public interface IIpcProviderAll :
         ITrayIpcProvider,
+        IMonitorIpcProvider,
         ILaunchPadIpcProvider
     {
     }

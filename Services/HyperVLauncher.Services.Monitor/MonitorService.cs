@@ -2,6 +2,7 @@
 using HyperVLauncher.Contracts.Interfaces;
 
 using HyperVLauncher.Providers.Tracing;
+using HyperVLauncher.Contracts.Enums;
 
 namespace HyperVLauncher.Services.Monitor
 {
@@ -11,7 +12,11 @@ namespace HyperVLauncher.Services.Monitor
         private readonly ITrayIpcProvider _trayIpcProvider;
         private readonly IShortcutProvider _shortcutProvider;
         private readonly ISettingsProvider _settingsProvider;
+        private readonly IMonitorIpcProvider _monitorIpcProvider;
         private readonly IRdpLauncherProvider _rdpLauncherProvider;
+
+        private Task? _ipcProxy;
+        private Task? _ipcProcessor;
 
         private readonly CancellationToken _cancellationToken;
 
@@ -20,6 +25,7 @@ namespace HyperVLauncher.Services.Monitor
             ITrayIpcProvider trayIpcProvider,
             ISettingsProvider settingsProvider,
             IShortcutProvider shortcutProvider,
+            IMonitorIpcProvider monitorIpcProvider,
             IRdpLauncherProvider rdpLauncherProvider,
             CancellationToken cancellationToken)
         {
@@ -27,6 +33,7 @@ namespace HyperVLauncher.Services.Monitor
             _trayIpcProvider = trayIpcProvider;
             _shortcutProvider = shortcutProvider;
             _settingsProvider = settingsProvider;
+            _monitorIpcProvider = monitorIpcProvider;
             _rdpLauncherProvider = rdpLauncherProvider;
 
             _cancellationToken = cancellationToken;
@@ -44,7 +51,30 @@ namespace HyperVLauncher.Services.Monitor
             _hyperVProvider.OnVirtualMachineCreated = OnVirtualMachineCreated;
             _hyperVProvider.OnVirtualMachineDeleted = OnVirtualMachineDeleted;
 
-            _cancellationToken.Register(() => _rdpLauncherProvider.StopListeners());
+            _ipcProxy = Task.Run(() => _monitorIpcProvider.RunIpcProxy(_cancellationToken));
+            _ipcProcessor = Task.Run(() => ProcessIpcMessages(_cancellationToken));
+        }
+
+        public async Task Stop()
+        {
+            try
+            {
+                if (_ipcProcessor is not null)
+                {
+                    await _ipcProcessor;
+                }
+
+                if (_ipcProxy is not null)
+                {
+                    await _ipcProxy;
+                }
+
+                await _rdpLauncherProvider.StopListeners();
+            }
+            catch (Exception ex)
+            {
+                Tracer.Debug("Failed to stop gracefully.", ex);
+            }
         }
 
         private async Task CheckForInvalidShortcuts()
@@ -114,6 +144,36 @@ namespace HyperVLauncher.Services.Monitor
                     _trayIpcProvider,
                     _shortcutProvider);
             }
+        }
+
+        private Task ProcessIpcMessages(CancellationToken cancellationToken)
+        {
+            Tracer.Info("Starting processing of IPC messages...");
+
+            try
+            {
+                foreach (var ipcMessage in _monitorIpcProvider.ReadMessages(cancellationToken))
+                {
+                    switch (ipcMessage.IpcCommand)
+                    {
+                        case IpcCommand.ReloadSettings:
+                            break;
+
+                        default:
+                            throw new InvalidDataException($"Invalid IPC command: {ipcMessage.IpcCommand}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Tracer.Error("Error while processing IPC messages.", ex);
+
+                throw;
+            }
+
+            Tracer.Info("Stopping processing of IPC messages...");
+
+            return Task.CompletedTask;
         }
     }
 }
