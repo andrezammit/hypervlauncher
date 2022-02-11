@@ -94,11 +94,15 @@ namespace HyperVLauncher.Providers.RdpLauncher
                 catch (Exception ex)
                 {
                     Tracer.Debug($"Failed to connect to {remoteAddress}.", ex);
+
+                    _clientSocket.Close();
                 }
             }
 
             if (ConnectedIpAddress is null)
             {
+                _clientSocket.Close();
+
                 throw new InvalidOperationException("Connected IP address is null.");
             }
 
@@ -138,25 +142,41 @@ namespace HyperVLauncher.Providers.RdpLauncher
         {
             Tracer.Debug($"Waiting for the first UDP packet...");
 
-            var result = await clientUdpClient.ReceiveAsync(_socketCancellationToken);
-            await serverUdpClient.SendAsync(result.Buffer, _socketCancellationToken);
+            var udpSocketCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_socketCancellationToken);
+            udpSocketCancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(10));
 
-            Tracer.Debug($"Starting UDP proxy...");
+            var cancellatonToken = udpSocketCancellationTokenSource.Token;
 
-            var clientSocketProxy = ProxyUdpSocket(clientUdpClient, serverUdpClient, null);
-            var serverSocketProxy = ProxyUdpSocket(serverUdpClient, clientUdpClient, result.RemoteEndPoint);
-
-            _proxyTasks.Add(clientSocketProxy);
-            _proxyTasks.Add(serverSocketProxy);
-
-            var udpProxyTasks = new List<Task>()
+            try
             {
-                clientSocketProxy,
-                serverSocketProxy
-            };
+                var result = await clientUdpClient.ReceiveAsync(cancellatonToken);
+                await serverUdpClient.SendAsync(result.Buffer, _socketCancellationToken);
 
-            _ = Task.WhenAny(udpProxyTasks)
-                .ContinueWith((result) => Tracer.Debug($"UDP proxy stopped on port {_port}"));
+                Tracer.Debug($"Starting UDP proxy...");
+
+                var clientSocketProxy = ProxyUdpSocket(clientUdpClient, serverUdpClient, null);
+                var serverSocketProxy = ProxyUdpSocket(serverUdpClient, clientUdpClient, result.RemoteEndPoint);
+
+                _proxyTasks.Add(clientSocketProxy);
+                _proxyTasks.Add(serverSocketProxy);
+
+                var udpProxyTasks = new List<Task>()
+                {
+                    clientSocketProxy,
+                    serverSocketProxy
+                };
+
+                _ = Task.WhenAny(udpProxyTasks)
+                    .ContinueWith((result) => Tracer.Debug($"UDP proxy stopped on port {_port}"));
+            }
+            catch (OperationCanceledException)
+            {
+                if (!_socketCancellationToken.IsCancellationRequested && 
+                    udpSocketCancellationTokenSource.IsCancellationRequested)
+                {
+                    Tracer.Debug($"Giving up on UDP proxy on port {_port}.");
+                }
+            }
         }
 
         private async Task ProxyUdpSocket(UdpClient clientUdpClient, UdpClient serverUdpClient, IPEndPoint? remoteEndpoint)

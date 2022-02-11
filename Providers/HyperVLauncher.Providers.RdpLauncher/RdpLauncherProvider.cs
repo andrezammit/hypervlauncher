@@ -149,7 +149,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
                     string[]? ipAddresses = null;
 
-                    for (var cnt = 0; cnt < 5; cnt++)
+                    for (var cnt = 0; cnt < 10; cnt++)
                     {
                         ipAddresses = _hyperVProvider.GetVirtualMachineIpAddresses(vmId);
 
@@ -162,7 +162,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
                         await Task.Delay(1000, cancellationToken);
                     }
 
-                    if (ipAddresses is null)
+                    if (ipAddresses is null || ipAddresses.Length == 0)
                     {
                         throw new InvalidOperationException("Failed to get virtual machine IP addresses.");
                     }
