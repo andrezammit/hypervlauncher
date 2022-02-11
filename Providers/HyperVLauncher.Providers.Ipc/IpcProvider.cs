@@ -141,14 +141,12 @@ namespace HyperVLauncher.Providers.Ipc
         {
             using var subscriberSocket = CreateSubscriberSocket(port);
 
-            cancellationToken.Register(() => subscriberSocket.Close());
+            cancellationToken.Register(() => NetMQConfig.Cleanup(false));
 
             do
             {
                 try
                 {
-                    subscriberSocket.Poll();
-
                     var jsonMessage = subscriberSocket.ReceiveFrameString();
 
                     if (jsonMessage is null)
@@ -174,7 +172,7 @@ namespace HyperVLauncher.Providers.Ipc
         {
             using var subscriberSocket = CreateSubscriberSocket(8870);
 
-            cancellationToken.Register(() => subscriberSocket.Close());
+            cancellationToken.Register(() => NetMQConfig.Cleanup(false));
 
             do
             {
@@ -182,8 +180,6 @@ namespace HyperVLauncher.Providers.Ipc
 
                 try
                 {
-                    subscriberSocket.Poll();
-
                     var jsonMessage = subscriberSocket.ReceiveFrameString();
 
                     if (jsonMessage is null)

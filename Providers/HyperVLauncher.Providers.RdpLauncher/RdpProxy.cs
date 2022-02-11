@@ -1,5 +1,7 @@
 ﻿using System;
+
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 using System.Net;
 using System.Net.Sockets;
@@ -21,6 +23,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
         private readonly Socket _clientSocket;
         private readonly UdpClient _udpListener;
         private readonly string[] _remoteAddresses;
+
         private readonly CancellationToken _cancellationToken;
         private readonly CancellationToken _socketCancellationToken;
         private readonly CancellationTokenSource _socketCancellationTokenSource;
@@ -30,21 +33,31 @@ namespace HyperVLauncher.Providers.RdpLauncher
         private Socket? _serverSocket;
         private UdpClient? _serverUdpSocket;
 
+        private static readonly ConcurrentDictionary<int, UdpClient> _udpListeners = new();
+
         private readonly List<Task> _taskList = new();
 
         public RdpProxy(
             string vmId,
             string[] remoteAddresses,
-            UdpClient udpListener,
+            int port,
             Socket clientSocket,
             CancellationToken cancellationToken)
         {
             VmId = vmId;
 
-            _udpListener = udpListener;
+            if (_udpListeners.TryGetValue(port, out var currentUdpClient))
+            {
+                currentUdpClient.Dispose();
+            }
+
+            _udpListener = new UdpClient(port);
+            _udpListeners[port] = _udpListener;
+
             _clientSocket = clientSocket;
             _remoteAddresses = remoteAddresses;
             _cancellationToken = cancellationToken;
+
 
             _socketCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_cancellationToken);
             _socketCancellationToken = _socketCancellationTokenSource.Token;
@@ -188,6 +201,8 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
             _serverSocket?.Dispose();
             _serverUdpSocket?.Dispose();
+
+            _udpListener.Dispose();
 
             Tracer.Info($"RDP proxy with virtual machine {VmId} closed.");
 

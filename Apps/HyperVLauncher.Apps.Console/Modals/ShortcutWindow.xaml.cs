@@ -72,11 +72,16 @@ namespace HyperVLauncher.Modals
                 SetDefaultCloseActionSelection(shortcut.CloseAction);
 
                 txtRdpPort.Text = shortcut.RdpPort.ToString();
+                chkRdpTrigger.IsChecked = shortcut.RdpTriggerEnabled;
             }
             else
             {
                 SetDefaultCloseActionSelection(CloseAction.None);
 
+            }
+
+            if (!chkRdpTrigger.IsChecked.GetValueOrDefault())
+            {
                 txtRdpPort.Text = GenericHelpers.GetAvailablePort(3390).ToString();
             }
 

@@ -18,6 +18,8 @@ namespace HyperVLauncher.Providers.RdpLauncher
         private readonly IHyperVProvider _hyperVProvider;
         private readonly ISettingsProvider _settingsProvider;
 
+        private CancellationTokenSource _tcpListenerCancellationTokenSource;
+
         private readonly List<RdpProxy> _rdpProxies = new();
         private readonly List<Task> _tcpListenerTasks = new();
         private readonly CancellationTokenSource _cancellationTokenSource = new();
@@ -28,28 +30,18 @@ namespace HyperVLauncher.Providers.RdpLauncher
         {
             _hyperVProvider = hyperVProvider;
             _settingsProvider = settingsProvider;
+
+            _tcpListenerCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
         }
 
-        public async Task StartListeners()
+        public Task Start()
         {
             Tracer.Info("Starting listening for RDP connections...");
 
-            var appSettings = await _settingsProvider.Get(true);
-
-            foreach (var shortcut in appSettings.Shortcuts)
-            {
-                if (shortcut.RdpTriggerEnabled)
-                {
-                    var tcpListenerTask = StartTcpListener(
-                        shortcut.VmId,
-                        shortcut.RdpPort);
-
-                    _tcpListenerTasks.Add(tcpListenerTask);
-                }
-            }
+            return StartListeners();
         }
 
-        public async Task StopListeners()
+        public async Task Stop()
         {
             Tracer.Info("Stopping listening for RDP connections...");
 
@@ -68,16 +60,57 @@ namespace HyperVLauncher.Providers.RdpLauncher
             Tracer.Debug($"Waiting for {taskList.Count} RDP proxies to stop...");
 
             await Task.WhenAll(taskList);
+
+            await StopListeners();
+        }
+
+        public async Task RefreshListeners()
+        {
+            Tracer.Info("Refreshing RDP connection listeners...");
+
+            await StopListeners();
+            await StartListeners();
+        }
+
+        private async Task StartListeners()
+        {
+            if (_tcpListenerCancellationTokenSource.IsCancellationRequested)
+            {
+                _tcpListenerCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
+            }
+
+            var appSettings = await _settingsProvider.Get(true);
+
+            foreach (var shortcut in appSettings.Shortcuts)
+            {
+                if (shortcut.RdpTriggerEnabled)
+                {
+                    var tcpListenerTask = StartTcpListener(
+                        shortcut.VmId,
+                        shortcut.RdpPort,
+                        _tcpListenerCancellationTokenSource.Token);
+
+                    _tcpListenerTasks.Add(tcpListenerTask);
+                }
+            }
+        }
+
+        private async Task StopListeners()
+        {
+            _tcpListenerCancellationTokenSource.Cancel();
+
             await Task.WhenAll(_tcpListenerTasks);
         }
 
-        public async Task StartTcpListener(string vmId, int port)
+        public async Task StartTcpListener(
+            string vmId, 
+            int port,
+            CancellationToken cancellationToken)
         {
             Tracer.Debug($"Starting TCP listener for virtual machine {vmId} on port {port}...");
 
             try
             {
-                using var udpListener = new UdpClient(port);
                 var tcpListener = new TcpListener(IPAddress.Any, port);
 
                 tcpListener.Start();
@@ -85,8 +118,8 @@ namespace HyperVLauncher.Providers.RdpLauncher
                 await ProcessTcpSockets(
                     vmId,
                     port,
-                    udpListener, 
-                    tcpListener);
+                    tcpListener,
+                    cancellationToken);
 
                 Tracer.Debug($"Stopping TCP listener for virtual machine {vmId} on port {port}...");
 
@@ -101,15 +134,15 @@ namespace HyperVLauncher.Providers.RdpLauncher
         private async Task ProcessTcpSockets(
             string vmId,
             int port,
-            UdpClient udpListener, 
-            TcpListener tcpListener)
+            TcpListener tcpListener,
+            CancellationToken cancellationToken)
         {
-            while (!_cancellationTokenSource.IsCancellationRequested)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 try
                 {
-                    var tcpClient = await tcpListener.AcceptTcpClientAsync(_cancellationTokenSource.Token);
-
+                    var tcpClient = await tcpListener.AcceptTcpClientAsync(cancellationToken);
+                    
                     Tracer.Info($"New socket detected on port {port}. Peer address: {tcpClient.Client.RemoteEndPoint}");
 
                     _hyperVProvider.StartVirtualMachine(vmId);
@@ -126,7 +159,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
                             break;
                         }
 
-                        await Task.Delay(1000);
+                        await Task.Delay(1000, cancellationToken);
                     }
 
                     if (ipAddresses is null)
@@ -137,7 +170,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
                     var rdpProxy = new RdpProxy(
                         vmId,
                         ipAddresses,
-                        udpListener,
+                        port,
                         tcpClient.Client,
                         _cancellationTokenSource.Token);
 

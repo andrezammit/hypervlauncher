@@ -4,7 +4,9 @@ namespace HyperVLauncher.Contracts.Interfaces
 {
     public interface IRdpLauncherProvider
     {
-        Task StopListeners();
-        Task StartListeners();
+        Task Stop();
+        Task Start();
+
+        Task RefreshListeners();
     }
 }

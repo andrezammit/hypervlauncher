@@ -43,7 +43,7 @@ namespace HyperVLauncher.Services.Monitor
         {
             await CheckForInvalidShortcuts();
 
-            await _rdpLauncherProvider.StartListeners();
+            await _rdpLauncherProvider.Start();
 
             _hyperVProvider.StartVirtualMachineCreatedMonitor(_cancellationToken);
             _hyperVProvider.StartVirtualMachineDeletedMonitor(_cancellationToken);
@@ -69,7 +69,7 @@ namespace HyperVLauncher.Services.Monitor
                     await _ipcProxy;
                 }
 
-                await _rdpLauncherProvider.StopListeners();
+                await _rdpLauncherProvider.Stop();
             }
             catch (Exception ex)
             {
@@ -157,6 +157,7 @@ namespace HyperVLauncher.Services.Monitor
                     switch (ipcMessage.IpcCommand)
                     {
                         case IpcCommand.ReloadSettings:
+                            _rdpLauncherProvider.RefreshListeners();
                             break;
 
                         default:
@@ -168,10 +169,10 @@ namespace HyperVLauncher.Services.Monitor
             {
                 Tracer.Error("Error while processing IPC messages.", ex);
 
-                throw;
+                //throw;
             }
 
-            Tracer.Info("Stopping processing of IPC messages...");
+            Tracer.Info("Stopped processing of IPC messages.");
 
             return Task.CompletedTask;
         }
