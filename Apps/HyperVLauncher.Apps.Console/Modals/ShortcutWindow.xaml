@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:HyperVLauncher.Modals"
         mc:Ignorable="d"
         Title="Hyper-V Launcher" 
-        Height="414" 
+        Height="556" 
         Width="520"
         Background="#FF2E3349"
         Foreground="White" ResizeMode="NoResize" WindowStyle="SingleBorderWindow" SizeToContent="Height">
@@ -57,8 +57,11 @@
             <ComboBox x:Name="cmbCloseAction" Margin="0,4,0,0" Padding="6,3,4,5" Width="300" HorizontalAlignment="Left" FontSize="16"/>
             <CheckBox x:Name="chkDesktopShortcut" Margin="0,15,0,0" VerticalContentAlignment="Center" Content="Desktop Shortcut" FontSize="14" />
             <CheckBox x:Name="chkStartMenuShortcut" Margin="0,15,0,0" VerticalContentAlignment="Center" Content="Start Menu Shortcut" FontSize="14" />
-            <CheckBox x:Name="chkRdpTrigger" Margin="0,15,0,0" VerticalContentAlignment="Center" Content="Enable Remote Desktop Connection trigger on port:" FontSize="14" Checked="ChkRdpTrigger_OnCheckChange" Unchecked="ChkRdpTrigger_OnCheckChange" />
-            <TextBox x:Name="txtRdpPort" Margin="0,4,0,0" Padding="4,2,4,4" HorizontalAlignment="Left" FontSize="16" TextWrapping="Wrap" Text="3389" Width="300" />
+            <CheckBox x:Name="chkRdpTrigger" Margin="0,15,0,0" VerticalContentAlignment="Center" Content="Start shortcut from remote connection" FontSize="14" Checked="ChkRdpTrigger_OnCheckChange" Unchecked="ChkRdpTrigger_OnCheckChange" />
+            <Label Content="Local port" Padding="0,0,20,0" Margin="15,4,0,0" FontSize="12" VerticalContentAlignment="Center"/>
+            <TextBox x:Name="txtListenPort" Padding="4,2,4,4" Margin="15,4,0,0" HorizontalAlignment="Left" FontSize="16" TextWrapping="Wrap" Text="3389" Width="300" />
+            <Label Content="Remote port:" Padding="0,0,5,0" Margin="15,4,0,0" FontSize="12" VerticalContentAlignment="Center"/>
+            <TextBox x:Name="txtRemotePort" Padding="4,2,4,4" Margin="15,4,0,0" HorizontalAlignment="Left" FontSize="16" TextWrapping="Wrap" Text="3389" Width="300" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,40,20,15">
                 <Button Name="btnSave" IsDefault="True" Content="Save" Height="30"  Width="75" FontSize="14" Click="BtnSave_Click" />
                 <Button Name="btnCancel" IsCancel="True" Content="Cancel" Width="75" Margin="15,0,0,0" Click="BtnCancel_Click" FontSize="14"/>

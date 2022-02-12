@@ -139,7 +139,8 @@ namespace HyperVLauncher.Pages
                 shortcutWindow.chkDesktopShortcut.IsChecked.GetValueOrDefault(),
                 shortcutWindow.chkStartMenuShortcut.IsChecked.GetValueOrDefault(),
                 shortcutWindow.chkRdpTrigger.IsChecked.GetValueOrDefault(),
-                int.Parse(shortcutWindow.txtRdpPort.Text),
+                int.Parse(shortcutWindow.txtListenPort.Text),
+                int.Parse(shortcutWindow.txtRemotePort.Text),
                 shortcutWindow.GetSelectedCloseAction());
         }
     }

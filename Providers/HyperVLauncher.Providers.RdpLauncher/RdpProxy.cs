@@ -50,13 +50,13 @@ namespace HyperVLauncher.Providers.RdpLauncher
         {
             Shortcut = shortcut;
 
-            if (_udpListeners.TryGetValue(shortcut.RdpPort, out var currentUdpClient))
+            if (_udpListeners.TryGetValue(shortcut.ListenPort, out var currentUdpClient))
             {
                 currentUdpClient.Dispose();
             }
 
-            _udpListener = new UdpClient(shortcut.RdpPort);
-            _udpListeners[shortcut.RdpPort] = _udpListener;
+            _udpListener = new UdpClient(shortcut.ListenPort);
+            _udpListeners[shortcut.ListenPort] = _udpListener;
 
             _clientSocket = clientSocket;
             _remoteAddresses = remoteAddresses;
@@ -84,14 +84,14 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
                     await _serverSocket.ConnectAsync(
                         IPAddress.Parse(remoteAddress), 
-                        3389,
+                        Shortcut.RemotePort,
                         connectCancellationTokenSource.Token);
 
                     _stopwatch.Start();
 
                     ConnectedIpAddress = remoteAddress;
 
-                    Tracer.Debug($"Connected to {ConnectedIpAddress}.");
+                    Tracer.Debug($"Connected to {ConnectedIpAddress}:{Shortcut.RemotePort}.");
 
                     break;
                 }
@@ -113,7 +113,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
             _serverUdpSocket = new UdpClient(AddressFamily.InterNetworkV6);
             _serverUdpSocket.Client.DualMode = true;
 
-            _serverUdpSocket.Connect(ConnectedIpAddress, 3389);
+            _serverUdpSocket.Connect(ConnectedIpAddress, Shortcut.RemotePort);
 
             Tracer.Debug($"Starting TCP proxy...");
 
@@ -171,14 +171,14 @@ namespace HyperVLauncher.Providers.RdpLauncher
                 };
 
                 _ = Task.WhenAny(udpProxyTasks)
-                    .ContinueWith((result) => Tracer.Debug($"UDP proxy stopped on port {Shortcut.RdpPort}"));
+                    .ContinueWith((result) => Tracer.Debug($"UDP proxy stopped on port {Shortcut.ListenPort}"));
             }
             catch (OperationCanceledException)
             {
                 if (!_socketCancellationToken.IsCancellationRequested && 
                     udpSocketCancellationTokenSource.IsCancellationRequested)
                 {
-                    Tracer.Debug($"Giving up on UDP proxy on port {Shortcut.RdpPort}.");
+                    Tracer.Debug($"Giving up on UDP proxy on port {Shortcut.ListenPort}.");
                 }
             }
         }

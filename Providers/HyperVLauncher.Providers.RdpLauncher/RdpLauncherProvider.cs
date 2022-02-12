@@ -88,7 +88,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
             foreach (var shortcut in appSettings.Shortcuts)
             {
-                if (shortcut.RdpTriggerEnabled)
+                if (shortcut.RemoteTriggerEnabled)
                 {
                     var tcpListenerTask = StartTcpListener(
                         shortcut,
@@ -110,11 +110,11 @@ namespace HyperVLauncher.Providers.RdpLauncher
             Shortcut shortcut,
             CancellationToken cancellationToken)
         {
-            Tracer.Debug($"Starting TCP listener for shortcut {shortcut.Name} on port {shortcut.RdpPort}...");
+            Tracer.Debug($"Starting TCP listener for shortcut {shortcut.Name} on port {shortcut.ListenPort}...");
 
             try
             {
-                var tcpListener = new TcpListener(IPAddress.Any, shortcut.RdpPort);
+                var tcpListener = new TcpListener(IPAddress.Any, shortcut.ListenPort);
 
                 tcpListener.Start();
 
@@ -123,13 +123,13 @@ namespace HyperVLauncher.Providers.RdpLauncher
                     tcpListener,
                     cancellationToken);
 
-                Tracer.Debug($"Stopping TCP listener for shortcut {shortcut.Name} on port {shortcut.RdpPort}...");
+                Tracer.Debug($"Stopping TCP listener for shortcut {shortcut.Name} on port {shortcut.ListenPort}...");
 
                 tcpListener.Stop();
             }
             catch (Exception ex)
             {
-                Tracer.Error($"Failed to start listening for shortcut {shortcut.Name} on port {shortcut.RdpPort}.", ex);
+                Tracer.Error($"Failed to start listening for shortcut {shortcut.Name} on port {shortcut.ListenPort}.", ex);
             }
         }
 
@@ -144,7 +144,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
                 {
                     var tcpClient = await tcpListener.AcceptTcpClientAsync(cancellationToken);
                     
-                    Tracer.Info($"New socket detected on port {shortcut.RdpPort}. Peer address: {tcpClient.Client.RemoteEndPoint}");
+                    Tracer.Info($"New socket detected on port {shortcut.ListenPort}. Peer address: {tcpClient.Client.RemoteEndPoint}");
 
                     _hyperVProvider.StartVirtualMachine(shortcut.VmId);
 
@@ -165,6 +165,8 @@ namespace HyperVLauncher.Providers.RdpLauncher
 
                     if (ipAddresses is null || ipAddresses.Length == 0)
                     {
+                        tcpClient.Client.Close();
+
                         throw new InvalidOperationException("Failed to get virtual machine IP addresses.");
                     }
 
@@ -186,7 +188,7 @@ namespace HyperVLauncher.Providers.RdpLauncher
                 }
                 catch (Exception ex)
                 {
-                    Tracer.Warning($"Exception while listening on RDP proxy port {shortcut.RdpPort}.", ex);
+                    Tracer.Warning($"Exception while listening on RDP proxy port {shortcut.ListenPort}.", ex);
                 }
             }
         }

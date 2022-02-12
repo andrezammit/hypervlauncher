@@ -180,11 +180,15 @@ namespace HyperVLauncher.Apps.Tray
                         var vmId = toastArgs["vmId"];
                         var vmName = toastArgs["vmName"];
 
+                        var appSettings = await _settingsProvider.Get();
+
                         await _settingsProvider.ProcessCreateShortcut(
                             vmId,
                             vmName,
                             _trayIpcProvider,
-                            _shortcutProvider);
+                            _shortcutProvider,
+                            appSettings.AutoCreateDesktopShortcut,
+                            appSettings.AutoCreateStartMenuShortcut);
                     }
 
                     break;

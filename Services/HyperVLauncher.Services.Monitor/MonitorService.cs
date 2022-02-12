@@ -123,7 +123,9 @@ namespace HyperVLauncher.Services.Monitor
                     vm.Id,
                     vm.Name,
                     _trayIpcProvider,
-                    _shortcutProvider);
+                    _shortcutProvider,
+                    appSettings.AutoCreateDesktopShortcut,
+                    appSettings.AutoCreateStartMenuShortcut);
             }
             else if (appSettings.NotifyOnNewVm)
             {

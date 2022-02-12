@@ -31,10 +31,11 @@ namespace HyperVLauncher.Contracts.Interfaces
             string name,
             ITrayIpcProvider trayIpcProvider,
             IShortcutProvider shortcutProvider,
-            bool? createDesktopShortcut = null,
-            bool? createStartMenuShortcut = null,
-            bool rdpTriggerEnabled = false,
-            int rdpPort = 0,
+            bool createDesktopShortcut,
+            bool createStartMenuShortcut,
+            bool remoteTriggerEnabled = false,
+            int listenPort = 0,
+            int remotePort = 0,
             CloseAction closeAction = CloseAction.None);
 
         Task ProcessDeleteShortcut(

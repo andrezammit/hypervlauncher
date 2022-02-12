@@ -71,8 +71,10 @@ namespace HyperVLauncher.Modals
 
                 SetDefaultCloseActionSelection(shortcut.CloseAction);
 
-                txtRdpPort.Text = shortcut.RdpPort.ToString();
-                chkRdpTrigger.IsChecked = shortcut.RdpTriggerEnabled;
+                txtListenPort.Text = shortcut.ListenPort.ToString();
+                txtRemotePort.Text = shortcut.RemotePort.ToString();
+
+                chkRdpTrigger.IsChecked = shortcut.RemoteTriggerEnabled;
             }
             else
             {
@@ -82,7 +84,7 @@ namespace HyperVLauncher.Modals
 
             if (!chkRdpTrigger.IsChecked.GetValueOrDefault())
             {
-                txtRdpPort.Text = GenericHelpers.GetAvailablePort(3390).ToString();
+                txtListenPort.Text = GenericHelpers.GetAvailablePort(3390).ToString();
             }
 
             EnableControls();
@@ -90,7 +92,10 @@ namespace HyperVLauncher.Modals
 
         private void EnableControls()
         {
-            txtRdpPort.IsEnabled = chkRdpTrigger.IsChecked.GetValueOrDefault();
+            var enable = chkRdpTrigger.IsChecked.GetValueOrDefault();
+
+            txtListenPort.IsEnabled = enable;
+            txtRemotePort.IsEnabled = enable;
         }
 
         public CloseAction GetSelectedCloseAction()

@@ -4,9 +4,10 @@ namespace HyperVLauncher.Contracts.Models
 {
     public class Shortcut
     {
-        public bool RdpTriggerEnabled { get; set; }
+        public bool RemoteTriggerEnabled { get; set; }
 
-        public int RdpPort { get; set; }
+        public int ListenPort { get; set; }
+        public int RemotePort { get; set; }
 
         public string Id { get; init; }
         public string VmId { get; init; }
@@ -18,16 +19,18 @@ namespace HyperVLauncher.Contracts.Models
             string id,
             string vmId,
             string name,
-            bool rdpTriggerEnabled = false,
-            int rdpPort = 0,
+            bool remoteTriggerEnabled = false,
+            int listenPort = 0,
+            int remotePort = 0,
             CloseAction closeAction = CloseAction.None)
         {
             Id = id;
             VmId = vmId;
             Name = name;
-            RdpPort = rdpPort;
+            ListenPort = listenPort;
+            RemotePort = remotePort;
             CloseAction = closeAction;
-            RdpTriggerEnabled = rdpTriggerEnabled;
+            RemoteTriggerEnabled = remoteTriggerEnabled;
         }
     }
 }
