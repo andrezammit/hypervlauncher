@@ -2,6 +2,7 @@
 using HyperVLauncher.Contracts.Interfaces;
 
 using HyperVLauncher.Providers.Tracing;
+using HyperVLauncher.Contracts.Enums;
 
 namespace HyperVLauncher.Services.Monitor
 {
@@ -11,6 +12,12 @@ namespace HyperVLauncher.Services.Monitor
         private readonly ITrayIpcProvider _trayIpcProvider;
         private readonly IShortcutProvider _shortcutProvider;
         private readonly ISettingsProvider _settingsProvider;
+        private readonly IMonitorIpcProvider _monitorIpcProvider;
+        private readonly IRdpLauncherProvider _rdpLauncherProvider;
+
+        private Task? _ipcProxy;
+        private Task? _ipcProcessor;
+
         private readonly CancellationToken _cancellationToken;
 
         public MonitorService(
@@ -18,12 +25,17 @@ namespace HyperVLauncher.Services.Monitor
             ITrayIpcProvider trayIpcProvider,
             ISettingsProvider settingsProvider,
             IShortcutProvider shortcutProvider,
+            IMonitorIpcProvider monitorIpcProvider,
+            IRdpLauncherProvider rdpLauncherProvider,
             CancellationToken cancellationToken)
         {
             _hyperVProvider = hyperVProvider;
             _trayIpcProvider = trayIpcProvider;
             _shortcutProvider = shortcutProvider;
             _settingsProvider = settingsProvider;
+            _monitorIpcProvider = monitorIpcProvider;
+            _rdpLauncherProvider = rdpLauncherProvider;
+
             _cancellationToken = cancellationToken;
         }
 
@@ -31,11 +43,40 @@ namespace HyperVLauncher.Services.Monitor
         {
             await CheckForInvalidShortcuts();
 
+            await _rdpLauncherProvider.Start();
+
             _hyperVProvider.StartVirtualMachineCreatedMonitor(_cancellationToken);
             _hyperVProvider.StartVirtualMachineDeletedMonitor(_cancellationToken);
 
             _hyperVProvider.OnVirtualMachineCreated = OnVirtualMachineCreated;
             _hyperVProvider.OnVirtualMachineDeleted = OnVirtualMachineDeleted;
+
+            _ipcProxy = Task.Run(() => _monitorIpcProvider.RunIpcProxy(_cancellationToken));
+            _ipcProcessor = Task.Run(() => ProcessIpcMessages(_cancellationToken));
+
+            Tracer.Info("Monitor service initialization done.");
+        }
+
+        public async Task Stop()
+        {
+            try
+            {
+                if (_ipcProcessor is not null)
+                {
+                    await _ipcProcessor;
+                }
+
+                if (_ipcProxy is not null)
+                {
+                    await _ipcProxy;
+                }
+
+                await _rdpLauncherProvider.Stop();
+            }
+            catch (Exception ex)
+            {
+                Tracer.Debug("Failed to stop gracefully.", ex);
+            }
         }
 
         private async Task CheckForInvalidShortcuts()
@@ -82,7 +123,9 @@ namespace HyperVLauncher.Services.Monitor
                     vm.Id,
                     vm.Name,
                     _trayIpcProvider,
-                    _shortcutProvider);
+                    _shortcutProvider,
+                    appSettings.AutoCreateDesktopShortcut,
+                    appSettings.AutoCreateStartMenuShortcut);
             }
             else if (appSettings.NotifyOnNewVm)
             {
@@ -105,6 +148,39 @@ namespace HyperVLauncher.Services.Monitor
                     _trayIpcProvider,
                     _shortcutProvider);
             }
+        }
+
+        private Task ProcessIpcMessages(CancellationToken cancellationToken)
+        {
+            Tracer.Info("Starting processing of IPC messages...");
+
+            try
+            {
+                foreach (var ipcMessage in _monitorIpcProvider.ReadMessages(
+                    new List<IpcTopic> { IpcTopic.Settings }, 
+                    cancellationToken))
+                {
+                    switch (ipcMessage.IpcCommand)
+                    {
+                        case IpcCommand.ReloadSettings:
+                            _rdpLauncherProvider.RefreshListeners();
+                            break;
+
+                        default:
+                            throw new InvalidDataException($"Invalid IPC command: {ipcMessage.IpcCommand}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Tracer.Error("Error while processing IPC messages.", ex);
+
+                //throw;
+            }
+
+            Tracer.Info("Stopped processing of IPC messages.");
+
+            return Task.CompletedTask;
         }
     }
 }

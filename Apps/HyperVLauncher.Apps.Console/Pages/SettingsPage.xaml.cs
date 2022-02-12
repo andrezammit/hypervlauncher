@@ -11,15 +11,18 @@ namespace HyperVLauncher.Pages
     {
         private bool _isLoading;
 
+        private readonly ITrayIpcProvider _trayIpcProvider;
         private readonly IShortcutProvider _shortcutProvider;
         private readonly ISettingsProvider _settingsProvider;
 
         public SettingsPage(
+            ITrayIpcProvider trayIpcProvider,
             IShortcutProvider shortcutProvider,
             ISettingsProvider settingsProvider)
         {
             InitializeComponent();
 
+            _trayIpcProvider = trayIpcProvider;
             _shortcutProvider = shortcutProvider;
             _settingsProvider = settingsProvider;
         }
@@ -92,6 +95,7 @@ namespace HyperVLauncher.Pages
             }
 
             await _settingsProvider.Save();
+            await _trayIpcProvider.SendReloadSettings();
         }
     }
 }

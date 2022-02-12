@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,8 +50,11 @@ try
     Tracer.Debug($"Shortcut ID: {shortcutId}");
 
     var settingsProvider = new SettingsProvider(pathProvider);
-    var trayIpcProvider = new IpcProvider(GeneralConstants.TrayIpcPipeName);
-    var launchPadIpcProvider = new IpcProvider(GeneralConstants.LaunchPadIpcPipeName);
+
+    var ipcProvider = new IpcProvider(GeneralConstants.LaunchPadIpcPort);
+
+    var trayIpcProvider = ipcProvider;
+    var launchPadIpcProvider = ipcProvider;
 
     ipcProcessor = Task.Run(
         () => ProcessIpcMessages(launchPadIpcProvider, cancellationTokenSource.Token));
@@ -89,7 +93,7 @@ try
 
         Tracer.Info($"{process.ProcessName} ({process.Id}) closed. Handling any further actions...");
 
-        await HandleShortcutExitBehaviour(hyperVProvider, trayIpcProvider, shortcut);
+        await GenericHelpers.HandleShortcutExitBehaviour(hyperVProvider, trayIpcProvider, shortcut);
     }
 
     cancellationTokenSource.Cancel();
@@ -103,43 +107,13 @@ catch (Exception ex)
     Tracer.Error("Failed to start shortcut.", ex);
 }
 
-async Task HandleShortcutExitBehaviour(
-    IHyperVProvider hyperVProvider, 
-    IIpcProviderBase ipcProvider,
-    Shortcut shortcut)
-{
-    switch (shortcut.CloseAction)
-    {
-        case HyperVLauncher.Contracts.Enums.CloseAction.Pause:
-            Tracer.Info($"Pausing {vmName}...");
-
-            await ipcProvider.SendShowMessageNotif("Virtual Machine State Change", $"Pausing {shortcut.Name}...");
-            hyperVProvider.PauseVirtualMachine(shortcut.VmId);
-
-            Tracer.Info($"{vmName} paused.");
-
-            break;
-
-        case HyperVLauncher.Contracts.Enums.CloseAction.Shutdown:
-            Tracer.Info($"Shutting down {vmName}...");
-
-            await ipcProvider.SendShowMessageNotif("Virtual Machine State Change", $"Shutting down {shortcut.Name}...");
-            hyperVProvider.ShutdownVirtualMachine(shortcut.VmId);
-
-            Tracer.Info($"{vmName} shut down.");
-
-            break;
-
-        default:
-            break;
-    }
-}
-
-async Task ProcessIpcMessages(IIpcProviderBase ipcProvider, CancellationToken cancellationToken)
+void ProcessIpcMessages(IIpcProviderBase ipcProvider, CancellationToken cancellationToken)
 {
     try
     {
-        await foreach (var ipcMessage in ipcProvider.ReadMessages(cancellationToken))
+        foreach (var ipcMessage in ipcProvider.ReadMessages(
+            new List<IpcTopic> { IpcTopic.LaunchPad }, 
+            cancellationToken))
         {
             switch (ipcMessage.IpcCommand)
             {

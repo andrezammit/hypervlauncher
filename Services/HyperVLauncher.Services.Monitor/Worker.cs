@@ -4,6 +4,7 @@ namespace HyperVLauncher.Services.Monitor
     public class Worker : BackgroundService
     {
         private Task? _monitorTask;
+        private MonitorService? _monitorService;
 
         private readonly IServiceProvider _serviceProvider;
 
@@ -16,12 +17,13 @@ namespace HyperVLauncher.Services.Monitor
         {
             _monitorTask = Task.Run(async () =>
             {
-                var monitorService = ActivatorUtilities
+                _monitorService = ActivatorUtilities
                     .CreateInstance<MonitorService>(
                         _serviceProvider,
                         cancellationToken);
 
-                await monitorService.Run();
+                await _monitorService.Run();
+
             }, cancellationToken);
 
             return Task.CompletedTask;
@@ -34,6 +36,11 @@ namespace HyperVLauncher.Services.Monitor
             if (_monitorTask is not null)
             {
                 await _monitorTask;
+            }
+
+            if (_monitorService is not null)
+            {
+                await _monitorService.Stop();
             }
         }
     }

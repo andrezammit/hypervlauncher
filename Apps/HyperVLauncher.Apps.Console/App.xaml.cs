@@ -101,9 +101,12 @@ namespace HyperVLauncher
             services.AddSingleton<IShortcutProvider, ShortcutProvider>();
 
             services.AddSingleton(provider => _pathProvider);
-         
-            services.AddSingleton<ITrayIpcProvider>(provider => new IpcProvider(GeneralConstants.TrayIpcPipeName));
-            services.AddSingleton<ILaunchPadIpcProvider>(provider => new IpcProvider(GeneralConstants.LaunchPadIpcPipeName));
+
+            var consoleIpcProvider = new IpcProvider(GeneralConstants.ConsoleIpcPort);
+
+            services.AddSingleton<ITrayIpcProvider>(consoleIpcProvider);
+            services.AddSingleton<IMonitorIpcProvider>(consoleIpcProvider);
+            services.AddSingleton<ILaunchPadIpcProvider>(consoleIpcProvider);
         }
 
         private void App_OnStartup(object sender, StartupEventArgs e)

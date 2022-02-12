@@ -82,8 +82,11 @@ namespace HyperVLauncher.Providers.Settings
             string name,
             ITrayIpcProvider trayIpcProvider,
             IShortcutProvider shortcutProvider,
-            bool? createDesktopShortcut = null,
-            bool? createStartMenuShortcut = null,
+            bool createDesktopShortcut,
+            bool createStartMenuShortcut,
+            bool remoteTriggerEnabled = false,
+            int listenPort = 0,
+            int remotePort = 0,
             CloseAction closeAction = CloseAction.None)
         {
             var appSettings = await Get(true);
@@ -93,20 +96,24 @@ namespace HyperVLauncher.Providers.Settings
             shortcut.CloseAction = closeAction;
             shortcut.Name = GetValidShortcutName(shortcut.Id, name, appSettings);
 
+            shortcut.ListenPort = listenPort;
+            shortcut.RemotePort = remotePort;
+            shortcut.RemoteTriggerEnabled = remoteTriggerEnabled;
+
             appSettings.Shortcuts.Add(shortcut);
 
             await Save();
 
             Tracer.Info($"New Shortcut created {shortcut.Id} - \"{shortcut.Name}\" for Virtual Machine {vmId}.");
 
-            if (createDesktopShortcut == true || appSettings.AutoCreateDesktopShortcut)
+            if (createDesktopShortcut)
             {
                 Tracer.Info($"Creating desktop shortcut for \"{shortcut.Name}\"...");
 
                 shortcutProvider.CreateDesktopShortcut(shortcut);
             }
 
-            if (createStartMenuShortcut == true || appSettings.AutoCreateStartMenuShortcut)
+            if (createStartMenuShortcut)
             {
                 Tracer.Info($"Creating start menu shortcut for \"{shortcut.Name}\"...");
 

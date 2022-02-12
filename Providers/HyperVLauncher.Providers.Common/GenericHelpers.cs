@@ -1,12 +1,18 @@
 ﻿using System;
-using System.Threading;
+using System.Linq;
 using System.Diagnostics;
+using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 
-using HyperVLauncher.Providers.Tracing;
+using System.Threading;
+using System.Threading.Tasks;
+
+using HyperVLauncher.Contracts.Models;
 using HyperVLauncher.Contracts.Constants;
 using HyperVLauncher.Contracts.Interfaces;
-using System.Linq;
+
+using HyperVLauncher.Providers.Tracing;
 
 namespace HyperVLauncher.Providers.Common
 {
@@ -127,6 +133,78 @@ namespace HyperVLauncher.Providers.Common
             {
                 Tracer.Error($"Failed to launch Hyper-V Manager.", ex);
             }
+        }
+
+        public static async Task HandleShortcutExitBehaviour(
+            IHyperVProvider hyperVProvider,
+            ITrayIpcProvider trayIpcProvider,
+            Shortcut shortcut)
+        {
+            switch (shortcut.CloseAction)
+            {
+                case HyperVLauncher.Contracts.Enums.CloseAction.Pause:
+                    Tracer.Info($"Pausing {shortcut.Name}...");
+
+                    await trayIpcProvider.SendShowMessageNotif("Virtual Machine State Change", $"Pausing {shortcut.Name}...");
+                    hyperVProvider.PauseVirtualMachine(shortcut.VmId);
+
+                    Tracer.Info($"{shortcut.Name} paused.");
+
+                    break;
+
+                case HyperVLauncher.Contracts.Enums.CloseAction.Shutdown:
+                    Tracer.Info($"Shutting down {shortcut.Name}...");
+
+                    await trayIpcProvider.SendShowMessageNotif("Virtual Machine State Change", $"Shutting down {shortcut.Name}...");
+                    hyperVProvider.ShutdownVirtualMachine(shortcut.VmId);
+
+                    Tracer.Info($"{shortcut.Name} shut down.");
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        public static int GetAvailablePort(int startingPort)
+        {
+            var portArray = new List<int>();
+
+            var properties = IPGlobalProperties.GetIPGlobalProperties();
+
+            // Ignore active connections
+            var connections = properties.GetActiveTcpConnections();
+
+            portArray.AddRange(from n in connections
+                               where n.LocalEndPoint.Port >= startingPort
+                               select n.LocalEndPoint.Port);
+
+            // Ignore active tcp listners
+            var endPoints = properties.GetActiveTcpListeners();
+
+            portArray.AddRange(from n in endPoints
+                               where n.Port >= startingPort
+                               select n.Port);
+
+            // Ignore active UDP listeners
+            endPoints = properties.GetActiveUdpListeners();
+
+            portArray.AddRange(from n in endPoints
+                               where n.Port >= startingPort
+                               select n.Port);
+
+            portArray.Sort();
+
+            for (var i = startingPort; i < UInt16.MaxValue; i++)
+            {
+                if (!portArray.Contains(i))
+                {
+                    return i;
+                }
+            }
+
+            return 0;
         }
 
         public static void BringToFront(this Process process)
