@@ -92,6 +92,11 @@ namespace HyperVLauncher.Services.Monitor
 
             var vmList = _hyperVProvider.GetVirtualMachineList().ToList();
 
+            if (!vmList.Any())
+            {
+                return;
+            }
+
             var vmIdsToDelete = new HashSet<string>();
 
             foreach (var shortcut in appSettings.Shortcuts)
