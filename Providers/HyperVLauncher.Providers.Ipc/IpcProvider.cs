@@ -20,12 +20,10 @@ namespace HyperVLauncher.Providers.Ipc
 {
     public class IpcProvider : IIpcProviderAll
     {
-
-        protected readonly NetMQSocket _publisherSocket;
+        protected RequestSocket? _requestSocket;
 
         public IpcProvider()
         {
-            _publisherSocket = CreatePublisherSocket();
         }
 
         protected static SubscriberSocket CreateSubscriberSocket(int port, IList<IpcTopic> topics)
@@ -50,7 +48,7 @@ namespace HyperVLauncher.Providers.Ipc
             return subscriberSocket;
         }
 
-        protected virtual NetMQSocket CreatePublisherSocket()
+        protected RequestSocket CreateRequestSocket()
         {
             var requestSocket = new RequestSocket();
 
@@ -64,11 +62,18 @@ namespace HyperVLauncher.Providers.Ipc
         {
             try
             {
+                if (_requestSocket is null)
+                {
+                    _requestSocket = CreateRequestSocket();
+                }
+
                 var jsonMessage = JsonConvert.SerializeObject(ipcMessage);
 
-                _publisherSocket
+                _requestSocket
                     .SendMoreFrame(topic.ToString())
                     .SendFrame(jsonMessage);
+
+                _requestSocket.ReceiveFrameString();
             }
             catch (TimeoutException)
             {

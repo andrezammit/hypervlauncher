@@ -18,13 +18,15 @@ namespace HyperVLauncher.Providers.Ipc
     public class MonitorIpcProvider : IpcProvider, IMonitorIpcProvider
     {
         private readonly int _port;
-
+        private readonly PublisherSocket _publisherSocket;
+             
         public MonitorIpcProvider(int port) 
         {
             _port = port;
+            _publisherSocket = CreatePublisherSocket();
         }
 
-        protected override NetMQSocket CreatePublisherSocket()
+        protected PublisherSocket CreatePublisherSocket()
         {
             var publisherSocket = new PublisherSocket();
 
@@ -32,6 +34,14 @@ namespace HyperVLauncher.Providers.Ipc
             publisherSocket.Options.SendHighWatermark = 1000;
 
             return publisherSocket;
+        }
+
+        private ResponseSocket CreateResponseSocket(int port)
+        {
+            var responseSocket = new ResponseSocket();
+            responseSocket.Bind($"tcp://127.0.0.1:{port}");
+
+            return responseSocket;
         }
 
         public Task RunIpcProxy(CancellationToken cancellationToken)
@@ -52,14 +62,16 @@ namespace HyperVLauncher.Providers.Ipc
         {
             Tracer.Debug($"Starting IPC proxy on port {port}...");
 
-            using var subscriberSocket = CreateSubscriberSocket(port, new List<IpcTopic> { IpcTopic.All });
+            using var responseSocket = CreateResponseSocket(port);
 
             do
             {
                 try
                 {
-                    var topic = subscriberSocket.ReceiveFrameString();
-                    var jsonMessage = subscriberSocket.ReceiveFrameString();
+                    var topic = responseSocket.ReceiveFrameString();
+                    var jsonMessage = responseSocket.ReceiveFrameString();
+
+                    responseSocket.SendFrame("OK");
 
                     if (jsonMessage is null)
                     {
