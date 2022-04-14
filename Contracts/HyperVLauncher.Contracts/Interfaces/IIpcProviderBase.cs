@@ -40,7 +40,6 @@ namespace HyperVLauncher.Contracts.Interfaces
 
     public interface IIpcProviderAll :
         ITrayIpcProvider,
-        IMonitorIpcProvider,
         ILaunchPadIpcProvider
     {
     }

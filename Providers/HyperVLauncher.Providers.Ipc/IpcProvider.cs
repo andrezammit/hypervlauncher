@@ -20,18 +20,15 @@ namespace HyperVLauncher.Providers.Ipc
 {
     public class IpcProvider : IIpcProviderAll
     {
-        private readonly int _port;
 
-        private readonly PublisherSocket _publisherSocket;
+        protected readonly NetMQSocket _publisherSocket;
 
-        public IpcProvider(int port)
+        public IpcProvider()
         {
-            _port = port;
-
-            _publisherSocket = CreatePublisherSocket(_port);
+            _publisherSocket = CreatePublisherSocket();
         }
 
-        private static SubscriberSocket CreateSubscriberSocket(int port, IList<IpcTopic> topics)
+        protected static SubscriberSocket CreateSubscriberSocket(int port, IList<IpcTopic> topics)
         {
             var subscriberSocket = new SubscriberSocket();
             
@@ -53,27 +50,14 @@ namespace HyperVLauncher.Providers.Ipc
             return subscriberSocket;
         }
 
-        private static PublisherSocket CreatePublisherSocket(int port)
+        protected virtual NetMQSocket CreatePublisherSocket()
         {
-            var publisherSocket = new PublisherSocket();
+            var requestSocket = new RequestSocket();
 
-            publisherSocket.Bind($"tcp://127.0.0.1:{port}");
-            publisherSocket.Options.SendHighWatermark = 1000;
+            requestSocket.Connect($"tcp://127.0.0.1:{GeneralConstants.MonitorIpcProxyPort}");
+            requestSocket.Options.Linger = TimeSpan.Zero;
 
-            return publisherSocket;
-        }
-
-        public Task RunIpcProxy(CancellationToken cancellationToken)
-        {
-            cancellationToken.Register(() => NetMQConfig.Cleanup(false));
-
-            var taskList = new List<Task>
-            {
-                Task.Run(() => ProxyMessages(GeneralConstants.TrayIpcPort, cancellationToken), cancellationToken),
-                Task.Run(() => ProxyMessages(GeneralConstants.ConsoleIpcPort, cancellationToken), cancellationToken)
-            };
-
-            return Task.WhenAll(taskList);
+            return requestSocket;
         }
 
         public Task SendMessage(IpcTopic topic, IpcMessage ipcMessage)
@@ -151,41 +135,6 @@ namespace HyperVLauncher.Providers.Ipc
             return SendMessage(IpcTopic.LaunchPad, ipcMessage);
         }
 
-        private void ProxyMessages(
-            int port,
-            CancellationToken cancellationToken)
-        {
-            Tracer.Debug($"Starting IPC proxy on port {port}...");
-
-            using var subscriberSocket = CreateSubscriberSocket(port, new List<IpcTopic> { IpcTopic.All });
-
-            do
-            {
-                try
-                {
-                    var topic = subscriberSocket.ReceiveFrameString();
-                    var jsonMessage = subscriberSocket.ReceiveFrameString();
-
-                    if (jsonMessage is null)
-                    {
-                        continue;
-                    }
-
-                    _publisherSocket
-                        .SendMoreFrame(topic)
-                        .SendFrame(jsonMessage);
-                }
-                catch (Exception ex)
-                {
-                    if (!cancellationToken.IsCancellationRequested)
-                    {
-                        Tracer.Warning($"Failed to proxy message on port {port}.", ex);
-                    }
-                }
-            }
-            while (!cancellationToken.IsCancellationRequested);
-        }
-
         public IEnumerable<IpcMessage> ReadMessages(
             IList<IpcTopic> topics,
             CancellationToken cancellationToken)
@@ -219,7 +168,7 @@ namespace HyperVLauncher.Providers.Ipc
                 {
                     if (!cancellationToken.IsCancellationRequested)
                     {
-                        Tracer.Warning($"Failed to proxy message on port {_port}.", ex);
+                        Tracer.Warning($"Failed to read message on port {GeneralConstants.MonitorIpcPort}.", ex);
                     }
                 }
 

@@ -22,8 +22,8 @@ using HyperVLauncher.Contracts.Interfaces;
 using HyperVLauncher.Providers.Ipc;
 using HyperVLauncher.Providers.Path;
 using HyperVLauncher.Providers.Common;
-using HyperVLauncher.Providers.Settings;
 using HyperVLauncher.Providers.Tracing;
+using HyperVLauncher.Providers.Settings;
 using HyperVLauncher.Providers.Shortcut;
 
 namespace HyperVLauncher.Apps.Tray
@@ -54,7 +54,7 @@ namespace HyperVLauncher.Apps.Tray
         {
             _settingsProvider = new SettingsProvider(_pathProvider);
 
-            var ipcProvider = new IpcProvider(GeneralConstants.TrayIpcPort);
+            var ipcProvider = new IpcProvider();
 
             _trayIpcProvider = ipcProvider;
             _launchPadIpcProvider = ipcProvider;
