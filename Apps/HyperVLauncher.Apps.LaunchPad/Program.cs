@@ -51,7 +51,7 @@ try
 
     var settingsProvider = new SettingsProvider(pathProvider);
 
-    var ipcProvider = new IpcProvider(GeneralConstants.LaunchPadIpcPort);
+    var ipcProvider = new IpcProvider();
 
     var trayIpcProvider = ipcProvider;
     var launchPadIpcProvider = ipcProvider;

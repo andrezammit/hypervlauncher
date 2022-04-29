@@ -102,10 +102,9 @@ namespace HyperVLauncher
 
             services.AddSingleton(provider => _pathProvider);
 
-            var consoleIpcProvider = new IpcProvider(GeneralConstants.ConsoleIpcPort);
+            var consoleIpcProvider = new IpcProvider();
 
             services.AddSingleton<ITrayIpcProvider>(consoleIpcProvider);
-            services.AddSingleton<IMonitorIpcProvider>(consoleIpcProvider);
             services.AddSingleton<ILaunchPadIpcProvider>(consoleIpcProvider);
         }
 

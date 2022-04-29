@@ -29,10 +29,11 @@ var hostBuilder = Host.CreateDefaultBuilder(args)
 
         services.AddSingleton<IPathProvider>(provider => pathProvider);
 
-        var ipcProvider = new IpcProvider(GeneralConstants.MonitorIpcPort);
+        var ipcProvider = new IpcProvider();
+        var monitorIpcProvider = new MonitorIpcProvider(GeneralConstants.MonitorIpcPort);
 
         services.AddSingleton<ITrayIpcProvider>(ipcProvider);
-        services.AddSingleton<IMonitorIpcProvider>(ipcProvider);
+        services.AddSingleton<IMonitorIpcProvider>(monitorIpcProvider);
     });
 
 if (Environment.UserInteractive)

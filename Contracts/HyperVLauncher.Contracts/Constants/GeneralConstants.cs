@@ -15,5 +15,6 @@ namespace HyperVLauncher.Contracts.Constants
         public const int MonitorIpcPort = 8870;
         public const int ConsoleIpcPort = 8872;
         public const int LaunchPadIpcPort = 8873;
+        public const int MonitorIpcProxyPort = 8874;
     }
 }
